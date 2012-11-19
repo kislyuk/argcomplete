@@ -1,7 +1,7 @@
-Warning: under heavy development. Some things are a bit messy.
+Warning: under development. Some things are a bit messy.
 
-:mod:`argcomplete`
-==================
+argcomplete
+===========
 
 Argcomplete provides easy and extensible automatic tab completion of arguments and options for your Python script.
 
