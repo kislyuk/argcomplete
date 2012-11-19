@@ -31,14 +31,14 @@ _python_argcomplete() {
 complete -o nospace -o default -F _python_argcomplete %s
 '''
 
-import argparse
+import sys, argparse
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("executable")
 
-def main():
-    args = parser.parse_args()
-    print shellcode % args.executable
+if len(sys.argv)==1:
+    parser.print_help()
+    sys.exit(1)
 
-if __name__ == '__main__':
-    main()
+args = parser.parse_args()
+print shellcode % args.executable
