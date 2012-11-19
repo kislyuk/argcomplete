@@ -20,7 +20,7 @@ setup(
     name='argcomplete',
     version='0.1.0',
     url='https://github.com/kislyuk/argcomplete',
-    license='BSD',
+    license='GPL',
     author='Andrey Kislyuk',
     author_email='kislyuk@gmail.com',
     description='Bash tab completion for argparse',
