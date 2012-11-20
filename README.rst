@@ -11,7 +11,8 @@ It makes two assumptions:
 * You're using argparse to manage your command line options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if you can suggest
-completions for your argument/option values (for example, if the user is browsing resources over the network).
+completions for your argument/option values (for example, if the user is browsing resources over the network). Its
+functionality is analogous to that provided by various bash-completion modules.
 
 Installation
 ------------
@@ -31,7 +32,7 @@ Python code (e.g. my-awesome-script.py)::
     parser.parse()
     ...
 
-Shellcode (e.g. .bashrc) to register a bash-completion module::
+Shellcode (to be put in e.g. *.bashrc*)::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
