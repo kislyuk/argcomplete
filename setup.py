@@ -10,7 +10,7 @@ It makes two assumptions:
 - You're using bash as your shell
 - You're using argparse to manage your command line options
 
-See AUTODOCS_LINK for more info.
+See https://github.com/kislyuk/argcomplete for more info.
 
 """
 
@@ -19,7 +19,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='argcomplete',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/kislyuk/argcomplete',
     license='GPL',
     author='Andrey Kislyuk',
@@ -27,7 +27,7 @@ setup(
     description='Bash tab completion for argparse',
     long_description=__doc__,
     packages = find_packages(),
-    scripts = [os.path.join(os.path.dirname(__file__), 'scripts', 'register-python-argcomplete')],
+    scripts = ['scripts/register-python-argcomplete'],
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
