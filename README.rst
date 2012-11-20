@@ -11,8 +11,7 @@ It makes two assumptions:
 * You're using argparse to manage your command line options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if you can suggest
-completions for your argument/option values (for example, if the user is browsing resources over the network). Its
-functionality is analogous to that provided by various bash-completion modules.
+completions for your argument/option values (for example, if the user is browsing resources over the network).
 
 Installation
 ------------
