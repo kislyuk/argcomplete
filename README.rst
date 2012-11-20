@@ -48,3 +48,10 @@ way to do this at definition time is::
     parser.add_argument("--env-var1").completer = EnvironCompleter
     parser.add_argument("--env-var2").completer = EnvironCompleter
     argcomplete.autocomplete(parser)
+
+Acknowledgments
+---------------
+
+Inspired and informed by the optcomplete_ module.
+
+.. _optcomplete: http://pypi.python.org/pypi/optcomplete
