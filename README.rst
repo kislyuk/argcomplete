@@ -23,6 +23,7 @@ Python code (e.g. my-awesome-script.py)::
     ...
     argcomplete.autocomplete(parser)
     parser.parse()
+    ...
 
 Shellcode (e.g. .bashrc)::
 
