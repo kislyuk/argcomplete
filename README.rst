@@ -37,3 +37,13 @@ An example completer for names of environment variables might look like this::
 
     def EnvironCompleter(text):
         return (v for v in os.environ if v.startswith(text))
+
+To specify a completer for an argument or option, set the "completer" attribute of its associated action. An easy
+way to do this at definition time is::
+
+    from argcomplete.completers import EnvironCompleter
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--env-var1").completer = EnvironCompleter
+    parser.add_argument("--env-var2").completer = EnvironCompleter
+    argcomplete.autocomplete(parser)

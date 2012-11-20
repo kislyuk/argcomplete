@@ -14,6 +14,7 @@ See AUTODOCS_LINK for more info.
 
 """
 
+import os
 from setuptools import setup, find_packages
 
 setup(
@@ -26,7 +27,7 @@ setup(
     description='Bash tab completion for argparse',
     long_description=__doc__,
     packages = find_packages(),
-    scripts = ['scripts/register-python-argcomplete'],
+    scripts = [os.path.join(os.path.dirname(__file__), 'scripts', 'register-python-argcomplete')],
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],

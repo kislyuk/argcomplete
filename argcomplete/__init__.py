@@ -37,6 +37,16 @@ An example completer for names of environment variables might look like this::
     def EnvironCompleter(text):
         return (v for v in os.environ if v.startswith(text))
 
+To specify a completer for an argument or option, set the "completer" attribute of its associated action. An easy
+way to do this at definition time is::
+
+    from argcomplete.completers import EnvironCompleter
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--env-var1").completer = EnvironCompleter
+    parser.add_argument("--env-var2").completer = EnvironCompleter
+    argcomplete.autocomplete(parser)
+
 '''
 
 class DefaultCompleter(object):
@@ -47,6 +57,7 @@ class DefaultCompleter(object):
         return []
 
 import os, sys, argparse, shlex, pipes, contextlib
+from . import completers
 
 #if '_DEBUG' in os.environ:
 debug_stream = sys.stderr
@@ -187,8 +198,9 @@ def autocomplete(argument_parser, always_complete_options=True):
                 print >>debug_stream, "Completions:", completer(cword_prefix)
                 completions += completer(cword_prefix)
 
-    # If there's only one completion, and it doesn't end with / or :, add a space
-    if len(completions) == 1 and completions[0][-1] not in '/:':
+    continuation_chars = '=/:'
+    # If there's only one completion, and it doesn't end with a continuation char, add a space
+    if len(completions) == 1 and completions[0][-1] not in continuation_chars:
         completions[0] += ' '
 
 #    print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
