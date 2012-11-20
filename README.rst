@@ -13,6 +13,12 @@ It makes two assumptions:
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if you can suggest
 completions for your argument/option values (for example, if the user is browsing resources over the network).
 
+Installation
+------------
+::
+
+    pip install argcomplete
+
 Synopsis
 --------
 
