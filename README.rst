@@ -31,7 +31,7 @@ Python code (e.g. my-awesome-script.py)::
     parser.parse()
     ...
 
-Shellcode (e.g. .bashrc)::
+Shellcode (e.g. .bashrc) to register a bash-completion module::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
