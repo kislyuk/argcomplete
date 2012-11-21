@@ -22,7 +22,7 @@ Installation
 Synopsis
 --------
 
-Python code (e.g. my-awesome-script.py)::
+Python code (e.g. ``my-awesome-script.py``)::
 
     import argcomplete, argparse
     parser = argparse.ArgumentParser()
@@ -31,7 +31,7 @@ Python code (e.g. my-awesome-script.py)::
     parser.parse()
     ...
 
-Shellcode (to be put in e.g. *.bashrc*)::
+Shellcode (to be put in e.g. ``.bashrc``)::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
@@ -45,7 +45,7 @@ An example completer for names of environment variables might look like this::
     def EnvironCompleter(text):
         return (v for v in os.environ if v.startswith(text))
 
-To specify a completer for an argument or option, set the "completer" attribute of its associated action. An easy
+To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is::
 
     from argcomplete.completers import EnvironCompleter
