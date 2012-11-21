@@ -1,7 +1,7 @@
 Warning: under development. Some things are a bit messy.
 
-argcomplete
-===========
+argcomplete - Bash completion for argparse
+==========================================
 
 Argcomplete provides easy and extensible automatic tab completion of arguments and options for your Python script.
 
@@ -22,7 +22,7 @@ Installation
 Synopsis
 --------
 
-Python code (e.g. my-awesome-script.py)::
+Python code (e.g. ``my-awesome-script.py``)::
 
     import argcomplete, argparse
     parser = argparse.ArgumentParser()
@@ -31,7 +31,7 @@ Python code (e.g. my-awesome-script.py)::
     parser.parse()
     ...
 
-Shellcode (e.g. .bashrc) to register a bash-completion module::
+Shellcode (to be put in e.g. ``.bashrc``)::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
@@ -45,7 +45,7 @@ An example completer for names of environment variables might look like this::
     def EnvironCompleter(text):
         return (v for v in os.environ if v.startswith(text))
 
-To specify a completer for an argument or option, set the "completer" attribute of its associated action. An easy
+To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is::
 
     from argcomplete.completers import EnvironCompleter
@@ -58,6 +58,13 @@ way to do this at definition time is::
 Acknowledgments
 ---------------
 
-Inspired and informed by the optcomplete_ module.
+Inspired and informed by the optcomplete_ module by Martin Blais.
 
 .. _optcomplete: http://pypi.python.org/pypi/optcomplete
+
+Links
+-----
+
+* `Home page <https://github.com/kislyuk/argcomplete>`_
+* `Docs <https://argcomplete.readthedocs.org/en/latest/>`_
+* `On pypi <http://pypi.python.org/pypi/argcomplete>`_
