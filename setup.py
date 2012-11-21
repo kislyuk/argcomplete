@@ -32,12 +32,15 @@ setup(
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
     classifiers=[
-        'Environment :: Web Environment',
+        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Unix Shell',
+        'Development Status :: 4 - Beta',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]
 )
