@@ -61,3 +61,10 @@ Acknowledgments
 Inspired and informed by the optcomplete_ module by Martin Blais.
 
 .. _optcomplete: http://pypi.python.org/pypi/optcomplete
+
+Links
+-----
+
+* `Home page <https://github.com/kislyuk/argcomplete>`_
+* `Docs <https://argcomplete.readthedocs.org/en/latest/>`_
+* `On pypi <http://pypi.python.org/pypi/argcomplete>`_
