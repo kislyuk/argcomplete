@@ -58,6 +58,6 @@ way to do this at definition time is::
 Acknowledgments
 ---------------
 
-Inspired and informed by the optcomplete_ module.
+Inspired and informed by the optcomplete_ module by Martin Blais.
 
 .. _optcomplete: http://pypi.python.org/pypi/optcomplete
