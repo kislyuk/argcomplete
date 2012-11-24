@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='argcomplete',
-    version='0.1.3',
+    version='0.1.4',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',

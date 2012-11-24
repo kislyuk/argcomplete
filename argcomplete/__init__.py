@@ -1,63 +1,6 @@
-'''
-:mod:`argcomplete`
-==================
-
-Argcomplete provides easy and extensible automatic tab completion of arguments and options for your Python script.
-
-It makes two assumptions:
-
-* You're using bash as your shell
-* You're using argparse to manage your command line options
-
-Argcomplete is particularly useful if your program has lots of options or subparsers, and if you can suggest
-completions for your argument/option values (for example, if the user is browsing resources over the network).
-
-Synopsis
---------
-
-Python code (e.g. my-awesome-script.py)::
-
-    import argcomplete, argparse
-    parser = argparse.ArgumentParser()
-    ...
-    argcomplete.autocomplete(parser)
-    parser.parse()
-
-Shellcode (e.g. .bashrc)::
-
-    eval "$(register-python-argcomplete my-awesome-script.py)"
-
-Specifying completers
----------------------
-
-You can specify custom completion functions for your options and arguments. Completers are called with one argument,
-the prefix text that all completions should match. Completers should return their completions as a list of strings.
-An example completer for names of environment variables might look like this::
-
-    def EnvironCompleter(text):
-        return (v for v in os.environ if v.startswith(text))
-
-To specify a completer for an argument or option, set the "completer" attribute of its associated action. An easy
-way to do this at definition time is::
-
-    from argcomplete.completers import EnvironCompleter
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--env-var1").completer = EnvironCompleter
-    parser.add_argument("--env-var2").completer = EnvironCompleter
-    argcomplete.autocomplete(parser)
-
-'''
-
-class DefaultCompleter(object):
-    def __init__(self):
-        pass
-
-    def __call__(self, text):
-        return []
-
 import os, sys, argparse, shlex, pipes, contextlib
 from . import completers
+from .my_argparse import IntrospectiveArgumentParser
 
 #if '_DEBUG' in os.environ:
 debug_stream = sys.stderr
@@ -107,11 +50,11 @@ def split_line(line, point):
             if word == lexer.eof:
                 raise ArgcompleteException("Unexpected end of input")
             if lexer.instream.tell() >= point:
-                print >>debug_stream, "word", word, "split", split_word(word)
+                print >>debug_stream, "word", word, "split"
                 return split_word(word)
             words.append(word)
         except ValueError as e:
-            print >>debug_stream, "word", lexer.token, "split", split_word(lexer.token)
+            print >>debug_stream, "word", lexer.token, "split (lexer stopped)"
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:
@@ -136,11 +79,13 @@ def autocomplete(argument_parser, always_complete_options=True):
     visited_actions = []
 
     '''
-    Since argparse doesn't support much introspection, we monkey-patch it to replace all actions with hooks that
-    let us have the parser figure out which subparsers need to be activated (then recursively monkey-patch those).
+    Since argparse doesn't support much introspection, we monkey-patch it to replace the parse_known_args method and
+    all actions with hooks that let us have the parser figure out which subparsers need to be activated (then
+    recursively monkey-patch those), and which action was last taken or about to be taken.
     We save all active ArgumentParsers to extract all their possible option values later.
     '''
     def patchArgumentParser(parser):
+        parser.__class__ = IntrospectiveArgumentParser
         for action in parser._actions:
             # TODO: accomplish this with super
             class IntrospectAction(action.__class__):
@@ -174,8 +119,9 @@ def autocomplete(argument_parser, always_complete_options=True):
     except BaseException as e:
         print >> debug_stream, "\nexception", type(e), str(e), "while parsing args"
 
-    print >>debug_stream, "\nActive parsers:", active_parsers
+    print >>debug_stream, "Active parsers:", active_parsers
     print >>debug_stream, "Visited actions:", visited_actions
+    print >> debug_stream, "Active action:", argument_parser.active_action
     completions = []
 
     # Subcommand and options completion
@@ -192,20 +138,34 @@ def autocomplete(argument_parser, always_complete_options=True):
             elif always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars):
                 completions += [option for option in action.option_strings if option.startswith(cword_prefix)]
 
-            if len(comp_words) > 0 and comp_words[-1] in action.option_strings:
-                print >>debug_stream, "Activating completion for", action
-                completer = getattr(action, 'completer', DefaultCompleter())
-                print >>debug_stream, "Completions:", completer(cword_prefix)
-                completions += completer(cword_prefix)
+        if parser.active_action is not None:
+            print >>debug_stream, "Activating completion for", parser.active_action, parser.active_action._orig_class
+            #completer = getattr(parser.active_action, 'completer', DefaultCompleter())
+            completer = getattr(parser.active_action, 'completer', None)
+
+            if completer is None and parser.active_action.choices is not None:
+                completer = completers.ChoicesCompleter(parser.active_action.choices)
+
+            if completer:
+                print >>debug_stream, "Completions:", completer(prefix=cword_prefix,
+                                                                parser=parser,
+                                                                action=parser.active_action)
+                completions += [c for c in completer(prefix=cword_prefix,
+                                                     parser=parser,
+                                                     action=parser.active_action) if c.startswith(cword_prefix)]
+            elif not isinstance(parser.active_action, argparse._SubParsersAction):
+                print >>debug_stream, "Completer not available, falling back"
+                # TODO: if the fallback completer produces only one choice, our shellcode must add a space to it (or reconfigure compgen to do so)
+                exit(BASH_FILE_COMPLETION_FALLBACK)
 
     continuation_chars = '=/:'
     # If there's only one completion, and it doesn't end with a continuation char, add a space
     if len(completions) == 1 and completions[0][-1] not in continuation_chars:
         completions[0] += ' '
 
-#    print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
-#    print ifs.join([pipes.quote(c) for c in completions])
-#    print ifs.join([escape_completion_name_str(c) for c in completions])
+    # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
+    # print ifs.join([pipes.quote(c) for c in completions])
+    # print ifs.join([escape_completion_name_str(c) for c in completions])
 
     print >>debug_stream, "\nReturning completions:", completions
     print ifs.join(completions)

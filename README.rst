@@ -37,13 +37,28 @@ Shellcode (to be put in e.g. ``.bashrc``)::
 
 Specifying completers
 ---------------------
+If you specify the ``choices`` keyword argument for an option or argument, it will be used for completions. You can
+also specify custom completion functions for your options and arguments. Completers are called with the
+following keyword arguments:
 
-You can specify custom completion functions for your options and arguments. Completers are called with one argument,
-the prefix text that all completions should match. Completers should return their completions as a list of strings.
-An example completer for names of environment variables might look like this::
+* ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
+* ``action``: The ``argparse.Action`` instance that this completer was called for.
+* ``parser``: The ``argparse.ArgumentParser`` instance that the action was taken by.
 
-    def EnvironCompleter(text):
-        return (v for v in os.environ if v.startswith(text))
+Completers should return their completions as a list of strings. An example completer for names of environment
+variables might look like this::
+
+    def EnvironCompleter(prefix, **kwargs):
+        return (v for v in os.environ if v.startswith(prefix))
+
+A completer that takes a set of all possible values for its action might look like this::
+
+    class ChoicesCompleter(object):
+        def __init__(self, choices=[]):
+            self.choices = choices
+
+        def __call__(self, prefix, **kwargs):
+        return (c for c in self.choices if c.startswith(prefix))
 
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is::
@@ -54,6 +69,13 @@ way to do this at definition time is::
     parser.add_argument("--env-var1").completer = EnvironCompleter
     parser.add_argument("--env-var2").completer = EnvironCompleter
     argcomplete.autocomplete(parser)
+
+The following two ways to specify a static set of choices are equivalent for completion purposes::
+
+    from argcomplete.completers import ChoicesCompleter
+    parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
+    parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
+
 
 Acknowledgments
 ---------------
