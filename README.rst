@@ -37,8 +37,7 @@ Shellcode (to be put in e.g. ``.bashrc``)::
 
 Specifying completers
 ---------------------
-If you specify the ``choices`` keyword argument for an option or argument, it will be used for completions. You can
-also specify custom completion functions for your options and arguments. Completers are called with the
+You can specify custom completion functions for your options and arguments. Completers are called with the
 following keyword arguments:
 
 * ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
@@ -50,6 +49,9 @@ variables might look like this::
 
     def EnvironCompleter(prefix, **kwargs):
         return (v for v in os.environ if v.startswith(prefix))
+
+If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
+used for completions. 
 
 A completer that takes a set of all possible values for its action might look like this::
 
@@ -73,6 +75,7 @@ way to do this at definition time is::
 The following two ways to specify a static set of choices are equivalent for completion purposes::
 
     from argcomplete.completers import ChoicesCompleter
+
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
 
