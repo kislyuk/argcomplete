@@ -16,6 +16,9 @@ Installation
 ::
 
     pip install argcomplete
+    activate-global-python-argcomplete
+
+See `Activating global completion`_ below if the second step reports an error.
 
 Synopsis
 --------
@@ -29,7 +32,7 @@ Python code (e.g. ``my-awesome-script.py``)::
     parser.parse()
     ...
 
-Shellcode (to be put in e.g. ``.bashrc``) (or see `Activating global completion`_ below)::
+Shellcode (only necessary if global completion is not activated - see `Activating global completion`_ below), to be put in e.g. ``.bashrc``::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
@@ -87,13 +90,25 @@ The following two ways to specify a static set of choices are equivalent for com
 
 Activating global completion
 ----------------------------
-The file ``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) can be installed into
-``/etc/bash_completion.d`` or ``~/.bash_completion.d/`` to activate global completion. In this mode, bash will look for
+The script ``activate-global-python-argcomplete`` will try to install the file
+``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
+(``/etc/bash_completion.d/`` or ``~/.bash_completion.d/``). If it
+fails, but you know the correct location of your bash completion scripts directory, you can specify it with ``--dest``::
+
+    activate-global-python-argcomplete --dest=/path/to/bash_completion.d
+
+Otherwise, you can redirect its shellcode output into a file::
+
+    activate-global-python-argcomplete --dest=- > file
+
+The file's contents should then be sourced in e.g. ``~/.bashrc``.
+
+In global completion mode, bash will look for
 the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running completion for, and if
 it's found, follow the rest of the argcomplete protocol as described above. This frees you from the requirement to
 register each argcomplete-capable executable separately.
 
-.. note:: This requires bash support for ``complete -D``, which is not present in bash 3.x (e.g. OS X).
+.. note:: Global completion requires bash support for ``complete -D``, which is not present in bash 3.x (e.g. OS X).
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
 

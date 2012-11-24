@@ -15,12 +15,15 @@ args = parser.parse_args()
 if args.user:
     args.dest = os.path.expanduser("~/.bash_completion.d/")
 
-if not os.path.exists(args.dest):
+if not os.path.exists(args.dest) and args.dest != '-':
     parser.error("Path {d} does not exist".format(d=args.dest))
 
-args.dest = os.path.join(args.dest, "python-argcomplete.sh")
+if args.dest == '-':
+    args.dest = sys.stdout
+else:
+    args.dest = os.path.join(args.dest, "python-argcomplete.sh")
+    print "Installing bash completion script", args.dest
+    args.dest = open(args.dest, 'w')
 
-print "Installing bash completion script", args.dest
-
-with pkg_resources.resource_stream("argcomplete", "resources/python-argcomplete.sh") as in_fh, open(args.dest, 'w') as out_fh:
-    out_fh.write(in_fh.read())
+with pkg_resources.resource_stream("argcomplete", "resources/python-argcomplete.sh") as in_fh:
+    args.dest.write(in_fh.read())
