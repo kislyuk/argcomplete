@@ -1,11 +1,11 @@
-import os, sys, argparse, shlex, pipes, contextlib
+import os, sys, argparse, shlex, pipes, contextlib, subprocess
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser
 
-#if '_DEBUG' in os.environ:
-debug_stream = sys.stderr
-#else:
-debug_stream = open('/dev/null', 'w')
+if '_ARC_DEBUG' in os.environ:
+    debug_stream = sys.stderr
+else:
+    debug_stream = open(os.devnull, 'w')
 
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
@@ -144,19 +144,26 @@ def autocomplete(argument_parser, always_complete_options=True):
             completer = getattr(parser.active_action, 'completer', None)
 
             if completer is None and parser.active_action.choices is not None:
-                completer = completers.ChoicesCompleter(parser.active_action.choices)
+                if not isinstance(parser.active_action, argparse._SubParsersAction):
+                    completer = completers.ChoicesCompleter(parser.active_action.choices)
 
             if completer:
-                print >>debug_stream, "Completions:", completer(prefix=cword_prefix,
-                                                                parser=parser,
-                                                                action=parser.active_action)
+                print >>debug_stream, "Completions:", list(completer(prefix=cword_prefix, parser=parser, action=parser.active_action))
                 completions += [c for c in completer(prefix=cword_prefix,
                                                      parser=parser,
                                                      action=parser.active_action) if c.startswith(cword_prefix)]
             elif not isinstance(parser.active_action, argparse._SubParsersAction):
                 print >>debug_stream, "Completer not available, falling back"
-                # TODO: if the fallback completer produces only one choice, our shellcode must add a space to it (or reconfigure compgen to do so)
-                exit(BASH_FILE_COMPLETION_FALLBACK)
+                try:
+                    # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
+                    completions += subprocess.check_output("compgen -A file '{p}'".format(p=cword_prefix),
+                                                           shell=True).splitlines()
+                except subprocess.CalledProcessError:
+                    pass
+
+    # De-duplicate completions
+    seen = set()
+    completions = [ c for c in completions if c not in seen and not seen.add(c)]
 
     continuation_chars = '=/:'
     # If there's only one completion, and it doesn't end with a continuation char, add a space
