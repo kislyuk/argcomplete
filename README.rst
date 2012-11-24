@@ -33,8 +33,8 @@ Shellcode (to be put in e.g. ``.bashrc``)::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
-argcomplete.autocomplete()
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+argcomplete.autocomplete(*parser*)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
 **before** the ``ArgumentParser.parse()`` method is called. The method looks for an environment variable that the
@@ -59,7 +59,7 @@ variables might look like this::
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions. 
 
-A completer that is initialized a set of all possible choices of values for its action might look like this::
+A completer that is initialized with a set of all possible choices of values for its action might look like this::
 
     class ChoicesCompleter(object):
         def __init__(self, choices=[]):
