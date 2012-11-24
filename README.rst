@@ -76,7 +76,7 @@ A completer that is initialized with a set of all possible choices of values for
             self.choices = choices
 
         def __call__(self, prefix, **kwargs):
-        return (c for c in self.choices if c.startswith(prefix))
+            return (c for c in self.choices if c.startswith(prefix))
 
 The following two ways to specify a static set of choices are equivalent for completion purposes::
 
