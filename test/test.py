@@ -13,6 +13,7 @@ class TestArgcomplete(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         os.environ['_ARGCOMPLETE'] = "yes"
+        os.environ['_ARC_DEBUG'] = "yes"
         os.environ['IFS'] = IFS
 
     def setUp(self):

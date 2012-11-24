@@ -3,7 +3,10 @@ from . import completers
 from .my_argparse import IntrospectiveArgumentParser
 
 if '_ARC_DEBUG' in os.environ:
-    debug_stream = sys.stderr
+    try:
+        debug_stream = os.fdopen(9, 'wb')
+    except:
+        debug_stream = sys.stderr
 else:
     debug_stream = open(os.devnull, 'w')
 
@@ -60,10 +63,17 @@ def split_line(line, point):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
-def autocomplete(argument_parser, always_complete_options=True, output_stream=sys.stdout):
+def autocomplete(argument_parser, always_complete_options=True, output_stream=None):
     if '_ARGCOMPLETE' not in os.environ:
         # not an argument completion invocation
         return
+
+    if output_stream is None:
+        try:
+            output_stream = os.fdopen(8, 'wb')
+        except:
+            print >>debug_stream, "Unable to open fd 8 for writing, quitting"
+            os._exit(1)
 
     # print >> debug_stream, ""
     # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', 'COMP_WORDBREAKS', 'COMP_WORDS':
@@ -163,7 +173,7 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=sy
 
     # De-duplicate completions
     seen = set()
-    completions = [ c for c in completions if c not in seen and not seen.add(c)]
+    completions = [c for c in completions if c not in seen and not seen.add(c)]
 
     continuation_chars = '=/:'
     # If there's only one completion, and it doesn't end with a continuation char, add a space
@@ -176,7 +186,16 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=sy
 
     print >>debug_stream, "\nReturning completions:", completions
     output_stream.write(ifs.join(completions))
-    exit()
+    output_stream.flush()
+    # os.fsync(output_stream.fileno()) - this raises an error, why?
+    debug_stream.flush()
+    # os.fsync(debug_stream.fileno())
+
+    if '_ARC_DEBUG' in os.environ:
+        exit()
+    else:
+        # Avoid firing any atexits
+        os._exit(0)
 
     # COMP_CWORD
     # COMP_LINE

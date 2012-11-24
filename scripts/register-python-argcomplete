@@ -18,7 +18,11 @@ _python_argcomplete() {
         ARGCOMPLETE_IFS_TEMP=$IFS
     fi
     IFS='\013'
-    COMPREPLY=( $(IFS="$IFS" COMP_LINE="$COMP_LINE" COMP_POINT="$COMP_POINT" _ARGCOMPLETE=1 $1) )
+    COMPREPLY=( $(IFS="$IFS" \
+                  COMP_LINE="$COMP_LINE" \
+                  COMP_POINT="$COMP_POINT" \
+                  _ARGCOMPLETE=1 \
+                  $1 8>&1 9>&2 1>/dev/null 2>/dev/null) )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
     fi
