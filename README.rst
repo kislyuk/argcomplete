@@ -1,5 +1,3 @@
-Warning: under development. Some things are a bit messy.
-
 argcomplete - Bash completion for argparse
 ==========================================
 
