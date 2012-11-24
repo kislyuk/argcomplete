@@ -24,7 +24,7 @@ def mute_stderr():
     yield
     sys.stderr = stderr
 
-def ArgcompleteException(Exception):
+class ArgcompleteException(Exception):
     pass
 
 def split_line(line, point):
@@ -60,7 +60,7 @@ def split_line(line, point):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
-def autocomplete(argument_parser, always_complete_options=True):
+def autocomplete(argument_parser, always_complete_options=True, output_stream=sys.stdout):
     if '_ARGCOMPLETE' not in os.environ:
         # not an argument completion invocation
         return
@@ -175,7 +175,7 @@ def autocomplete(argument_parser, always_complete_options=True):
     # print ifs.join([escape_completion_name_str(c) for c in completions])
 
     print >>debug_stream, "\nReturning completions:", completions
-    print ifs.join(completions)
+    output_stream.write(ifs.join(completions))
     exit()
 
     # COMP_CWORD
