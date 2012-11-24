@@ -29,7 +29,7 @@ Python code (e.g. ``my-awesome-script.py``)::
     parser.parse()
     ...
 
-Shellcode (to be put in e.g. ``.bashrc``)::
+Shellcode (to be put in e.g. ``.bashrc``) (or see `Activating global completion`_ below)::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
@@ -85,6 +85,14 @@ The following two ways to specify a static set of choices are equivalent for com
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
 
+Activating global completion
+----------------------------
+The file ``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) can be installed into
+``/etc/bash_completion.d`` or ``~/.bash_completion.d/`` to activate global completion.
+
+.. note:: this requires bash support for ``complete -D``, which is not present in bash 3.x (e.g. OS X).
+
+.. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
 
 Acknowledgments
 ---------------
