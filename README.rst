@@ -59,15 +59,6 @@ variables might look like this::
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions. 
 
-A completer that is initialized with a set of all possible choices of values for its action might look like this::
-
-    class ChoicesCompleter(object):
-        def __init__(self, choices=[]):
-            self.choices = choices
-
-        def __call__(self, prefix, **kwargs):
-        return (c for c in self.choices if c.startswith(prefix))
-
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is::
 
@@ -77,6 +68,15 @@ way to do this at definition time is::
     parser.add_argument("--env-var1").completer = EnvironCompleter
     parser.add_argument("--env-var2").completer = EnvironCompleter
     argcomplete.autocomplete(parser)
+
+A completer that is initialized with a set of all possible choices of values for its action might look like this::
+
+    class ChoicesCompleter(object):
+        def __init__(self, choices=[]):
+            self.choices = choices
+
+        def __call__(self, prefix, **kwargs):
+        return (c for c in self.choices if c.startswith(prefix))
 
 The following two ways to specify a static set of choices are equivalent for completion purposes::
 
