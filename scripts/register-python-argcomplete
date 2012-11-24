@@ -10,14 +10,9 @@ Example:
     $ eval "$(register-python-argcomplete my-favorite-script.py)"
 '''
 
-# TODO: figure out how to get rid of IFS substitution
-
 shellcode = '''
 _python_argcomplete() {
-    if [[ ${!IFS[@]} ]]; then
-        ARGCOMPLETE_IFS_TEMP=$IFS
-    fi
-    IFS='\013'
+    local IFS='\013'
     COMPREPLY=( $(IFS="$IFS" \
                   COMP_LINE="$COMP_LINE" \
                   COMP_POINT="$COMP_POINT" \
@@ -25,11 +20,6 @@ _python_argcomplete() {
                   $1 8>&1 9>&2 1>/dev/null 2>/dev/null) )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
-    fi
-
-    if [[ ${!ARGCOMPLETE_IFS_TEMP[@]} ]]; then
-        IFS=$ARGCOMPLETE_IFS_TEMP
-        unset ARGCOMPLETE_IFS_TEMP
     fi
 }
 complete -o nospace -o default -F _python_argcomplete %s
