@@ -56,9 +56,6 @@ variables might look like this::
     def EnvironCompleter(prefix, **kwargs):
         return (v for v in os.environ if v.startswith(prefix))
 
-If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
-used for completions. 
-
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is::
 
@@ -68,6 +65,9 @@ way to do this at definition time is::
     parser.add_argument("--env-var1").completer = EnvironCompleter
     parser.add_argument("--env-var2").completer = EnvironCompleter
     argcomplete.autocomplete(parser)
+
+If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
+used for completions. 
 
 A completer that is initialized with a set of all possible choices of values for its action might look like this::
 
