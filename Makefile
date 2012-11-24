@@ -1,6 +1,6 @@
 # TODO: pyflakes?
 test:
-#	pylint -E argcomplete
+	-pylint -E argcomplete
 	./test/test.py
 
 release:
