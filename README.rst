@@ -88,9 +88,12 @@ The following two ways to specify a static set of choices are equivalent for com
 Activating global completion
 ----------------------------
 The file ``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) can be installed into
-``/etc/bash_completion.d`` or ``~/.bash_completion.d/`` to activate global completion.
+``/etc/bash_completion.d`` or ``~/.bash_completion.d/`` to activate global completion. In this mode, bash will look for
+the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running completion for, and if
+it's found, follow the rest of the argcomplete protocol as described above. This frees you from the requirement to
+register each argcomplete-capable executable separately.
 
-.. note:: this requires bash support for ``complete -D``, which is not present in bash 3.x (e.g. OS X).
+.. note:: This requires bash support for ``complete -D``, which is not present in bash 3.x (e.g. OS X).
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
 
