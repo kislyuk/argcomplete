@@ -53,7 +53,7 @@ variables might look like this::
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions. 
 
-A completer that takes a set of all possible values for its action might look like this::
+A completer that is initialized a set of all possible choices of values for its action might look like this::
 
     class ChoicesCompleter(object):
         def __init__(self, choices=[]):
