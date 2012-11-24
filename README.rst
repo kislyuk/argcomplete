@@ -38,8 +38,8 @@ argcomplete.autocomplete(*parser*)
 
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
 **before** the ``ArgumentParser.parse()`` method is called. The method looks for an environment variable that the
-completion hook shellcode sets, and if it's there, collects completions, prints them to standard output, and exits.
-Otherwise, it returns to the caller immediately.
+completion hook shellcode sets, and if it's there, collects completions, prints them to the output stream (fd 8 by
+default), and exits. Otherwise, it returns to the caller immediately.
 
 Specifying completers
 ---------------------
