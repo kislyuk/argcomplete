@@ -25,6 +25,7 @@ Synopsis
 
 Python code (e.g. ``my-awesome-script.py``)::
 
+    # PYTHON_ARGCOMPLETE_OK
     import argcomplete, argparse
     parser = argparse.ArgumentParser()
     ...
