@@ -109,7 +109,7 @@ the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable t
 it's found, follow the rest of the argcomplete protocol as described above. This frees you from the requirement to
 register each argcomplete-capable executable separately.
 
-.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older systems, you will need to update bash to use this feature.
+.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older systems, you will need to update bash to use this feature. Check the version of the running copy of bash with ```echo $BASH_VERSION```.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
 
