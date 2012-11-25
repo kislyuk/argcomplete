@@ -120,6 +120,10 @@ Inspired and informed by the optcomplete_ module by Martin Blais.
 
 .. _optcomplete: http://pypi.python.org/pypi/optcomplete
 
+Bugs
+----
+Please report bugs, issues, feature requests, etc. on `GitHub <https://github.com/kislyuk/argcomplete/issues>`_.
+
 Links
 -----
 
