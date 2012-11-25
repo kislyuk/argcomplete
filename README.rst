@@ -122,7 +122,7 @@ Inspired and informed by the optcomplete_ module by Martin Blais.
 
 Links
 -----
-* `Home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
+* `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
 * `Docs (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
 * `Package distribution (PyPI) <http://pypi.python.org/pypi/argcomplete>`_
 
