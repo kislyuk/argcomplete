@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='argcomplete',
-    version='0.2.1',
+    version='0.2.2',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',
@@ -16,7 +16,7 @@ setup(
     packages = find_packages(),
     scripts = ['scripts/register-python-argcomplete',
                'scripts/activate-global-python-argcomplete'],
-    data_files=[('argcomplete/resources', ['etc/bash_completion.d/python-argcomplete.sh'])],
+    package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],

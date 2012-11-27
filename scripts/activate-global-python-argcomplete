@@ -4,7 +4,7 @@
 Activate the generic bash-completion script for the argcomplete module.
 '''
 
-import os, sys, argparse, pkg_resources
+import os, sys, argparse, argcomplete, shutil
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -18,12 +18,11 @@ if args.user:
 if not os.path.exists(args.dest) and args.dest != '-':
     parser.error("Path {d} does not exist".format(d=args.dest))
 
+activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete.sh')
+
 if args.dest == '-':
-    args.dest = sys.stdout
+    print open(activator).read()
 else:
     args.dest = os.path.join(args.dest, "python-argcomplete.sh")
     print "Installing bash completion script", args.dest
-    args.dest = open(args.dest, 'w')
-
-with pkg_resources.resource_stream("argcomplete", "resources/python-argcomplete.sh") as in_fh:
-    args.dest.write(in_fh.read())
+    shutil.copy(activator, args.dest)
