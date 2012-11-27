@@ -90,9 +90,10 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=No
 
     '''
     Since argparse doesn't support much introspection, we monkey-patch it to replace the parse_known_args method and
-    all actions with hooks that let us have the parser figure out which subparsers need to be activated (then
-    recursively monkey-patch those), and which action was last taken or about to be taken.
-    We save all active ArgumentParsers to extract all their possible option values later.
+    all actions with hooks that tell us which action was last taken or about to be taken, and let us have the parser
+    figure out which subparsers need to be activated (then recursively monkey-patch those).
+    This way we never execute the original actions, in case they have any side effects.
+    We save all active ArgumentParsers to extract all their possible option names later.
     '''
     def patchArgumentParser(parser):
         parser.__class__ = IntrospectiveArgumentParser
@@ -131,13 +132,13 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=No
 
     print >>debug_stream, "Active parsers:", active_parsers
     print >>debug_stream, "Visited actions:", visited_actions
-    print >> debug_stream, "Active action:", argument_parser.active_action
     completions = []
 
     # Subcommand and options completion
     for parser in active_parsers:
+        print >>debug_stream, "Examining parser", parser
         for action in parser._actions:
-            print >>debug_stream, "Examining", action
+            print >>debug_stream, "Examining action", action
             if isinstance(action, argparse._SubParsersAction):
                 subparser_activated = False
                 for subparser in action._name_parser_map.values():
@@ -148,21 +149,23 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=No
             elif always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars):
                 completions += [option for option in action.option_strings if option.startswith(cword_prefix)]
 
-        if parser.active_action is not None:
-            print >>debug_stream, "Activating completion for", parser.active_action, parser.active_action._orig_class
-            #completer = getattr(parser.active_action, 'completer', DefaultCompleter())
-            completer = getattr(parser.active_action, 'completer', None)
+        print >>debug_stream, "Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions)
 
-            if completer is None and parser.active_action.choices is not None:
-                if not isinstance(parser.active_action, argparse._SubParsersAction):
-                    completer = completers.ChoicesCompleter(parser.active_action.choices)
+        for active_action in parser.active_actions:
+            print >>debug_stream, "Activating completion for", active_action, active_action._orig_class
+            #completer = getattr(active_action, 'completer', DefaultCompleter())
+            completer = getattr(active_action, 'completer', None)
+
+            if completer is None and active_action.choices is not None:
+                if not isinstance(active_action, argparse._SubParsersAction):
+                    completer = completers.ChoicesCompleter(active_action.choices)
 
             if completer:
-                print >>debug_stream, "Completions:", list(completer(prefix=cword_prefix, parser=parser, action=parser.active_action))
+                print >>debug_stream, "Completions:", list(completer(prefix=cword_prefix, parser=parser, action=active_action))
                 completions += [c for c in completer(prefix=cword_prefix,
                                                      parser=parser,
-                                                     action=parser.active_action) if c.startswith(cword_prefix)]
-            elif not isinstance(parser.active_action, argparse._SubParsersAction):
+                                                     action=active_action) if c.startswith(cword_prefix)]
+            elif not isinstance(active_action, argparse._SubParsersAction):
                 print >>debug_stream, "Completer not available, falling back"
                 try:
                     # TODO: what happens if completions contain newlines? How do I make compgen use IFS?

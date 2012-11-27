@@ -7,7 +7,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
     except for the lines that contain the string "Added by argcomplete".
     '''
     def _parse_known_args(self, arg_strings, namespace):
-        self.active_action = None # Added by argcomplete
+        self.active_actions = [] # Added by argcomplete
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
             arg_strings = self._read_args_from_files(arg_strings)
@@ -134,9 +134,10 @@ class IntrospectiveArgumentParser(ArgumentParser):
                 else:
                     start = start_index + 1
                     selected_patterns = arg_strings_pattern[start:]
-                    self.active_action = action # Added by argcomplete
+                    self.active_actions = [action] # Added by argcomplete
                     arg_count = match_argument(action, selected_patterns)
-                    self.active_action = None # Added by argcomplete
+                    if arg_count > 0: # Added by argcomplete
+                        self.active_actions = [] # Added by argcomplete
                     stop = start + arg_count
                     args = arg_strings[start:stop]
                     action_tuples.append((action, args, option_string))
@@ -163,9 +164,12 @@ class IntrospectiveArgumentParser(ArgumentParser):
             # slice off the appropriate arg strings for each Positional
             # and add the Positional and its args to the list
             for action, arg_count in zip(positionals, arg_counts):
+                self.active_actions.append(action) # Added by argcomplete
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
                 take_action(action, args)
+                if arg_count > 0: # Added by argcomplete
+                    self.active_actions = [] # Added by argcomplete
 
             # slice off the Positionals that we just parsed and return the
             # index at which the Positionals' string args stopped
@@ -218,7 +222,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         # arg strings supplied.
 
         if positionals:
-            self.active_action = positionals[0] # Added by argcomplete
+            self.active_actions.append(positionals[0]) # Added by argcomplete
             self.error(_('too few arguments'))
 
         # make sure all required actions were present
