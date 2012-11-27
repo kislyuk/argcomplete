@@ -1,1 +1,1 @@
-include etc/bash_completion.d/*
+include argcomplete/bash_completion.d/*
