@@ -136,8 +136,6 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     selected_patterns = arg_strings_pattern[start:]
                     self.active_actions = [action] # Added by argcomplete
                     arg_count = match_argument(action, selected_patterns)
-                    if arg_count > 0: # Added by argcomplete
-                        self.active_actions = [] # Added by argcomplete
                     stop = start + arg_count
                     args = arg_strings[start:stop]
                     action_tuples.append((action, args, option_string))
@@ -164,12 +162,13 @@ class IntrospectiveArgumentParser(ArgumentParser):
             # slice off the appropriate arg strings for each Positional
             # and add the Positional and its args to the list
             for action, arg_count in zip(positionals, arg_counts):
-                self.active_actions.append(action) # Added by argcomplete
+                if arg_count > 0: # Added by argcomplete
+                    self.active_actions = [action] # Added by argcomplete
+                else: # Added by argcomplete
+                    self.active_actions.append(action) # Added by argcomplete
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
                 take_action(action, args)
-                if arg_count > 0: # Added by argcomplete
-                    self.active_actions = [] # Added by argcomplete
 
             # slice off the Positionals that we just parsed and return the
             # index at which the Positionals' string args stopped
