@@ -1,6 +1,9 @@
 argcomplete - Bash completion for argparse
 ==========================================
 
+.. image:: https://secure.travis-ci.org/kislyuk/argcomplete.png
+        :target: https://secure.travis-ci.org/kislyuk/argcomplete
+
 Argcomplete provides easy and extensible automatic tab completion of arguments and options for your Python script.
 
 It makes two assumptions:
