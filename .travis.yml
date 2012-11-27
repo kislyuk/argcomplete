@@ -1,6 +1,6 @@
 language: python
 python:
     - 2.7
-    - 3.2
+#    - 3.2
 install: true
 script: make test
