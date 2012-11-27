@@ -67,7 +67,7 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=No
     '''
     :param argument_parser: The argument parser to autocomplete on
     :type argument_parser: :class:`argparse.ArgumentParser`
-    :param always_complete_options: Specifies whether or not to autocomplete options even if an option string opening character (normally ``-``) has not been entered.
+    :param always_complete_options: Whether or not to autocomplete options even if an option string opening character (normally ``-``) has not been entered
     :type always_complete_options: boolean
     '''
 
