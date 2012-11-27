@@ -64,6 +64,13 @@ def split_line(line, point):
                 raise ArgcompleteException("unexpected state? TODO")
 
 def autocomplete(argument_parser, always_complete_options=True, output_stream=None):
+    '''
+    :param argument_parser: The argument parser to autocomplete on
+    :type argument_parser: :class:`argparse.ArgumentParser`
+    :param always_complete_options: Specifies whether or not to autocomplete options even if an option string opening character (normally ``-``) has not been entered.
+    :type always_complete_options: boolean
+    '''
+
     if '_ARGCOMPLETE' not in os.environ:
         # not an argument completion invocation
         return
