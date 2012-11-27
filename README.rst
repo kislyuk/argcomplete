@@ -39,6 +39,7 @@ Shellcode (only necessary if global completion is not activated - see `Activatin
 
 .. automodule:: argcomplete
    :members:
+   :alt: test test.
 
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
 **before** the ``ArgumentParser.parse()`` method is called. The method looks for an environment variable that the
