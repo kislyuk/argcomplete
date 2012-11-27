@@ -12,6 +12,7 @@ setup(
     author_email='kislyuk@gmail.com',
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
+    install_requires=['distribute'],
     packages = find_packages(),
     scripts = ['scripts/register-python-argcomplete',
                'scripts/activate-global-python-argcomplete'],
