@@ -63,12 +63,14 @@ def split_line(line, point):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
-def autocomplete(argument_parser, always_complete_options=True, output_stream=None):
+def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None):
     '''
     :param argument_parser: The argument parser to autocomplete on
     :type argument_parser: :class:`argparse.ArgumentParser`
     :param always_complete_options: Whether or not to autocomplete options even if an option string opening character (normally ``-``) has not been entered
     :type always_complete_options: boolean
+    :param exit_method: Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
+    :type exit_method: method
     '''
 
     if '_ARGCOMPLETE' not in os.environ:
@@ -80,7 +82,7 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=No
             output_stream = os.fdopen(8, 'wb')
         except:
             print >>debug_stream, "Unable to open fd 8 for writing, quitting"
-            os._exit(1)
+            exit_method(1)
 
     # print >> debug_stream, ""
     # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', 'COMP_WORDBREAKS', 'COMP_WORDS':
@@ -201,11 +203,7 @@ def autocomplete(argument_parser, always_complete_options=True, output_stream=No
     debug_stream.flush()
     # os.fsync(debug_stream.fileno())
 
-    if '_ARC_DEBUG' in os.environ:
-        exit()
-    else:
-        # Avoid firing any atexits
-        os._exit(0)
+    exit_method(0)
 
     # COMP_CWORD
     # COMP_LINE

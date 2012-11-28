@@ -46,6 +46,14 @@ This method is the entry point to the module. It must be called **after** Argume
 completion hook shellcode sets, and if it's there, collects completions, prints them to the output stream (fd 8 by
 default), and exits. Otherwise, it returns to the caller immediately.
 
+.. admonition:: Side effects
+
+ ``argcomplete`` gets completions by running your program. It intercepts the execution flow at the moment
+ :meth:`argcomplete.autocomplete()` is called. After sending completions, it exits using ``exit_method``. This means if
+ your program has any side effects that happen before ``argcomplete`` is called, those side effects will happen every
+ time the user presses ``<TAB>`` (although anything your program prints to stdout or stderr will be suppressed). For
+ this reason it's best to construct the argument parser and call :meth:`argcomplete.autocomplete()` as early as
+ possible in your execution flow.
 
 Specifying completers
 ---------------------

@@ -27,7 +27,7 @@ class TestArgcomplete(unittest.TestCase):
             os.environ['COMP_LINE'] = command
             os.environ['COMP_POINT'] = point if point else str(len(command))
             with self.assertRaises(SystemExit):
-                autocomplete(parser, output_stream=t)
+                autocomplete(parser, output_stream=t, exit_method=sys.exit)
             t.seek(0)
             return t.read().split(IFS)
 
