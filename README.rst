@@ -1,9 +1,5 @@
 argcomplete - Bash completion for argparse
 ==========================================
-
-.. image:: https://secure.travis-ci.org/kislyuk/argcomplete.png
-        :target: https://secure.travis-ci.org/kislyuk/argcomplete
-
 Argcomplete provides easy and extensible automatic tab completion of arguments and options for your Python script.
 
 It makes two assumptions:
@@ -25,9 +21,9 @@ See `Activating global completion`_ below if the second step reports an error.
 
 Synopsis
 --------
-
 Python code (e.g. ``my-awesome-script.py``)::
 
+    #!/usr/bin/env python
     # PYTHON_ARGCOMPLETE_OK
     import argcomplete, argparse
     parser = argparse.ArgumentParser()
@@ -121,7 +117,6 @@ register each argcomplete-capable executable separately.
 
 Acknowledgments
 ---------------
-
 Inspired and informed by the optcomplete_ module by Martin Blais.
 
 .. _optcomplete: http://pypi.python.org/pypi/optcomplete
@@ -135,3 +130,6 @@ Links
 Bugs
 ~~~~
 Please report bugs, issues, feature requests, etc. on `GitHub <https://github.com/kislyuk/argcomplete/issues>`_.
+
+.. image:: https://secure.travis-ci.org/kislyuk/argcomplete.png
+        :target: https://secure.travis-ci.org/kislyuk/argcomplete
