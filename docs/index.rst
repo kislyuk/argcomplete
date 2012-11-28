@@ -1,6 +1,7 @@
 .. include:: ../README.rst
 
-Contents:
+.. automodule:: argcomplete
+   :members:
 
 .. toctree::
    :maxdepth: 2
