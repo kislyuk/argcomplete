@@ -29,7 +29,7 @@ Python code (e.g. ``my-awesome-script.py``)::
     parser = argparse.ArgumentParser()
     ...
     argcomplete.autocomplete(parser)
-    parser.parse_args()
+    args = parser.parse_args()
     ...
 
 Shellcode (only necessary if global completion is not activated - see `Activating global completion`_ below), to be put in e.g. ``.bashrc``::
