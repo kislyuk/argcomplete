@@ -8,7 +8,7 @@ It makes two assumptions:
 * You're using argparse to manage your command line arguments/options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if yor program can dynamically
-generate completions for your argument/option values (for example, if the user is browsing resources over the network).
+suggest completions for your argument/option values (for example, if the user is browsing resources over the network).
 
 Installation
 ------------
