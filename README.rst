@@ -1,14 +1,14 @@
 argcomplete - Bash completion for argparse
 ==========================================
-Argcomplete provides easy and extensible automatic tab completion of arguments and options for your Python script.
+Argcomplete provides easy and extensible automatic tab completion of arguments for your Python script.
 
 It makes two assumptions:
 
 * You're using bash as your shell
-* You're using argparse to manage your command line options
+* You're using argparse to manage your command line arguments/options
 
-Argcomplete is particularly useful if your program has lots of options or subparsers, and if you can suggest
-completions for your argument/option values (for example, if the user is browsing resources over the network).
+Argcomplete is particularly useful if your program has lots of options or subparsers, and if yor program can dynamically
+generate completions for your argument/option values (for example, if the user is browsing resources over the network).
 
 Installation
 ------------
