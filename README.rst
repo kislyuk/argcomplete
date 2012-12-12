@@ -112,7 +112,7 @@ completion for, and if it's found, follow the rest of the argcomplete protocol a
  destination code.
 
 The script ``activate-global-python-argcomplete`` will try to install the file
-``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
+``bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
 (``/etc/bash_completion.d/`` or ``~/.bash_completion.d/``). If it
 fails, but you know the correct location of your bash completion scripts directory, you can specify it with ``--dest``::
 
@@ -124,7 +124,7 @@ Otherwise, you can redirect its shellcode output into a file::
 
 The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
-.. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
+.. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
 
 Acknowledgments
 ---------------
