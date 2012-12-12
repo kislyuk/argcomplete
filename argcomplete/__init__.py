@@ -4,7 +4,7 @@ from .my_argparse import IntrospectiveArgumentParser
 
 if '_ARC_DEBUG' in os.environ:
     try:
-        debug_stream = os.fdopen(9, 'wb')
+        debug_stream = os.fdopen(9, 'w')
     except:
         debug_stream = sys.stderr
 else:
@@ -84,14 +84,16 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
             print >>debug_stream, "Unable to open fd 8 for writing, quitting"
             exit_method(1)
 
-    # print >> debug_stream, ""
+    # print >>debug_stream, ""
     # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', 'COMP_WORDBREAKS', 'COMP_WORDS':
-    #     print >> debug_stream, v, os.environ[v]
+    #     print >>debug_stream, v, os.environ[v]
 
     ifs = os.environ.get('IFS', ' ')
     comp_line = os.environ['COMP_LINE']
     comp_point = int(os.environ['COMP_POINT'])
     cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
+    if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
+        comp_words.pop(0)
     print >>debug_stream, "\nPREFIX: '{p}'".format(p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words
 
     active_parsers = [argument_parser]
@@ -132,12 +134,12 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     patchArgumentParser(argument_parser)
 
     try:
-        print >> debug_stream, "invoking parser with", comp_words[1:]
+        print >>debug_stream, "invoking parser with", comp_words[1:]
         with mute_stderr():
             a = argument_parser.parse_known_args(comp_words[1:])
-        print >> debug_stream, "parsed args:", a
+        print >>debug_stream, "parsed args:", a
     except BaseException as e:
-        print >> debug_stream, "\nexception", type(e), str(e), "while parsing args"
+        print >>debug_stream, "\nexception", type(e), str(e), "while parsing args"
 
     print >>debug_stream, "Active parsers:", active_parsers
     print >>debug_stream, "Visited actions:", visited_actions
@@ -204,16 +206,3 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # os.fsync(debug_stream.fileno())
 
     exit_method(0)
-
-    # COMP_CWORD
-    # COMP_LINE
-    # COMP_POINT
-    # COMP_TYPE
-    # COMP_KEY
-    # COMP_WORDBREAKS
-    # COMP_WORDS
-    # ifs = os.environ.get('IFS')
-    # cwords = os.environ['COMP_WORDS'].split(ifs)
-    # cline = os.environ['COMP_LINE']
-    # cpoint = int(os.environ['COMP_POINT'])
-    # cword = int(os.environ['COMP_CWORD'])

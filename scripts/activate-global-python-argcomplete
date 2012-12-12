@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# PYTHON_ARGCOMPLETE_OK
 '''
 Activate the generic bash-completion script for the argcomplete module.
 '''
@@ -8,8 +8,9 @@ import os, sys, argparse, argcomplete, shutil
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 
-parser.add_argument("--dest", help="Specify the destination directory", default="/etc/bash_completion.d")
+dest_opt = parser.add_argument("--dest", help="Specify the bash completion modules directory to install into", default="/etc/bash_completion.d")
 parser.add_argument("--user", help="Install into user directory (~/.bash_completion.d/)", action='store_true')
+argcomplete.autocomplete(parser)
 args = parser.parse_args()
 
 if args.user:
@@ -23,6 +24,12 @@ activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion
 if args.dest == '-':
     print open(activator).read()
 else:
-    args.dest = os.path.join(args.dest, "python-argcomplete.sh")
-    print "Installing bash completion script", args.dest
-    shutil.copy(activator, args.dest)
+    dest = os.path.join(args.dest, "python-argcomplete.sh")
+    print "Installing bash completion script", dest
+    try:
+        shutil.copy(activator, dest)
+    except Exception as e:
+        err = str(e)
+        if args.dest == dest_opt.default:
+            err += "\nPlease try --user to install into a user directory, or --dest to specify the bash completion modules directory"
+        parser.error(err)

@@ -7,8 +7,9 @@ It makes two assumptions:
 * You're using bash as your shell
 * You're using argparse to manage your command line arguments/options
 
-Argcomplete is particularly useful if your program has lots of options or subparsers, and if yor program can dynamically
-suggest completions for your argument/option values (for example, if the user is browsing resources over the network).
+Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
+dynamically suggest completions for your argument/option values (for example, if the user is browsing resources over
+the network).
 
 Installation
 ------------
@@ -46,11 +47,11 @@ default), and exits. Otherwise, it returns to the caller immediately.
 .. admonition:: Side effects
 
  Argcomplete gets completions by running your program. It intercepts the execution flow at the moment
- ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method``. This means if
- your program has any side effects that happen before ``argcomplete`` is called, those side effects will happen every
- time the user presses ``<TAB>`` (although anything your program prints to stdout or stderr will be suppressed). For
- this reason it's best to construct the argument parser and call ``argcomplete.autocomplete()`` as early as
- possible in your execution flow.
+ ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method`` (``os._exit()``
+ by default). This means if your program has any side effects that happen before ``argcomplete`` is called, those
+ side effects will happen every time the user presses ``<TAB>`` (although anything your program prints to stdout or
+ stderr will be suppressed). For this reason it's best to construct the argument parser and call
+ ``argcomplete.autocomplete()`` as early as possible in your execution flow.
 
 Specifying completers
 ---------------------
@@ -98,6 +99,18 @@ The following two ways to specify a static set of choices are equivalent for com
 
 Activating global completion
 ----------------------------
+In global completion mode, you don't have to register each argcomplete-capable executable separately. Instead, bash
+will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
+completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
+
+.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older
+ systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
+ ``echo $BASH_VERSION``.
+
+.. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
+ argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
+ destination code.
+
 The script ``activate-global-python-argcomplete`` will try to install the file
 ``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
 (``/etc/bash_completion.d/`` or ``~/.bash_completion.d/``). If it
@@ -110,13 +123,6 @@ Otherwise, you can redirect its shellcode output into a file::
     activate-global-python-argcomplete --dest=- > file
 
 The file's contents should then be sourced in e.g. ``~/.bashrc``.
-
-In global completion mode, bash will look for
-the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running completion for, and if
-it's found, follow the rest of the argcomplete protocol as described above. This frees you from the requirement to
-register each argcomplete-capable executable separately.
-
-.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older systems, you will need to update bash to use this feature. Check the version of the running copy of bash with ``echo $BASH_VERSION``.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
 

@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+'''
+Check if an EASY-INSTALL-SCRIPT wrapper redirects to a script that contains "PYTHON_ARGCOMPLETE_OK"
+'''
+import os, sys, re, argparse, pkg_resources
+
+parser = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+
+parser.add_argument("wrapper_script", help="Wrapper script to examine")
+args = parser.parse_args()
+
+with open(args.wrapper_script) as fh:
+    line1, line2 = fh.read(1024).split("\n", 2)[:2]
+    assert(line1.startswith('#') and 'py' in line1)
+    if line2.startswith("# EASY-INSTALL-SCRIPT"):
+        dist, script = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line2).groups()
+        if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata('scripts/'+script):
+            exit(0)
+    elif line2.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
+        dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line2).groups()
+        import pkgutil
+        module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
+        with open(pkgutil.get_loader(module_name).filename) as mod_fh:
+            if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
+                exit(0)
+
+exit(1)
