@@ -97,8 +97,8 @@ The following two ways to specify a static set of choices are equivalent for com
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
 
-Activating global completion
-----------------------------
+Global completion
+-----------------
 In global completion mode, you don't have to register each argcomplete-capable executable separately. Instead, bash
 will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
 completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
@@ -111,6 +111,8 @@ completion for, and if it's found, follow the rest of the argcomplete protocol a
  argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
  destination code.
 
+Activating global completion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The script ``activate-global-python-argcomplete`` will try to install the file
 ``bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
 (``/etc/bash_completion.d/`` or ``~/.bash_completion.d/``). If it
