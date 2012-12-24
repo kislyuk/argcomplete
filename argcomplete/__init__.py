@@ -13,6 +13,14 @@ else:
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
 
+safe_actions = (argparse._StoreAction,
+                argparse._StoreConstAction,
+                argparse._StoreTrueAction,
+                argparse._StoreFalseAction,
+                argparse._AppendAction,
+                argparse._AppendConstAction,
+                argparse._CountAction)
+
 @contextlib.contextmanager
 def mute_stdout():
     stdout = sys.stdout
@@ -71,6 +79,12 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     :type always_complete_options: boolean
     :param exit_method: Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
     :type exit_method: method
+
+    Produces tab completions for ``argument_parser``. See module docs for more info.
+
+    Argcomplete only executes actions if their class is known not to have side effects. Custom action classes can be
+    added to argparse.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
+    execution is otherwise desirable.
     '''
 
     if '_ARGCOMPLETE' not in os.environ:
@@ -108,10 +122,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     Since argparse doesn't support much introspection, we monkey-patch it to replace the parse_known_args method and
     all actions with hooks that tell us which action was last taken or about to be taken, and let us have the parser
     figure out which subparsers need to be activated (then recursively monkey-patch those).
-    This way we never execute the original actions, in case they have any side effects.
     We save all active ArgumentParsers to extract all their possible option names later.
     '''
-    safe_actions = (argparse._StoreAction,)
     def patchArgumentParser(parser):
         parser.__class__ = IntrospectiveArgumentParser
         for action in parser._actions:
@@ -131,7 +143,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                         patchArgumentParser(active_subparser)
                         active_parsers.append(active_subparser)
                         self._orig_callable(parser, namespace, values, option_string=option_string)
-                    elif self._orig_class in safe_actions: # use isinstance?
+                    elif self._orig_class in safe_actions:
                         self._orig_callable(parser, namespace, values, option_string=option_string)
             if getattr(action, "_orig_class", None):
                 raise ArgcompleteException("unexpected condition")
