@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-
 # PYTHON_ARGCOMPLETE_OK
-
 import argcomplete, argparse, requests, pprint
 
 def github_org_members(prefix, parsed_args, **kwargs):
