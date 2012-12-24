@@ -88,7 +88,11 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', 'COMP_WORDBREAKS', 'COMP_WORDS':
     #     print >>debug_stream, v, os.environ[v]
 
-    ifs = os.environ.get('IFS', ' ')
+    ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
+    if len(ifs) != 1:
+        print >>debug_stream, "Invalid value for IFS, quitting".format(v=ifs)
+        exit_method(1)
+
     comp_line = os.environ['COMP_LINE']
     comp_point = int(os.environ['COMP_POINT'])
     cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
@@ -180,8 +184,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                 print >>debug_stream, "Completer not available, falling back"
                 try:
                     # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                    completions += subprocess.check_output("compgen -A file '{p}'".format(p=cword_prefix),
-                                                           shell=True).splitlines()
+                    completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).splitlines()
                 except subprocess.CalledProcessError:
                     pass
 
@@ -194,6 +197,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     if len(completions) == 1 and completions[0][-1] not in continuation_chars:
         completions[0] += ' '
 
+    # TODO: figure out the correct way to quote completions
     # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])

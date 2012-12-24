@@ -14,7 +14,7 @@ _python_argcomplete_global() {
 
     if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
         local IFS=$(echo -e '\v')
-        COMPREPLY=( $(IFS="$IFS" \
+        COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
             _ARGCOMPLETE=$ARGCOMPLETE \
