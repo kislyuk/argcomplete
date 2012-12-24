@@ -55,8 +55,8 @@ default), and exits. Otherwise, it returns to the caller immediately.
 
 Specifying completers
 ---------------------
-You can specify custom completion functions for your options and arguments. Completers are called with the
-following keyword arguments:
+You can specify custom completion functions for your options and arguments. Two styles are supported: callable and
+readline-style. Callable completers are simpler. They are called with the following keyword arguments:
 
 * ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
 * ``action``: The ``argparse.Action`` instance that this completer was called for.
@@ -96,6 +96,20 @@ The following two ways to specify a static set of choices are equivalent for com
 
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
+
+Readline-style completers
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
+argcomplete, so you can use the same completer object both in an interactive readline-powered shell and on the bash
+command line. For example, you can use the readline-style completer provided by IPython_ to get introspective
+completions like you would get in the IPython shell::
+
+    import IPython
+    parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
+
+.. _readline: http://docs.python.org/2/library/readline.html
+.. _rlcompleter: http://docs.python.org/2/library/rlcompleter.html#completer-objects
+.. _IPython: http://ipython.org/
 
 Global completion
 -----------------

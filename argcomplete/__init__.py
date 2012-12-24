@@ -90,7 +90,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
     if len(ifs) != 1:
-        print >>debug_stream, "Invalid value for IFS, quitting"
+        print >>debug_stream, "Invalid value for IFS, quitting".format(v=ifs)
         exit_method(1)
 
     comp_line = os.environ['COMP_LINE']
@@ -176,10 +176,19 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                     completer = completers.ChoicesCompleter(active_action.choices)
 
             if completer:
-                print >>debug_stream, "Completions:", list(completer(prefix=cword_prefix, parser=parser, action=active_action))
-                completions += [c for c in completer(prefix=cword_prefix,
-                                                     parser=parser,
-                                                     action=active_action) if c.startswith(cword_prefix)]
+                try:
+                    completions += [c for c in completer(prefix=cword_prefix,
+                                                         parser=parser,
+                                                         action=active_action) if c.startswith(cword_prefix)]
+                except TypeError:
+                    # If completer is not callable, try the readline completion protocol instead
+                    print >>debug_stream, "Could not call completer, trying readline protocol instead"
+                    for i in xrange(9999):
+                        next_completion = completer.complete(cword_prefix, i)
+                        if next_completion is None:
+                            break
+                        completions.append(next_completion)
+                print >>debug_stream, "Completions:", completions
             elif not isinstance(active_action, argparse._SubParsersAction):
                 print >>debug_stream, "Completer not available, falling back"
                 try:
