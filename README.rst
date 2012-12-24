@@ -109,8 +109,9 @@ The following two ways to specify a static set of choices are equivalent for com
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
 
-The following code uses ``parsed_args`` and `Requests <http://python-requests.org/>`_ to query GitHub for publicly known
-members of an organization and complete their names, then prints the member description:
+The following `script <https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py>`_ uses
+``parsed_args`` and `Requests <http://python-requests.org/>`_ to query GitHub for publicly known members of an
+organization and complete their names, then prints the member description:
 
 .. code:: python
 
@@ -132,6 +133,10 @@ members of an organization and complete their names, then prints the member desc
     args = parser.parse_args()
 
     pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json)
+
+Try it like this::
+
+    ./describe_github_user.py --organization github --member <TAB>
 
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
