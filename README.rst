@@ -61,6 +61,8 @@ readline-style. Callable completers are simpler. They are called with the follow
 * ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
 * ``action``: The ``argparse.Action`` instance that this completer was called for.
 * ``parser``: The ``argparse.ArgumentParser`` instance that the action was taken by.
+* ``parsed_args``: The result of argument parsing so far (the ``argparse.Namespace`` args object normally returned by
+  ``ArgumentParser.parse_args()``).
 
 Completers should return their completions as a list of strings. An example completer for names of environment
 variables might look like this::
@@ -96,6 +98,29 @@ The following two ways to specify a static set of choices are equivalent for com
 
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
+
+The following code uses ``parsed_args`` to query GitHub for publicly known members of an organization and complete their
+names::
+
+    #!/usr/bin/env python
+
+    # PYTHON_ARGCOMPLETE_OK
+
+    import argcomplete, argparse, requests, pprint
+
+    def github_org_members(prefix, parsed_args, **kwargs):
+        resource = "https://api.github.com/orgs/{org}/members".format(org=parsed_args.organization)
+        return (member['login'] for member in requests.get(resource).json if member['login'].startswith(prefix))
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--organization", help="GitHub organization")
+    parser.add_argument("--member", help="GitHub member").completer = github_org_members
+
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
+
+    pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json)
+
 
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -101,6 +101,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     print >>debug_stream, "\nPREFIX: '{p}'".format(p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words
 
     active_parsers = [argument_parser]
+    parsed_args = argparse.Namespace()
     visited_actions = []
 
     '''
@@ -110,6 +111,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     This way we never execute the original actions, in case they have any side effects.
     We save all active ArgumentParsers to extract all their possible option names later.
     '''
+    safe_actions = (argparse._StoreAction,)
     def patchArgumentParser(parser):
         parser.__class__ = IntrospectiveArgumentParser
         for action in parser._actions:
@@ -129,6 +131,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                         patchArgumentParser(active_subparser)
                         active_parsers.append(active_subparser)
                         self._orig_callable(parser, namespace, values, option_string=option_string)
+                    elif self._orig_class in safe_actions: # use isinstance?
+                        self._orig_callable(parser, namespace, values, option_string=option_string)
             if getattr(action, "_orig_class", None):
                 raise ArgcompleteException("unexpected condition")
             action._orig_class = action.__class__
@@ -140,13 +144,14 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     try:
         print >>debug_stream, "invoking parser with", comp_words[1:]
         with mute_stderr():
-            a = argument_parser.parse_known_args(comp_words[1:])
+            a = argument_parser.parse_known_args(comp_words[1:], namespace=parsed_args)
         print >>debug_stream, "parsed args:", a
     except BaseException as e:
         print >>debug_stream, "\nexception", type(e), str(e), "while parsing args"
 
     print >>debug_stream, "Active parsers:", active_parsers
     print >>debug_stream, "Visited actions:", visited_actions
+    print >>debug_stream, "Parse result namespace:", parsed_args
     completions = []
 
     # Subcommand and options completion
@@ -179,7 +184,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                 try:
                     completions += [c for c in completer(prefix=cword_prefix,
                                                          parser=parser,
-                                                         action=active_action) if c.startswith(cword_prefix)]
+                                                         action=active_action,
+                                                         parsed_args=parsed_args) if c.startswith(cword_prefix)]
                 except TypeError:
                     # If completer is not callable, try the readline completion protocol instead
                     print >>debug_stream, "Could not call completer, trying readline protocol instead"
