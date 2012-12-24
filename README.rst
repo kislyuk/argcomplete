@@ -100,7 +100,9 @@ The following two ways to specify a static set of choices are equivalent for com
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
 
 The following code uses ``parsed_args`` and `Requests <http://python-requests.org/>`_ to query GitHub for publicly known
-members of an organization and complete their names, then prints the member description::
+members of an organization and complete their names, then prints the member description:
+
+.. code:: python
 
     #!/usr/bin/env python
 
