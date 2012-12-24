@@ -24,7 +24,7 @@ Synopsis
 --------
 Python code (e.g. ``my-awesome-script.py``):
 
-.. code:: python
+.. code-block:: python
 
     #!/usr/bin/env python
     # PYTHON_ARGCOMPLETE_OK
@@ -69,7 +69,7 @@ readline-style. Callable completers are simpler. They are called with the follow
 Completers should return their completions as a list of strings. An example completer for names of environment
 variables might look like this:
 
-.. code:: python
+.. code-block:: python
 
     def EnvironCompleter(prefix, **kwargs):
         return (v for v in os.environ if v.startswith(prefix))
@@ -77,7 +77,7 @@ variables might look like this:
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is:
 
-.. code:: python
+.. code-block:: python
 
     from argcomplete.completers import EnvironCompleter
 
@@ -91,7 +91,7 @@ used for completions.
 
 A completer that is initialized with a set of all possible choices of values for its action might look like this:
 
-.. code:: python
+.. code-block:: python
 
     class ChoicesCompleter(object):
         def __init__(self, choices=[]):
@@ -102,7 +102,7 @@ A completer that is initialized with a set of all possible choices of values for
 
 The following two ways to specify a static set of choices are equivalent for completion purposes:
 
-.. code:: python
+.. code-block:: python
 
     from argcomplete.completers import ChoicesCompleter
 
@@ -113,7 +113,7 @@ The following `script <https://raw.github.com/kislyuk/argcomplete/master/docs/ex
 ``parsed_args`` and `Requests <http://python-requests.org/>`_ to query GitHub for publicly known members of an
 organization and complete their names, then prints the member description:
 
-.. code:: python
+.. code-block:: python
 
     #!/usr/bin/env python
     # PYTHON_ARGCOMPLETE_OK
@@ -147,7 +147,7 @@ completions like you would get in the IPython shell:
 .. _rlcompleter: http://docs.python.org/2/library/rlcompleter.html#completer-objects
 .. _IPython: http://ipython.org/
 
-.. code:: python
+.. code-block:: python
 
     import IPython
     parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
