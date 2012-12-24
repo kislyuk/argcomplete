@@ -22,7 +22,9 @@ See `Activating global completion`_ below if the second step reports an error.
 
 Synopsis
 --------
-Python code (e.g. ``my-awesome-script.py``)::
+Python code (e.g. ``my-awesome-script.py``):
+
+.. code:: python
 
     #!/usr/bin/env python
     # PYTHON_ARGCOMPLETE_OK
@@ -65,13 +67,17 @@ readline-style. Callable completers are simpler. They are called with the follow
   ``ArgumentParser.parse_args()``).
 
 Completers should return their completions as a list of strings. An example completer for names of environment
-variables might look like this::
+variables might look like this:
+
+.. code:: python
 
     def EnvironCompleter(prefix, **kwargs):
         return (v for v in os.environ if v.startswith(prefix))
 
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
-way to do this at definition time is::
+way to do this at definition time is:
+
+.. code:: python
 
     from argcomplete.completers import EnvironCompleter
 
@@ -83,7 +89,9 @@ way to do this at definition time is::
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions. 
 
-A completer that is initialized with a set of all possible choices of values for its action might look like this::
+A completer that is initialized with a set of all possible choices of values for its action might look like this:
+
+.. code:: python
 
     class ChoicesCompleter(object):
         def __init__(self, choices=[]):
@@ -92,7 +100,9 @@ A completer that is initialized with a set of all possible choices of values for
         def __call__(self, prefix, **kwargs):
             return (c for c in self.choices if c.startswith(prefix))
 
-The following two ways to specify a static set of choices are equivalent for completion purposes::
+The following two ways to specify a static set of choices are equivalent for completion purposes:
+
+.. code:: python
 
     from argcomplete.completers import ChoicesCompleter
 
@@ -128,14 +138,16 @@ Readline-style completers
 The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
 argcomplete, so you can use the same completer object both in an interactive readline-powered shell and on the bash
 command line. For example, you can use the readline-style completer provided by IPython_ to get introspective
-completions like you would get in the IPython shell::
-
-    import IPython
-    parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
+completions like you would get in the IPython shell:
 
 .. _readline: http://docs.python.org/2/library/readline.html
 .. _rlcompleter: http://docs.python.org/2/library/rlcompleter.html#completer-objects
 .. _IPython: http://ipython.org/
+
+.. code:: python
+
+    import IPython
+    parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
 
 Global completion
 -----------------
