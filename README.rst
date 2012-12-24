@@ -134,7 +134,7 @@ organization and complete their names, then prints the member description:
 
 Try it like this::
 
-    ./describe_github_user.py --organization github --member <TAB>
+    ./describe_github_user.py --organization heroku --member <TAB>
 
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
