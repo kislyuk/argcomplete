@@ -22,10 +22,14 @@ if not os.path.exists(args.dest) and args.dest != '-':
     parser.error("Path {d} does not exist".format(d=args.dest))
 
 activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete.sh')
+setup_py  = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-setup-py.sh')
 
 if args.dest == '-':
     print open(activator).read()
 else:
-    args.dest = os.path.join(args.dest, "python-argcomplete.sh")
-    print "Installing bash completion script", args.dest
-    shutil.copy(activator, args.dest)
+    activator_dest = os.path.join(args.dest, "python-argcomplete.sh")
+    print "Installing bash completion script", activator_dest
+    shutil.copy(activator, activator_dest)
+    setup_py_dest = os.path.join(args.dest, "python-setup-py.sh")
+    print "Installing bash completion script", setup_py_dest
+    shutil.copy(setup_py, setup_py_dest)
