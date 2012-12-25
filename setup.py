@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import os, glob
 from setuptools import setup, find_packages
 
 setup(
     name='argcomplete',
-    version='0.2.7',
+    version='0.3.2',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',
@@ -15,8 +15,7 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=['distribute'],
     packages = find_packages(),
-    scripts = ['scripts/register-python-argcomplete',
-               'scripts/activate-global-python-argcomplete'],
+    scripts = glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh', 'bash_completion/python-setup-py.sh']},
     zip_safe=False,
     include_package_data=True,

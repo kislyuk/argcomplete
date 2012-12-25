@@ -4,7 +4,7 @@ from .my_argparse import IntrospectiveArgumentParser
 
 if '_ARC_DEBUG' in os.environ:
     try:
-        debug_stream = os.fdopen(9, 'wb')
+        debug_stream = os.fdopen(9, 'w')
     except:
         debug_stream = sys.stderr
 else:
@@ -12,6 +12,14 @@ else:
 
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
+
+safe_actions = (argparse._StoreAction,
+                argparse._StoreConstAction,
+                argparse._StoreTrueAction,
+                argparse._StoreFalseAction,
+                argparse._AppendAction,
+                argparse._AppendConstAction,
+                argparse._CountAction)
 
 @contextlib.contextmanager
 def mute_stdout():
@@ -71,6 +79,12 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     :type always_complete_options: boolean
     :param exit_method: Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
     :type exit_method: method
+
+    Produces tab completions for ``argument_parser``. See module docs for more info.
+
+    Argcomplete only executes actions if their class is known not to have side effects. Custom action classes can be
+    added to argparse.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
+    execution is otherwise desirable.
     '''
 
     if '_ARGCOMPLETE' not in os.environ:
@@ -84,24 +98,30 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
             print >>debug_stream, "Unable to open fd 8 for writing, quitting"
             exit_method(1)
 
-    # print >> debug_stream, ""
+    # print >>debug_stream, ""
     # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', 'COMP_WORDBREAKS', 'COMP_WORDS':
-    #     print >> debug_stream, v, os.environ[v]
+    #     print >>debug_stream, v, os.environ[v]
 
-    ifs = os.environ.get('IFS', ' ')
+    ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
+    if len(ifs) != 1:
+        print >>debug_stream, "Invalid value for IFS, quitting".format(v=ifs)
+        exit_method(1)
+
     comp_line = os.environ['COMP_LINE']
     comp_point = int(os.environ['COMP_POINT'])
     cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
+    if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
+        comp_words.pop(0)
     print >>debug_stream, "\nPREFIX: '{p}'".format(p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words
 
     active_parsers = [argument_parser]
+    parsed_args = argparse.Namespace()
     visited_actions = []
 
     '''
     Since argparse doesn't support much introspection, we monkey-patch it to replace the parse_known_args method and
     all actions with hooks that tell us which action was last taken or about to be taken, and let us have the parser
     figure out which subparsers need to be activated (then recursively monkey-patch those).
-    This way we never execute the original actions, in case they have any side effects.
     We save all active ArgumentParsers to extract all their possible option names later.
     '''
     def patchArgumentParser(parser):
@@ -123,6 +143,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                         patchArgumentParser(active_subparser)
                         active_parsers.append(active_subparser)
                         self._orig_callable(parser, namespace, values, option_string=option_string)
+                    elif self._orig_class in safe_actions:
+                        self._orig_callable(parser, namespace, values, option_string=option_string)
             if getattr(action, "_orig_class", None):
                 raise ArgcompleteException("unexpected condition")
             action._orig_class = action.__class__
@@ -132,15 +154,16 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     patchArgumentParser(argument_parser)
 
     try:
-        print >> debug_stream, "invoking parser with", comp_words[1:]
+        print >>debug_stream, "invoking parser with", comp_words[1:]
         with mute_stderr():
-            a = argument_parser.parse_known_args(comp_words[1:])
-        print >> debug_stream, "parsed args:", a
+            a = argument_parser.parse_known_args(comp_words[1:], namespace=parsed_args)
+        print >>debug_stream, "parsed args:", a
     except BaseException as e:
-        print >> debug_stream, "\nexception", type(e), str(e), "while parsing args"
+        print >>debug_stream, "\nexception", type(e), str(e), "while parsing args"
 
     print >>debug_stream, "Active parsers:", active_parsers
     print >>debug_stream, "Visited actions:", visited_actions
+    print >>debug_stream, "Parse result namespace:", parsed_args
     completions = []
 
     # Subcommand and options completion
@@ -170,16 +193,25 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                     completer = completers.ChoicesCompleter(active_action.choices)
 
             if completer:
-                print >>debug_stream, "Completions:", list(completer(prefix=cword_prefix, parser=parser, action=active_action))
-                completions += [c for c in completer(prefix=cword_prefix,
-                                                     parser=parser,
-                                                     action=active_action) if c.startswith(cword_prefix)]
+                try:
+                    completions += [c for c in completer(prefix=cword_prefix,
+                                                         parser=parser,
+                                                         action=active_action,
+                                                         parsed_args=parsed_args) if c.startswith(cword_prefix)]
+                except TypeError:
+                    # If completer is not callable, try the readline completion protocol instead
+                    print >>debug_stream, "Could not call completer, trying readline protocol instead"
+                    for i in xrange(9999):
+                        next_completion = completer.complete(cword_prefix, i)
+                        if next_completion is None:
+                            break
+                        completions.append(next_completion)
+                print >>debug_stream, "Completions:", completions
             elif not isinstance(active_action, argparse._SubParsersAction):
                 print >>debug_stream, "Completer not available, falling back"
                 try:
                     # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                    completions += subprocess.check_output("compgen -A file '{p}'".format(p=cword_prefix),
-                                                           shell=True).splitlines()
+                    completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).splitlines()
                 except subprocess.CalledProcessError:
                     pass
 
@@ -192,6 +224,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     if len(completions) == 1 and completions[0][-1] not in continuation_chars:
         completions[0] += ' '
 
+    # TODO: figure out the correct way to quote completions
     # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
@@ -204,16 +237,3 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # os.fsync(debug_stream.fileno())
 
     exit_method(0)
-
-    # COMP_CWORD
-    # COMP_LINE
-    # COMP_POINT
-    # COMP_TYPE
-    # COMP_KEY
-    # COMP_WORDBREAKS
-    # COMP_WORDS
-    # ifs = os.environ.get('IFS')
-    # cwords = os.environ['COMP_WORDS'].split(ifs)
-    # cline = os.environ['COMP_LINE']
-    # cpoint = int(os.environ['COMP_POINT'])
-    # cword = int(os.environ['COMP_CWORD'])

@@ -1,14 +1,15 @@
 argcomplete - Bash completion for argparse
 ==========================================
-Argcomplete provides easy and extensible automatic tab completion of arguments for your Python script.
+Argcomplete provides easy, extensible command line tab completion of arguments for your Python script.
 
 It makes two assumptions:
 
 * You're using bash as your shell
 * You're using argparse to manage your command line arguments/options
 
-Argcomplete is particularly useful if your program has lots of options or subparsers, and if yor program can dynamically
-suggest completions for your argument/option values (for example, if the user is browsing resources over the network).
+Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
+dynamically suggest completions for your argument/option values (for example, if the user is browsing resources over
+the network).
 
 Installation
 ------------
@@ -21,7 +22,9 @@ See `Activating global completion`_ below if the second step reports an error.
 
 Synopsis
 --------
-Python code (e.g. ``my-awesome-script.py``)::
+Python code (e.g. ``my-awesome-script.py``):
+
+.. code-block:: python
 
     #!/usr/bin/env python
     # PYTHON_ARGCOMPLETE_OK
@@ -46,29 +49,35 @@ default), and exits. Otherwise, it returns to the caller immediately.
 .. admonition:: Side effects
 
  Argcomplete gets completions by running your program. It intercepts the execution flow at the moment
- ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method``. This means if
- your program has any side effects that happen before ``argcomplete`` is called, those side effects will happen every
- time the user presses ``<TAB>`` (although anything your program prints to stdout or stderr will be suppressed). For
- this reason it's best to construct the argument parser and call ``argcomplete.autocomplete()`` as early as
- possible in your execution flow.
+ ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method`` (``os._exit()``
+ by default). This means if your program has any side effects that happen before ``argcomplete`` is called, those
+ side effects will happen every time the user presses ``<TAB>`` (although anything your program prints to stdout or
+ stderr will be suppressed). For this reason it's best to construct the argument parser and call
+ ``argcomplete.autocomplete()`` as early as possible in your execution flow.
 
 Specifying completers
 ---------------------
-You can specify custom completion functions for your options and arguments. Completers are called with the
-following keyword arguments:
+You can specify custom completion functions for your options and arguments. Two styles are supported: callable and
+readline-style. Callable completers are simpler. They are called with the following keyword arguments:
 
 * ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
 * ``action``: The ``argparse.Action`` instance that this completer was called for.
 * ``parser``: The ``argparse.ArgumentParser`` instance that the action was taken by.
+* ``parsed_args``: The result of argument parsing so far (the ``argparse.Namespace`` args object normally returned by
+  ``ArgumentParser.parse_args()``).
 
 Completers should return their completions as a list of strings. An example completer for names of environment
-variables might look like this::
+variables might look like this:
+
+.. code-block:: python
 
     def EnvironCompleter(prefix, **kwargs):
         return (v for v in os.environ if v.startswith(prefix))
 
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
-way to do this at definition time is::
+way to do this at definition time is:
+
+.. code-block:: python
 
     from argcomplete.completers import EnvironCompleter
 
@@ -80,7 +89,9 @@ way to do this at definition time is::
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions. 
 
-A completer that is initialized with a set of all possible choices of values for its action might look like this::
+A completer that is initialized with a set of all possible choices of values for its action might look like this:
+
+.. code-block:: python
 
     class ChoicesCompleter(object):
         def __init__(self, choices=[]):
@@ -89,17 +100,76 @@ A completer that is initialized with a set of all possible choices of values for
         def __call__(self, prefix, **kwargs):
             return (c for c in self.choices if c.startswith(prefix))
 
-The following two ways to specify a static set of choices are equivalent for completion purposes::
+The following two ways to specify a static set of choices are equivalent for completion purposes:
+
+.. code-block:: python
 
     from argcomplete.completers import ChoicesCompleter
 
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
 
+The following `script <https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py>`_ uses
+``parsed_args`` and `Requests <http://python-requests.org/>`_ to query GitHub for publicly known members of an
+organization and complete their names, then prints the member description:
+
+.. code-block:: python
+
+    #!/usr/bin/env python
+    # PYTHON_ARGCOMPLETE_OK
+    import argcomplete, argparse, requests, pprint
+
+    def github_org_members(prefix, parsed_args, **kwargs):
+        resource = "https://api.github.com/orgs/{org}/members".format(org=parsed_args.organization)
+        return (member['login'] for member in requests.get(resource).json if member['login'].startswith(prefix))
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--organization", help="GitHub organization")
+    parser.add_argument("--member", help="GitHub member").completer = github_org_members
+
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
+
+    pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json)
+
+Try it like this::
+
+    ./describe_github_user.py --organization heroku --member <TAB>
+
+Readline-style completers
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
+argcomplete, so you can use the same completer object both in an interactive readline-powered shell and on the bash
+command line. For example, you can use the readline-style completer provided by IPython_ to get introspective
+completions like you would get in the IPython shell:
+
+.. _readline: http://docs.python.org/2/library/readline.html
+.. _rlcompleter: http://docs.python.org/2/library/rlcompleter.html#completer-objects
+.. _IPython: http://ipython.org/
+
+.. code-block:: python
+
+    import IPython
+    parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
+
+Global completion
+-----------------
+In global completion mode, you don't have to register each argcomplete-capable executable separately. Instead, bash
+will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
+completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
+
+.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older
+ systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
+ ``echo $BASH_VERSION``.
+
+.. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
+ argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
+ destination code.
+
 Activating global completion
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The script ``activate-global-python-argcomplete`` will try to install the file
-``etc/bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
+``bash_completion.d/python-argcomplete.sh`` (`see on GitHub`_) into an appropriate location on your system
 (``/etc/bash_completion.d/`` or ``~/.bash_completion.d/``). If it
 fails, but you know the correct location of your bash completion scripts directory, you can specify it with ``--dest``::
 
@@ -111,14 +181,7 @@ Otherwise, you can redirect its shellcode output into a file::
 
 The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
-In global completion mode, bash will look for
-the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running completion for, and if
-it's found, follow the rest of the argcomplete protocol as described above. This frees you from the requirement to
-register each argcomplete-capable executable separately.
-
-.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older systems, you will need to update bash to use this feature. Check the version of the running copy of bash with ``echo $BASH_VERSION``.
-
-.. _`see on GitHub`: https://github.com/kislyuk/argcomplete/tree/master/etc/bash_completion.d/python-argcomplete.sh
+.. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
 
 Acknowledgments
 ---------------
