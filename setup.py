@@ -17,7 +17,7 @@ setup(
     packages = find_packages(),
     scripts = ['scripts/register-python-argcomplete',
                'scripts/activate-global-python-argcomplete'],
-    package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
+    package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh', 'bash_completion/python-setup-py.sh']},
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
