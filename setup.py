@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os, glob
 from setuptools import setup, find_packages
@@ -15,7 +16,7 @@ setup(
     install_requires=['distribute'],
     packages = find_packages(),
     scripts = glob.glob('scripts/*'),
-    package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
+    package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh', 'bash_completion/python-setup-py.sh']},
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
