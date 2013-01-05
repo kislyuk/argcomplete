@@ -132,7 +132,7 @@ organization and complete their names, then prints the member description:
 
     pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json)
 
-Try it like this::
+`Try it <https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py>`_ like this::
 
     ./describe_github_user.py --organization heroku --member <TAB>
 
