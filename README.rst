@@ -49,7 +49,7 @@ default), and exits. Otherwise, it returns to the caller immediately.
 .. admonition:: Side effects
 
  Argcomplete gets completions by running your program. It intercepts the execution flow at the moment
- ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method`` (``os._exit()``
+ ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method`` (``os._exit``
  by default). This means if your program has any side effects that happen before ``argcomplete`` is called, those
  side effects will happen every time the user presses ``<TAB>`` (although anything your program prints to stdout or
  stderr will be suppressed). For this reason it's best to construct the argument parser and call
