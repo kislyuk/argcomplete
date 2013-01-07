@@ -5,7 +5,7 @@ Argcomplete provides easy, extensible command line tab completion of arguments f
 It makes two assumptions:
 
 * You're using bash as your shell
-* You're using argparse to manage your command line arguments/options
+* You're using `argparse <http://docs.python.org/2.7/library/argparse.html>`_ to manage your command line arguments/options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
 dynamically suggest completions for your argument/option values (for example, if the user is browsing resources over
