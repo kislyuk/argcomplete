@@ -1,3 +1,6 @@
+# Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
+# Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
+
 import os, sys, argparse, shlex, pipes, contextlib, subprocess
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser

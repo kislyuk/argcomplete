@@ -1,3 +1,6 @@
+# Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
+# Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
+
 _python_argcomplete_global() {
     local ARGCOMPLETE=0
     if [[ "$1" == python* ]] || [[ "$1" == pypy* ]]; then

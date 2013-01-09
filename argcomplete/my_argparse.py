@@ -1,3 +1,6 @@
+# Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
+# Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
+
 import sys
 from argparse import ArgumentParser, ArgumentError, SUPPRESS
 from argparse import _get_action_name, _
