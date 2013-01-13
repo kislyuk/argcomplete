@@ -12,7 +12,7 @@ setup(
     author_email='kislyuk@gmail.com',
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
-    install_requires=['distribute'],
+    install_requires=['distribute', 'argparse'],
     packages = find_packages(),
     scripts = glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
