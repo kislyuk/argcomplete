@@ -1,7 +1,7 @@
 # Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-import os, sys, argparse, shlex, pipes, contextlib, subprocess
+import os, sys, argparse, shlex, pipes, contextlib, subprocess, locale
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser
 
@@ -233,7 +233,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # print ifs.join([escape_completion_name_str(c) for c in completions])
 
     print >>debug_stream, "\nReturning completions:", completions
-    output_stream.write(ifs.join(completions))
+    output_stream.write(ifs.join(completions).encode(locale.getpreferredencoding()))
     output_stream.flush()
     # os.fsync(output_stream.fileno()) - this raises an error, why?
     debug_stream.flush()
