@@ -214,7 +214,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                 print >>debug_stream, "Completer not available, falling back"
                 try:
                     # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                    completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).splitlines()
+                    completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).decode().splitlines()
                 except subprocess.CalledProcessError:
                     pass
 
