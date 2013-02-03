@@ -15,7 +15,7 @@ parser.add_argument("wrapper_script", help="Wrapper script to examine")
 args = parser.parse_args()
 
 with open(args.wrapper_script) as fh:
-    line1, lines = fh.read(1024).split("\n", 2)[:2]
+    line1, lines = fh.read(1024).split("\n", 1)[:2]
     assert(line1.startswith('#') and 'py' in line1)
     for line in lines.split("\n", 10):
         if line.startswith("# EASY-INSTALL-SCRIPT"):

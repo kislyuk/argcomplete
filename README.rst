@@ -121,7 +121,7 @@ organization and complete their names, then prints the member description:
 
     def github_org_members(prefix, parsed_args, **kwargs):
         resource = "https://api.github.com/orgs/{org}/members".format(org=parsed_args.organization)
-        return (member['login'] for member in requests.get(resource).json if member['login'].startswith(prefix))
+        return (member['login'] for member in requests.get(resource).json() if member['login'].startswith(prefix))
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--organization", help="GitHub organization")
@@ -130,7 +130,7 @@ organization and complete their names, then prints the member description:
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
 
-    pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json)
+    pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json())
 
 `Try it <https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py>`_ like this::
 

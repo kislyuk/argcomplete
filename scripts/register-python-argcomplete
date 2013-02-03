@@ -14,6 +14,9 @@ Example:
     $ eval "$(register-python-argcomplete my-favorite-script.py)"
 '''
 
+from __future__ import print_function
+import os, sys, argparse
+
 shellcode = '''
 _python_argcomplete() {
     local IFS='\013'
@@ -29,16 +32,13 @@ _python_argcomplete() {
 complete -o nospace -o default -F _python_argcomplete "%s"
 '''
 
-import sys, argparse
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("executable")
-from argcomplete import autocomplete
-autocomplete(parser)
 
 if len(sys.argv)==1:
     parser.print_help()
     sys.exit(1)
 
 args = parser.parse_args()
-print shellcode % args.executable
+print(shellcode % args.executable)
