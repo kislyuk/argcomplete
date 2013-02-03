@@ -158,7 +158,9 @@ In global completion mode, you don't have to register each argcomplete-capable e
 will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
 completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
 
-.. note:: Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older
+.. admonition:: Bash version compatibility
+
+ Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older
  systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
  ``echo $BASH_VERSION``.
 
