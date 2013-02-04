@@ -204,6 +204,3 @@ Please report bugs, issues, feature requests, etc. on `GitHub <https://github.co
 License
 -------
 Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_.
-
-.. image:: https://travis-ci.org/kislyuk/argcomplete.png
-        :target: https://travis-ci.org/kislyuk/argcomplete
