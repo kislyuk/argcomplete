@@ -179,7 +179,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                 for subparser in action._name_parser_map.values():
                     if subparser in active_parsers:
                         subparser_activated = True
-                if not subparser_activated:
+                if subparser_activated:
+                    # Parent parser completions are not valid in the subparser, so flush them
+                    completions = []
+                else:
                     completions += [subcmd for subcmd in action.choices.keys() if subcmd.startswith(cword_prefix)]
             elif always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars):
                 completions += [option for option in action.option_strings if option.startswith(cword_prefix)]
