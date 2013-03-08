@@ -1,7 +1,7 @@
 # Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-import os, sys
+import os
 
 class ChoicesCompleter(object):
     def __init__(self, choices=[]):
