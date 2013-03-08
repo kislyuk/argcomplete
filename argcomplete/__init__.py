@@ -1,9 +1,16 @@
 # Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-import os, sys, argparse, shlex, pipes, contextlib, subprocess, locale
+from __future__ import print_function
+
+import os, sys, argparse, shlex, contextlib, subprocess, locale
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 if '_ARC_DEBUG' in os.environ:
     try:
@@ -36,6 +43,7 @@ def mute_stderr():
     stderr = sys.stderr
     sys.stderr = open(os.devnull, 'w')
     yield
+    sys.stderr.close()
     sys.stderr = stderr
 
 class ArgcompleteException(Exception):
@@ -52,7 +60,7 @@ def split_line(line, point):
         if isinstance(lexer.state, basestring) and lexer.state in lexer.whitespace:
             point_in_word += 1
         if point_in_word > len(word):
-            print >>debug_stream, "In trailing whitespace"
+            print("In trailing whitespace", file=debug_stream)
             words.append(word)
             word = ''
         prefix, suffix = word[:point_in_word], word[point_in_word:]
@@ -64,11 +72,11 @@ def split_line(line, point):
             if word == lexer.eof:
                 raise ArgcompleteException("Unexpected end of input")
             if lexer.instream.tell() >= point:
-                print >>debug_stream, "word", word, "split"
+                print("word", word, "split", file=debug_stream)
                 return split_word(word)
             words.append(word)
-        except ValueError as e:
-            print >>debug_stream, "word", lexer.token, "split (lexer stopped)"
+        except ValueError:
+            print("word", lexer.token, "split (lexer stopped)", file=debug_stream)
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:
@@ -98,7 +106,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         try:
             output_stream = os.fdopen(8, 'wb')
         except:
-            print >>debug_stream, "Unable to open fd 8 for writing, quitting"
+            print("Unable to open fd 8 for writing, quitting", file=debug_stream)
             exit_method(1)
 
     # print >>debug_stream, ""
@@ -107,7 +115,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
     if len(ifs) != 1:
-        print >>debug_stream, "Invalid value for IFS, quitting".format(v=ifs)
+        print("Invalid value for IFS, quitting".format(v=ifs), file=debug_stream)
         exit_method(1)
 
     comp_line = os.environ['COMP_LINE']
@@ -115,7 +123,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
     if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
         comp_words.pop(0)
-    print >>debug_stream, "\nPREFIX: '{p}'".format(p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words
+    print("\nPREFIX: '{p}'".format(p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words, file=debug_stream)
 
     active_parsers = [argument_parser]
     parsed_args = argparse.Namespace()
@@ -133,15 +141,15 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
             # TODO: accomplish this with super
             class IntrospectAction(action.__class__):
                 def __call__(self, parser, namespace, values, option_string=None):
-                    print >>debug_stream, 'Action stub called on', self
-                    print >>debug_stream, '\targs:', parser, namespace, values, option_string
-                    print >>debug_stream, '\torig class:', self._orig_class
-                    print >>debug_stream, '\torig callable:', self._orig_callable
+                    print('Action stub called on', self, file=debug_stream)
+                    print('\targs:', parser, namespace, values, option_string, file=debug_stream)
+                    print('\torig class:', self._orig_class, file=debug_stream)
+                    print('\torig callable:', self._orig_callable, file=debug_stream)
 
                     visited_actions.append(self)
 
                     if self._orig_class == argparse._SubParsersAction:
-                        print >>debug_stream, 'orig class is a subparsers action: patching and running it'
+                        print('orig class is a subparsers action: patching and running it', file=debug_stream)
                         active_subparser = self._name_parser_map[values[0]]
                         patchArgumentParser(active_subparser)
                         active_parsers.append(active_subparser)
@@ -157,23 +165,23 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     patchArgumentParser(argument_parser)
 
     try:
-        print >>debug_stream, "invoking parser with", comp_words[1:]
+        print("invoking parser with", comp_words[1:], file=debug_stream)
         with mute_stderr():
             a = argument_parser.parse_known_args(comp_words[1:], namespace=parsed_args)
-        print >>debug_stream, "parsed args:", a
+        print("parsed args:", a, file=debug_stream)
     except BaseException as e:
-        print >>debug_stream, "\nexception", type(e), str(e), "while parsing args"
+        print("\nexception", type(e), str(e), "while parsing args", file=debug_stream)
 
-    print >>debug_stream, "Active parsers:", active_parsers
-    print >>debug_stream, "Visited actions:", visited_actions
-    print >>debug_stream, "Parse result namespace:", parsed_args
+    print("Active parsers:", active_parsers, file=debug_stream)
+    print("Visited actions:", visited_actions, file=debug_stream)
+    print("Parse result namespace:", parsed_args, file=debug_stream)
     completions = []
 
     # Subcommand and options completion
     for parser in active_parsers:
-        print >>debug_stream, "Examining parser", parser
+        print("Examining parser", parser, file=debug_stream)
         for action in parser._actions:
-            print >>debug_stream, "Examining action", action
+            print("Examining action", action, file=debug_stream)
             if isinstance(action, argparse._SubParsersAction):
                 subparser_activated = False
                 for subparser in action._name_parser_map.values():
@@ -187,10 +195,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
             elif always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars):
                 completions += [option for option in action.option_strings if option.startswith(cword_prefix)]
 
-        print >>debug_stream, "Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions)
+        print("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions), file=debug_stream)
 
         for active_action in parser.active_actions:
-            print >>debug_stream, "Activating completion for", active_action, active_action._orig_class
+            print("Activating completion for", active_action, active_action._orig_class, file=debug_stream)
             #completer = getattr(active_action, 'completer', DefaultCompleter())
             completer = getattr(active_action, 'completer', None)
 
@@ -206,15 +214,15 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                                                          parsed_args=parsed_args) if c.startswith(cword_prefix)]
                 except TypeError:
                     # If completer is not callable, try the readline completion protocol instead
-                    print >>debug_stream, "Could not call completer, trying readline protocol instead"
-                    for i in xrange(9999):
+                    print("Could not call completer, trying readline protocol instead", file=debug_stream)
+                    for i in range(9999):
                         next_completion = completer.complete(cword_prefix, i)
                         if next_completion is None:
                             break
                         completions.append(next_completion)
-                print >>debug_stream, "Completions:", completions
+                print("Completions:", completions, file=debug_stream)
             elif not isinstance(active_action, argparse._SubParsersAction):
-                print >>debug_stream, "Completer not available, falling back"
+                print("Completer not available, falling back", file=debug_stream)
                 try:
                     # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
                     completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).decode().splitlines()
@@ -235,7 +243,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
 
-    print >>debug_stream, "\nReturning completions:", completions
+    print("\nReturning completions:", completions, file=debug_stream)
     output_stream.write(ifs.join(completions).encode(locale.getpreferredencoding()))
     output_stream.flush()
     # os.fsync(output_stream.fileno()) - this raises an error, why?

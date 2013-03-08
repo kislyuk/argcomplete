@@ -29,7 +29,7 @@ class TestArgcomplete(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 autocomplete(parser, output_stream=t, exit_method=sys.exit)
             t.seek(0)
-            return t.read().split(IFS)
+            return t.read().decode('utf-8').split(IFS)
 
     def test_basic_completion(self):
         p = ArgumentParser()
