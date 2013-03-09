@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-import os, sys, unittest, json, subprocess
+import locale
+import os
+import sys
+import unittest
 from tempfile import TemporaryFile
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -29,7 +32,7 @@ class TestArgcomplete(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 autocomplete(parser, output_stream=t, exit_method=sys.exit)
             t.seek(0)
-            return t.read().split(IFS)
+            return t.read().decode(locale.getpreferredencoding()).split(IFS)
 
     def test_basic_completion(self):
         p = ArgumentParser()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, glob
+import glob
 from setuptools import setup, find_packages
 
 setup(
@@ -19,7 +19,6 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
-    use_2to3 = True,
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Developers',
