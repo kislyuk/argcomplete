@@ -2,6 +2,7 @@
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 from argparse import ArgumentParser, ArgumentError, SUPPRESS
+from argparse import OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
 from argparse import _get_action_name, _
 
 class IntrospectiveArgumentParser(ArgumentParser):
@@ -140,6 +141,16 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     arg_count = match_argument(action, selected_patterns)
                     stop = start + arg_count
                     args = arg_strings[start:stop]
+
+                    # Begin added by argcomplete
+                    # If the pattern is not open (e.g. no + at the end), remove the action from active actions (since
+                    # it wouldn't be able to consume any more args)
+                    if action.nargs not in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]:
+                        self.active_actions.remove(action)
+                    elif action.nargs == OPTIONAL and len(args) == 1:
+                        self.active_actions.remove(action)
+                    # End added by argcomplete
+
                     action_tuples.append((action, args, option_string))
                     break
 
