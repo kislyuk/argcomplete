@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-import os, sys, argparse, shlex, contextlib, subprocess, locale
+import os, sys, argparse, shlex, contextlib, subprocess, locale, re
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser
 
@@ -119,6 +119,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         exit_method(1)
 
     comp_line = os.environ['COMP_LINE']
+    comp_wordbreaks = os.environ['COMP_WORDBREAKS']
     comp_point = int(os.environ['COMP_POINT'])
     cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
     if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
@@ -219,7 +220,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                         next_completion = completer.complete(cword_prefix, i)
                         if next_completion is None:
                             break
-                        completions.append(next_completion)
+                        if next_completion.startswith(cword_prefix):
+                            completions.append(next_completion)
                 print("Completions:", completions, file=debug_stream)
             elif not isinstance(active_action, argparse._SubParsersAction):
                 print("Completer not available, falling back", file=debug_stream)
@@ -232,6 +234,12 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # De-duplicate completions
     seen = set()
     completions = [c for c in completions if c not in seen and not seen.add(c)]
+
+    # If cword_prefix contains a char present in COMP_WORDBREAKS, strip from each completion the portion of
+    # cword_prefix up to the last such occurrence.
+    last_wb_match = re.search("[{wb}][^{wb}]*$".format(wb=comp_wordbreaks), cword_prefix)
+    if last_wb_match:
+        completions = [c[last_wb_match.start()+1:] for c in completions]
 
     continuation_chars = '=/:'
     # If there's only one completion, and it doesn't end with a continuation char, add a space
