@@ -29,6 +29,7 @@ class TestArgcomplete(unittest.TestCase):
         with TemporaryFile() as t:
             os.environ['COMP_LINE'] = command
             os.environ['COMP_POINT'] = point if point else str(len(command))
+            os.environ['COMP_WORDBREAKS'] = '"\'@><=;|&(:'
             with self.assertRaises(SystemExit):
                 autocomplete(parser, output_stream=t, exit_method=sys.exit)
             t.seek(0)
