@@ -154,8 +154,8 @@ completions like you would get in the IPython shell:
 
 Printing warnings in completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Normal stdout/stderr output is suspended when argcomplete runs. Sometimes, though, when the user presses `<TAB>`, it's
-appropriate to print information about why completions generation failed. To do this, use `warn`:
+Normal stdout/stderr output is suspended when argcomplete runs. Sometimes, though, when the user presses ``<TAB>``, it's
+appropriate to print information about why completions generation failed. To do this, use ``warn``:
 
 .. code-block:: python
 
