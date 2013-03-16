@@ -152,6 +152,20 @@ completions like you would get in the IPython shell:
     import IPython
     parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
 
+Printing warnings in completers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Normal stdout/stderr output is suspended when argcomplete runs. Sometimes, though, when the user presses `<TAB>`, it's
+appropriate to print information about why completions generation failed. To do this, use `warn`:
+
+.. code-block:: python
+
+    from argcomplete import warn
+
+    def AwesomeWebServiceCompleter(prefix, **kwargs):
+        if login_failed:
+            warn("Please log in to Awesome Web Service to use autocompletion")
+        return completions
+
 Global completion
 -----------------
 In global completion mode, you don't have to register each argcomplete-capable executable separately. Instead, bash
