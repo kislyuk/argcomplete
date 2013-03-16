@@ -87,7 +87,9 @@ def split_line(line, point):
         try:
             word = lexer.get_token()
             if word == lexer.eof:
-                raise ArgcompleteException("Unexpected end of input")
+                # TODO: check if this is ever unsafe
+                # raise ArgcompleteException("Unexpected end of input")
+                return "", "", words
             if lexer.instream.tell() >= point:
                 debug("word", word, "split")
                 return split_word(word)
