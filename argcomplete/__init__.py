@@ -52,7 +52,7 @@ def action_is_satisfied(action):
         return False
     else:
         try:
-            return num_consumed_args < action.nargs
+            return num_consumed_args == action.nargs
         except:
             return True
 
