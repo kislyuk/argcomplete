@@ -138,6 +138,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     start = start_index + 1
                     selected_patterns = arg_strings_pattern[start:]
                     self.active_actions = [action] # Added by argcomplete
+                    action.num_consumed_args = 0 # Added by argcomplete
                     arg_count = match_argument(action, selected_patterns)
                     stop = start + arg_count
                     args = arg_strings[start:stop]
@@ -149,6 +150,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                         self.active_actions.remove(action)
                     elif action.nargs == OPTIONAL and len(args) == 1:
                         self.active_actions.remove(action)
+                    action.num_consumed_args = len(args)
                     # End added by argcomplete
 
                     action_tuples.append((action, args, option_string))

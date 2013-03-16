@@ -46,6 +46,16 @@ def mute_stderr():
     sys.stderr.close()
     sys.stderr = stderr
 
+def action_is_satisfied(action):
+    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+    if action.nargs == argparse.ONE_OR_MORE and num_consumed_args < 1:
+        return False
+    else:
+        try:
+            return num_consumed_args < action.nargs
+        except:
+            return True
+
 class ArgcompleteException(Exception):
     pass
 
@@ -208,6 +218,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                     completer = completers.ChoicesCompleter(active_action.choices)
 
             if completer:
+                if not action_is_satisfied(active_action):
+                    # This means the current action will fail to parse if the word under the cursor is not given
+                    # to it, so give it exclusive control over completions (flush previous completions)
+                    completions = []
                 try:
                     completions += [c for c in completer(prefix=cword_prefix,
                                                          parser=parser,
@@ -237,9 +251,11 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     # If cword_prefix contains a char present in COMP_WORDBREAKS, strip from each completion the portion of
     # cword_prefix up to the last such occurrence.
-    last_wb_match = re.search("[{wb}][^{wb}]*$".format(wb=comp_wordbreaks), cword_prefix)
-    if last_wb_match:
-        completions = [c[last_wb_match.start()+1:] for c in completions]
+    cword_break_loc = -1
+    for wordbreak_char in comp_wordbreaks:
+        cword_break_loc = max(cword_break_loc, cword_prefix.rfind(wordbreak_char))
+    if cword_break_loc != -1:
+        completions = [c[cword_break_loc+1:] for c in completions]
 
     continuation_chars = '=/:'
     # If there's only one completion, and it doesn't end with a continuation char, add a space
