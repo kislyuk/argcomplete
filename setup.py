@@ -3,6 +3,13 @@
 import glob
 from setuptools import setup, find_packages
 
+install_requires = ['distribute']
+
+try:
+    import argparse
+except ImportError:
+    install_requires.append('argparse')
+
 setup(
     name='argcomplete',
     version='0.3.9',
@@ -12,7 +19,7 @@ setup(
     author_email='kislyuk@gmail.com',
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
-    install_requires=['distribute', 'argparse'],
+    install_requires=install_requires,
     packages = find_packages(),
     scripts = glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
