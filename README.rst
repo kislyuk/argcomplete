@@ -20,7 +20,7 @@ Installation
     pip install argcomplete
     activate-global-python-argcomplete
 
-See `Activating global completion`_ below if the second step reports an error.
+Refresh your bash environment (restart bash or ``source /etc/profile``). See `Activating global completion`_ below if the second step reports an error.
 
 Synopsis
 --------
