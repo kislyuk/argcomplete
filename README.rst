@@ -22,7 +22,7 @@ Installation
 
 See `Activating global completion`_ below if the second step reports an error.
 
-Refresh your bash environment (start a new bash shell or ``source /etc/profile``).
+Refresh your bash environment (start a new shell or ``source /etc/profile``).
 
 Synopsis
 --------
