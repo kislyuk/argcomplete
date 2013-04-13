@@ -81,7 +81,11 @@ def split_line(line, point):
             words.append(word)
             word = ''
         prefix, suffix = word[:point_in_word], word[point_in_word:]
-        return prefix, suffix, words
+        prequote = ''
+        for quote_char in lexer.quotes:
+            if prefix.startswith(quote_char):
+                prequote, prefix = prefix[0], prefix[1:]
+        return prequote, prefix, suffix, words
 
     while True:
         try:
@@ -89,7 +93,7 @@ def split_line(line, point):
             if word == lexer.eof:
                 # TODO: check if this is ever unsafe
                 # raise ArgcompleteException("Unexpected end of input")
-                return "", "", words
+                return "", "", "", words
             if lexer.instream.tell() >= point:
                 debug("word", word, "split")
                 return split_word(word)
@@ -140,10 +144,15 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     comp_line = os.environ['COMP_LINE']
     comp_wordbreaks = os.environ['COMP_WORDBREAKS']
     comp_point = int(os.environ['COMP_POINT'])
-    cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
+    cword_prequote, cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
+
+    # TODO: determine if this is best done here or earlier
+    cword_prefix = re.sub('\\\\(.)', '\\1', cword_prefix)
+    cword_suffix = re.sub('\\\\(.)', '\\1', cword_suffix)
+
     if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
         comp_words.pop(0)
-    debug("\nPREFIX: '{p}'".format(p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
+    debug("\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
 
     active_parsers = [argument_parser]
     parsed_args = argparse.Namespace()
@@ -260,18 +269,19 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     seen = set()
     completions = [c for c in completions if c not in seen and not seen.add(c)]
 
-    # If cword_prefix contains a char present in COMP_WORDBREAKS, strip from each completion the portion of
-    # cword_prefix up to the last such occurrence.
-    cword_break_loc = -1
-    for wordbreak_char in comp_wordbreaks:
-        cword_break_loc = max(cword_break_loc, cword_prefix.rfind(wordbreak_char))
-    if cword_break_loc != -1:
-        completions = [c[cword_break_loc+1:] for c in completions]
+    # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
+    # Otherwise, escape all COMP_WORDBREAKS chars
+    if cword_prequote == '':
+        for wordbreak_char in comp_wordbreaks:
+            completions = [c.replace(wordbreak_char, '\\'+wordbreak_char) for c in completions]
+    else:
+        completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
 
+    # If there's only one completion, and it's not open-quoted and doesn't end with a continuation char, add a space
     continuation_chars = '=/:'
-    # If there's only one completion, and it doesn't end with a continuation char, add a space
     if len(completions) == 1 and completions[0][-1] not in continuation_chars:
-        completions[0] += ' '
+        if cword_prequote == '':
+            completions[0] += ' '
 
     # TODO: figure out the correct way to quote completions
     # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
