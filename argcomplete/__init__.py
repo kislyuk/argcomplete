@@ -82,9 +82,8 @@ def split_line(line, point):
             word = ''
         prefix, suffix = word[:point_in_word], word[point_in_word:]
         prequote = ''
-        for quote_char in lexer.quotes:
-            if prefix.startswith(quote_char):
-                prequote, prefix = prefix[0], prefix[1:]
+        if len(prefix) > 0 and prefix[0] in lexer.quotes:
+            prequote, prefix = prefix[0], prefix[1:]
         return prequote, prefix, suffix, words
 
     while True:
