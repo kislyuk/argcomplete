@@ -39,7 +39,7 @@ Python code (e.g. ``my-awesome-script.py``):
     args = parser.parse_args()
     ...
 
-Shellcode (only necessary if global completion is not activated - see `Activating global completion`_ below), to be put in e.g. ``.bashrc``::
+Shellcode (only necessary if global completion is not activated - see `Global completion`_ below), to be put in e.g. ``.bashrc``::
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
