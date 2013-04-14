@@ -3,4 +3,11 @@ python:
     - 2.7
     - 3.3
 
-script: make test
+script:
+    - make test
+    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
+    - coverage report --show-missing
+
+after_success:
+    - pip install --quiet coveralls
+    - coveralls
