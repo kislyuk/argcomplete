@@ -6,6 +6,9 @@ python:
 before_install:
     - pip install --quiet coverage
 
+install:
+    - python setup.py install
+
 script:
     - make test
     - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
