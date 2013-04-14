@@ -116,7 +116,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     Produces tab completions for ``argument_parser``. See module docs for more info.
 
     Argcomplete only executes actions if their class is known not to have side effects. Custom action classes can be
-    added to argparse.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
+    added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
     execution is otherwise desirable.
     '''
 
