@@ -43,14 +43,6 @@ class TestArgcomplete(unittest.TestCase):
         completions = self.run_completer(p, "prog ")
         assert(set(completions) == set(['-h', '--help', '--foo', '--bar']))
 
-    def test_basic_completion(self):
-        p = ArgumentParser()
-        p.add_argument("--foo")
-        p.add_argument("--bar")
-
-        completions = self.run_completer(p, "prog ")
-        assert(set(completions) == set(['-h', '--help', '--foo', '--bar']))
-
     def test_completers(self):
         def c_url(prefix, parsed_args, **kwargs):
             return [ "http://url1", "http://url2" ]
