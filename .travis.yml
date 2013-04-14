@@ -3,6 +3,9 @@ python:
     - 2.7
     - 3.3
 
+before_install:
+    - pip install --quiet coverage
+
 script:
     - make test
     - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
