@@ -10,7 +10,7 @@ try:
 except NameError:
     basestring = str
 
-_DEBUG = True if '_ARC_DEBUG' in os.environ else False
+_DEBUG = '_ARC_DEBUG' in os.environ
 
 try:
     debug_stream = os.fdopen(9, 'w')
