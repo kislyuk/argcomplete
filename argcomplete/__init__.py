@@ -279,7 +279,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # If there's only one completion, and it's not open-quoted and doesn't end with a continuation char, add a space
     continuation_chars = '=/:'
     if len(completions) == 1 and completions[0][-1] not in continuation_chars:
-        if cword_prequote == '':
+        if cword_prequote == '' and not completions[0].endswith(' '):
             completions[0] += ' '
 
     # TODO: figure out the correct way to quote completions
