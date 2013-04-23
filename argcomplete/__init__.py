@@ -246,7 +246,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                                                          parser=parser,
                                                          action=active_action,
                                                          parsed_args=parsed_args) if c.startswith(cword_prefix)]
-                except TypeError:
+                except (AttributeError, TypeError):
                     # If completer is not callable, try the readline completion protocol instead
                     debug("Could not call completer, trying readline protocol instead")
                     for i in range(9999):
