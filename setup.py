@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name='argcomplete',
-    version='0.4.3',
+    version='0.4.4',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',
