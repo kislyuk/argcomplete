@@ -185,7 +185,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                     elif self._orig_class in safe_actions:
                         self._orig_callable(parser, namespace, values, option_string=option_string)
             if getattr(action, "_orig_class", None):
-                raise ArgcompleteException("unexpected condition")
+                debug("Action", action, "already patched")
             action._orig_class = action.__class__
             action._orig_callable = action.__call__
             action.__class__ = IntrospectAction
