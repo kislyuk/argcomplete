@@ -3,7 +3,9 @@
 
 from __future__ import print_function
 
-import os, sys, argparse, shlex, contextlib, subprocess, locale, re
+import os, sys, argparse, contextlib, subprocess, locale, re
+
+from . import my_shlex as shlex
 
 try:
     basestring
@@ -67,8 +69,7 @@ class ArgcompleteException(Exception):
     pass
 
 def split_line(line, point):
-    lexer = shlex.shlex(line)
-    lexer.whitespace_split = True
+    lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
     words = []
 
     def split_word(word):
@@ -82,8 +83,8 @@ def split_line(line, point):
             word = ''
         prefix, suffix = word[:point_in_word], word[point_in_word:]
         prequote = ''
-        if len(prefix) > 0 and prefix[0] in lexer.quotes:
-            prequote, prefix = prefix[0], prefix[1:]
+        if lexer.state is not None and lexer.state in lexer.quotes:
+            prequote = lexer.state
         return prequote, prefix, suffix, words
 
     while True:
@@ -94,11 +95,11 @@ def split_line(line, point):
                 # raise ArgcompleteException("Unexpected end of input")
                 return "", "", "", words
             if lexer.instream.tell() >= point:
-                debug("word", word, "split")
+                debug("word", word, "split, lexer state: '{s}'".format(s=lexer.state))
                 return split_word(word)
             words.append(word)
         except ValueError:
-            debug("word", lexer.token, "split (lexer stopped)")
+            debug("word", lexer.token, "split (lexer stopped, state: '{s}')".format(s=lexer.state))
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:

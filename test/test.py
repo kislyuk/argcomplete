@@ -59,7 +59,7 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --url \"http://url1\" --email a", ['a\\@b.c', 'a\\@b.d', 'ab\\@c.d']),
             ("prog --url \"http://url1\" --email \"a@", ['"a@b.c', '"a@b.d']),
             ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"a@", ['"a@b.c', '"a@b.d']),
-            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\"", ['--url', '--email', '-h', '--help']),
+            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ", ['--url', '--email', '-h', '--help']),
             )
 
         for cmd, output in expected_outputs:
@@ -81,6 +81,7 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --age 2 eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs \"on a", ['\"on a train', '\"on a boat']),
+            ("prog eggs on\\ a", ['on a train', 'on a boat']),
             ("prog spam ", ['iberico', 'ham', '--help', '-h']),
             )
 
