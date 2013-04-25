@@ -226,44 +226,45 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
         debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
-        for active_action in parser.active_actions:
-            debug("Activating completion for", active_action, active_action._orig_class)
-            #completer = getattr(active_action, 'completer', DefaultCompleter())
-            completer = getattr(active_action, 'completer', None)
+        if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
+            for active_action in parser.active_actions:
+                debug("Activating completion for", active_action, active_action._orig_class)
+                #completer = getattr(active_action, 'completer', DefaultCompleter())
+                completer = getattr(active_action, 'completer', None)
 
-            if completer is None and active_action.choices is not None:
-                if not isinstance(active_action, argparse._SubParsersAction):
-                    completer = completers.ChoicesCompleter(active_action.choices)
+                if completer is None and active_action.choices is not None:
+                    if not isinstance(active_action, argparse._SubParsersAction):
+                        completer = completers.ChoicesCompleter(active_action.choices)
 
-            if completer:
-                if len(active_action.option_strings) > 0: # only for optionals
-                    if not action_is_satisfied(active_action):
-                        # This means the current action will fail to parse if the word under the cursor is not given
-                        # to it, so give it exclusive control over completions (flush previous completions)
-                        debug("Resetting completions because", active_action, "is unsatisfied")
-                        completions = []
-                try:
-                    completions += [c for c in completer(prefix=cword_prefix,
-                                                         parser=parser,
-                                                         action=active_action,
-                                                         parsed_args=parsed_args) if c.startswith(cword_prefix)]
-                except (AttributeError, TypeError):
-                    # If completer is not callable, try the readline completion protocol instead
-                    debug("Could not call completer, trying readline protocol instead")
-                    for i in range(9999):
-                        next_completion = completer.complete(cword_prefix, i)
-                        if next_completion is None:
-                            break
-                        if next_completion.startswith(cword_prefix):
-                            completions.append(next_completion)
-                debug("Completions:", completions)
-            elif not isinstance(active_action, argparse._SubParsersAction):
-                debug("Completer not available, falling back")
-                try:
-                    # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                    completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).decode().splitlines()
-                except subprocess.CalledProcessError:
-                    pass
+                if completer:
+                    if len(active_action.option_strings) > 0: # only for optionals
+                        if not action_is_satisfied(active_action):
+                            # This means the current action will fail to parse if the word under the cursor is not given
+                            # to it, so give it exclusive control over completions (flush previous completions)
+                            debug("Resetting completions because", active_action, "is unsatisfied")
+                            completions = []
+                    try:
+                        completions += [c for c in completer(prefix=cword_prefix,
+                                                             parser=parser,
+                                                             action=active_action,
+                                                             parsed_args=parsed_args) if c.startswith(cword_prefix)]
+                    except (AttributeError, TypeError):
+                        # If completer is not callable, try the readline completion protocol instead
+                        debug("Could not call completer, trying readline protocol instead")
+                        for i in range(9999):
+                            next_completion = completer.complete(cword_prefix, i)
+                            if next_completion is None:
+                                break
+                            if next_completion.startswith(cword_prefix):
+                                completions.append(next_completion)
+                    debug("Completions:", completions)
+                elif not isinstance(active_action, argparse._SubParsersAction):
+                    debug("Completer not available, falling back")
+                    try:
+                        # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
+                        completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).decode().splitlines()
+                    except subprocess.CalledProcessError:
+                        pass
 
     # De-duplicate completions
     seen = set()
