@@ -5,7 +5,8 @@ from __future__ import print_function
 
 import os, sys, argparse, contextlib, subprocess, locale, re
 
-from . import my_shlex as shlex
+#from . import my_shlex as shlex
+import shlex
 
 try:
     basestring
@@ -68,8 +69,10 @@ def action_is_satisfied(action):
 class ArgcompleteException(Exception):
     pass
 
-def split_line(line, point):
-    lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+def split_line(line, point): #, punctuation_chars):
+#    lexer = shlex.shlex(line, posix=True, punctuation_chars=punctuation_chars)
+    lexer = shlex.shlex(line, posix=False) #, punctuation_chars=punctuation_chars)
+    lexer.whitespace_split = True
     words = []
 
     def split_word(word):
@@ -83,8 +86,11 @@ def split_line(line, point):
             word = ''
         prefix, suffix = word[:point_in_word], word[point_in_word:]
         prequote = ''
-        if lexer.state is not None and lexer.state in lexer.quotes:
-            prequote = lexer.state
+        # posix
+        #if lexer.state is not None and lexer.state in lexer.quotes:
+        #    prequote = lexer.state
+        if len(prefix) > 0 and prefix[0] in lexer.quotes:
+            prequote, prefix = prefix[0], prefix[1:]
         return prequote, prefix, suffix, words
 
     while True:
@@ -144,7 +150,17 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     comp_line = os.environ['COMP_LINE']
     comp_wordbreaks = os.environ['COMP_WORDBREAKS']
     comp_point = int(os.environ['COMP_POINT'])
+
+    # HACK: instead of using shlex posix mode, we just hack the non-posix mode to not escape spaces.
+    # The replacement string must be of the same length to avoid throwing off comp_point.
+    nbsp = ifs+ifs
+    comp_line = re.sub('\\\\ ', nbsp, comp_line)
+
     cword_prequote, cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
+
+    cword_prefix = re.sub(nbsp, '\\ ', cword_prefix)
+    cword_suffix = re.sub(nbsp, '\\ ', cword_suffix)
+    comp_words = [re.sub(nbsp, '\\ ', w) for w in comp_words]
 
     # TODO: determine if this is best done here or earlier
     cword_prefix = re.sub('\\\\(.)', '\\1', cword_prefix)
@@ -152,7 +168,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
         comp_words.pop(0)
-    debug("\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
+    debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
 
     active_parsers = [argument_parser]
     parsed_args = argparse.Namespace()
@@ -226,6 +242,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
         debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
+        # Only run completers if current word does not start with - (is not an optional)
         if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
             for active_action in parser.active_actions:
                 debug("Activating completion for", active_action, active_action._orig_class)
@@ -274,6 +291,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # Otherwise, escape all COMP_WORDBREAKS chars
     if cword_prequote == '':
         for wordbreak_char in comp_wordbreaks:
+            # equivalent of __ltrim_colon_completions in bash-completion may be needed here
+            # posix
+            # if wordbreak_char == ':':
+            #     continue
             completions = [c.replace(wordbreak_char, '\\'+wordbreak_char) for c in completions]
     else:
         completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
@@ -284,7 +305,6 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         if cword_prequote == '' and not completions[0].endswith(' '):
             completions[0] += ' '
 
-    # TODO: figure out the correct way to quote completions
     # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
