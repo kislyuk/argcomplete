@@ -111,6 +111,34 @@ def split_line(line, point): #, punctuation_chars):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
+def get_first_pos_of_char(char, string):
+    '''
+    :param char: The character to find
+    :type char: string
+    :param string: The string in which to search for *char*
+    :type string: string
+    :returns: Index in *string* where *char* last appears (unescaped by a preceding "\\"), -1 if not found
+    :rtype: int
+
+    Finds the first occurrence of *char* in *string* in which *char* is
+    not present as an escaped character.
+
+    '''
+    first_pos = -1
+    pos = len(string)
+    while pos > 0:
+        pos = string[:pos].rfind(char)
+        if pos == -1:
+            return first_pos
+        num_backslashes = 0
+        test_index = pos - 1
+        while test_index >= 0 and string[test_index] == '\\':
+            num_backslashes += 1
+            test_index -= 1
+        if num_backslashes % 2 == 0:
+            first_pos = pos
+    return first_pos
+
 def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None):
     '''
     :param argument_parser: The argument parser to autocomplete on
@@ -158,6 +186,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     cword_prequote, cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
 
+    first_colon_pos = get_first_pos_of_char(':', cword_prefix)
     cword_prefix = re.sub(nbsp, '\\ ', cword_prefix)
     cword_suffix = re.sub(nbsp, '\\ ', cword_suffix)
     comp_words = [re.sub(nbsp, '\\ ', w) for w in comp_words]
@@ -290,11 +319,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
     # Otherwise, escape all COMP_WORDBREAKS chars
     if cword_prequote == '':
+        if first_colon_pos != -1:
+            completions = [c[first_colon_pos+1:] for c in completions]
+
         for wordbreak_char in comp_wordbreaks:
-            # equivalent of __ltrim_colon_completions in bash-completion may be needed here
-            # posix
-            # if wordbreak_char == ':':
-            #     continue
             completions = [c.replace(wordbreak_char, '\\'+wordbreak_char) for c in completions]
     else:
         completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
