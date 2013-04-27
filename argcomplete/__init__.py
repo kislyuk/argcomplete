@@ -316,6 +316,11 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     seen = set()
     completions = [c for c in completions if c not in seen and not seen.add(c)]
 
+    punctuation_chars = '();<>|&!`'
+    for char in punctuation_chars:
+        if char not in comp_wordbreaks:
+            comp_wordbreaks += char
+
     # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
     # Otherwise, escape all COMP_WORDBREAKS chars
     if cword_prequote == '':
@@ -325,6 +330,9 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         for wordbreak_char in comp_wordbreaks:
             completions = [c.replace(wordbreak_char, '\\'+wordbreak_char) for c in completions]
     else:
+        if cword_prequote == '"':
+            for char in '`$!':
+                completions = [c.replace(char, '\\'+char) for c in completions]
         completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
 
     # If there's only one completion, and it's not open-quoted and doesn't end with a continuation char, add a space
