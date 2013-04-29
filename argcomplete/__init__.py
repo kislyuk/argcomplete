@@ -154,10 +154,6 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
 
-    # TODO: determine if this is best done here or earlier
-    cword_prefix = re.sub('\\\\(.)', '\\1', cword_prefix)
-    cword_suffix = re.sub('\\\\(.)', '\\1', cword_suffix)
-
     if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
         comp_words.pop(0)
     debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
