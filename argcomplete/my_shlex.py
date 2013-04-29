@@ -75,13 +75,15 @@ class shlex:
             # _pushback_chars is a push back queue used by lookahead logic
             self._pushback_chars = deque()
             # these chars added because allowed in file names, args, wildcards
-            self.wordchars += '~-./*?='
+            self.wordchars += '~-./*?=:@'
             #remove any punctuation chars from wordchars
             self.wordchars = ''.join(c for c in self.wordchars if c not in
                                      self.punctuation_chars)
             for c in punctuation_chars:
                 if c in self.wordchars:
                     self.wordchars.remove(c)
+
+        self.first_colon_pos = None
 
     def push_token(self, tok):
         "Push a token onto the stack popped by the get_token method"
@@ -238,6 +240,8 @@ class shlex:
                 elif (nextchar in self.wordchars or nextchar in self.quotes
                       or self.whitespace_split):
                     self.token += nextchar
+                    if nextchar == ':':
+                        self.first_colon_pos = len(self.token)-1
                 else:
                     if self.punctuation_chars:
                         self._pushback_chars.append(nextchar)
@@ -280,8 +284,8 @@ class shlex:
             raise StopIteration
         return token
 
-def split(s, comments=False, posix=True):
-    lex = shlex(s, posix=posix)
+def split(s, comments=False, posix=True, punctuation_chars=False):
+    lex = shlex(s, posix=posix, punctuation_chars=punctuation_chars)
     lex.whitespace_split = True
     if not comments:
         lex.commenters = ''

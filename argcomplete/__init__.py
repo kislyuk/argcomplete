@@ -5,8 +5,7 @@ from __future__ import print_function
 
 import os, sys, argparse, contextlib, subprocess, locale, re
 
-#from . import my_shlex as shlex
-import shlex
+from . import my_shlex as shlex
 
 try:
     basestring
@@ -69,10 +68,8 @@ def action_is_satisfied(action):
 class ArgcompleteException(Exception):
     pass
 
-def split_line(line, point): #, punctuation_chars):
-#    lexer = shlex.shlex(line, posix=True, punctuation_chars=punctuation_chars)
-    lexer = shlex.shlex(line, posix=False) #, punctuation_chars=punctuation_chars)
-    lexer.whitespace_split = True
+def split_line(line, point):
+    lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
     words = []
 
     def split_word(word):
@@ -87,11 +84,15 @@ def split_line(line, point): #, punctuation_chars):
         prefix, suffix = word[:point_in_word], word[point_in_word:]
         prequote = ''
         # posix
-        #if lexer.state is not None and lexer.state in lexer.quotes:
-        #    prequote = lexer.state
-        if len(prefix) > 0 and prefix[0] in lexer.quotes:
-            prequote, prefix = prefix[0], prefix[1:]
-        return prequote, prefix, suffix, words
+        if lexer.state is not None and lexer.state in lexer.quotes:
+            prequote = lexer.state
+        # non-posix
+        #if len(prefix) > 0 and prefix[0] in lexer.quotes:
+        #    prequote, prefix = prefix[0], prefix[1:]
+
+        first_colon_pos = lexer.first_colon_pos if ':' in word else None
+
+        return prequote, prefix, suffix, words, first_colon_pos
 
     while True:
         try:
@@ -99,7 +100,7 @@ def split_line(line, point): #, punctuation_chars):
             if word == lexer.eof:
                 # TODO: check if this is ever unsafe
                 # raise ArgcompleteException("Unexpected end of input")
-                return "", "", "", words
+                return "", "", "", words, None
             if lexer.instream.tell() >= point:
                 debug("word", word, "split, lexer state: '{s}'".format(s=lexer.state))
                 return split_word(word)
@@ -179,17 +180,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     comp_wordbreaks = os.environ['COMP_WORDBREAKS']
     comp_point = int(os.environ['COMP_POINT'])
 
-    # HACK: instead of using shlex posix mode, we just hack the non-posix mode to not escape spaces.
-    # The replacement string must be of the same length to avoid throwing off comp_point.
-    nbsp = ifs+ifs
-    comp_line = re.sub('\\\\ ', nbsp, comp_line)
-
-    cword_prequote, cword_prefix, cword_suffix, comp_words = split_line(comp_line, comp_point)
-
-    first_colon_pos = get_first_pos_of_char(':', cword_prefix)
-    cword_prefix = re.sub(nbsp, '\\ ', cword_prefix)
-    cword_suffix = re.sub(nbsp, '\\ ', cword_suffix)
-    comp_words = [re.sub(nbsp, '\\ ', w) for w in comp_words]
+    cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
 
     # TODO: determine if this is best done here or earlier
     cword_prefix = re.sub('\\\\(.)', '\\1', cword_prefix)
@@ -324,7 +315,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
     # Otherwise, escape all COMP_WORDBREAKS chars
     if cword_prequote == '':
-        if first_colon_pos != -1:
+        if first_colon_pos:
             completions = [c[first_colon_pos+1:] for c in completions]
 
         for wordbreak_char in comp_wordbreaks:
