@@ -287,6 +287,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
     # Otherwise, escape all COMP_WORDBREAKS chars
     if cword_prequote == '':
+        # Bash mangles completions which contain colons. This workaround has the same effect as __ltrim_colon_completions in bash_completion.
         if first_colon_pos:
             completions = [c[first_colon_pos+1:] for c in completions]
 
