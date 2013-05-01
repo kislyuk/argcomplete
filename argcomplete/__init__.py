@@ -305,7 +305,14 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
 
+    # Here's to all the brilliant minds who decided to make python disobey the system locale encoding and to use ascii as the default encoding in 2.7.
+    try:
+        completions = [c.decode(locale.getpreferredencoding()) for c in completions]
+    except:
+        pass
+
     debug("\nReturning completions:", completions)
+    
     output_stream.write(ifs.join(completions).encode(locale.getpreferredencoding()))
     output_stream.flush()
     # os.fsync(output_stream.fileno()) - this raises an error, why?
