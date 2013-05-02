@@ -305,14 +305,15 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
 
-    # Here's to all the brilliant minds who decided to make python disobey the system locale encoding and to use ascii as the default encoding in 2.7.
+    # On Python 2, we have to make sure all completions are unicode objects before we encode them.
+    # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will try
+    # to implicitly decode string objects using ascii, and fail.
     try:
         completions = [c.decode(locale.getpreferredencoding()) for c in completions]
     except:
         pass
 
     debug("\nReturning completions:", completions)
-    
     output_stream.write(ifs.join(completions).encode(locale.getpreferredencoding()))
     output_stream.flush()
     # os.fsync(output_stream.fileno()) - this raises an error, why?

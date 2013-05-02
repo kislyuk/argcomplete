@@ -14,7 +14,6 @@ Example:
     $ eval "$(register-python-argcomplete my-favorite-script.py)"
 '''
 
-from __future__ import print_function
 import os, sys, argparse
 
 shellcode = '''
@@ -42,4 +41,4 @@ if len(sys.argv)==1:
     sys.exit(1)
 
 args = parser.parse_args()
-print(shellcode % args.executable)
+sys.stdout.write(shellcode % args.executable)

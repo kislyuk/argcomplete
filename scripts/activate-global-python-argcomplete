@@ -8,7 +8,6 @@
 Activate the generic bash-completion script for the argcomplete module.
 '''
 
-from __future__ import print_function
 import os, sys, argparse, argcomplete, shutil
 
 parser = argparse.ArgumentParser(description=__doc__,
@@ -28,10 +27,10 @@ if not os.path.exists(args.dest) and args.dest != '-':
 activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete.sh')
 
 if args.dest == '-':
-    print(open(activator).read())
+    sys.stdout.write(open(activator).read())
 else:
     dest = os.path.join(args.dest, "python-argcomplete.sh")
-    print("Installing bash completion script", dest)
+    sys.stdout.write("Installing bash completion script " + dest)
     try:
         shutil.copy(activator, dest)
     except Exception as e:
