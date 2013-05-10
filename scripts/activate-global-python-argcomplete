@@ -30,7 +30,7 @@ if args.dest == '-':
     sys.stdout.write(open(activator).read())
 else:
     dest = os.path.join(args.dest, "python-argcomplete.sh")
-    sys.stdout.write("Installing bash completion script " + dest)
+    sys.stdout.write("Installing bash completion script " + dest + "\n")
     try:
         shutil.copy(activator, dest)
     except Exception as e:
