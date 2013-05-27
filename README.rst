@@ -225,3 +225,7 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
 
 .. image:: https://travis-ci.org/kislyuk/argcomplete.png
         :target: https://travis-ci.org/kislyuk/argcomplete
+.. image:: https://pypip.in/v/argcomplete/badge.png
+        :target: https://crate.io/packages/argcomplete
+.. image:: https://pypip.in/d/argcomplete/badge.png
+        :target: https://crate.io/packages/argcomplete
