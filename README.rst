@@ -213,7 +213,7 @@ Links
 -----
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
 * `Documentation (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
-* `Package distribution <https://crate.io/packages/argcomplete>`_ `(PyPI) <http://pypi.python.org/pypi/argcomplete>`_
+* `Package distribution (Crate) <https://crate.io/packages/argcomplete>`_ `(PyPI) <http://pypi.python.org/pypi/argcomplete>`_
 
 Bugs
 ~~~~
