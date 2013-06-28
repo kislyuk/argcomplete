@@ -3,7 +3,7 @@
 import glob
 from setuptools import setup, find_packages
 
-install_requires = ['distribute']
+install_requires = []
 
 try:
     import argparse
