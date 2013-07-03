@@ -12,3 +12,21 @@ class ChoicesCompleter(object):
 
 def EnvironCompleter(prefix, **kwargs):
     return (v for v in os.environ if v.startswith(prefix))
+
+class FilesCompleter(object):
+    'File completer class, optionally takes a list of allowed extensions'
+    def __init__(self,allowednames=()):
+        self.allowednames = [x.lstrip('*').lstrip('.') for x in allowednames]
+
+    def __call__(self, prefix, **kwargs):
+        completion = []
+        try:
+            if self.allowednames:
+                for x in self.allowednames:
+                    completion += subprocess.check_output(['bash', '-c', "compgen -A file -X '!*.{0}' -- '{1}'".format(x,prefix)]).decode().splitlines()
+            else:
+                completion += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=prefix)]).decode().splitlines()
+        except subprocess.CalledProcessError:
+            pass
+        return completion
+
