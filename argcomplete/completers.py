@@ -2,6 +2,7 @@
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 import os
+import subprocess
 
 class ChoicesCompleter(object):
     def __init__(self, choices=[]):
@@ -16,6 +17,10 @@ def EnvironCompleter(prefix, **kwargs):
 class FilesCompleter(object):
     'File completer class, optionally takes a list of allowed extensions'
     def __init__(self,allowednames=()):
+        # Fix if someone passes in a string instead of a list
+        if type(allowednames) is str:
+            allowednames = [allowednames]
+
         self.allowednames = [x.lstrip('*').lstrip('.') for x in allowednames]
 
     def __call__(self, prefix, **kwargs):
