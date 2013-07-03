@@ -4,6 +4,13 @@
 import os
 import subprocess
 
+def _wrapcall(*args, **kargs):
+    try:
+        return subprocess.check_output(*args,**kargs).decode().splitlines()
+    except subprocess.CalledProcessError:
+        return []
+
+
 class ChoicesCompleter(object):
     def __init__(self, choices=[]):
         self.choices = choices
@@ -16,22 +23,34 @@ def EnvironCompleter(prefix, **kwargs):
 
 class FilesCompleter(object):
     'File completer class, optionally takes a list of allowed extensions'
-    def __init__(self,allowednames=()):
+    def __init__(self,allowednames=(),directories=True):
         # Fix if someone passes in a string instead of a list
         if type(allowednames) is str:
             allowednames = [allowednames]
 
         self.allowednames = [x.lstrip('*').lstrip('.') for x in allowednames]
+        self.directories = directories
 
     def __call__(self, prefix, **kwargs):
         completion = []
-        try:
-            if self.allowednames:
-                for x in self.allowednames:
-                    completion += subprocess.check_output(['bash', '-c', "compgen -A file -X '!*.{0}' -- '{1}'".format(x,prefix)]).decode().splitlines()
-            else:
-                completion += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=prefix)]).decode().splitlines()
-        except subprocess.CalledProcessError:
-            pass
+        if self.allowednames:
+            if self.directories:
+                files = _wrapcall(['bash','-c',
+                    "compgen -A directory -- '{p}'".format(p=prefix)])
+                completion += [ f + '/' for f in files]
+            for x in self.allowednames:
+                completion += _wrapcall(['bash', '-c',
+                    "compgen -A file -X '!*.{0}' -- '{p}'".format(x,p=prefix)])
+        else:
+            completion += _wrapcall(['bash', '-c',
+                "compgen -A file -- '{p}'".format(p=prefix)])
+
+            anticomp = _wrapcall(['bash', '-c',
+                "compgen -A directory -- '{p}'".format(p=prefix)])
+
+            completion = list( set(completion) - set(anticomp))
+
+            if self.directories:
+                completion += [f + '/' for f in anticomp]
         return completion
 
