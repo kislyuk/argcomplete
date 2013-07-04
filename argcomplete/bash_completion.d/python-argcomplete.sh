@@ -26,6 +26,8 @@ _python_argcomplete_global() {
         if [[ $? != 0 ]]; then
             unset COMPREPLY
         fi
+    else
+        type -t _completion_loader | grep -q 'function' && _completion_loader "$@" 
     fi
 }
 complete -o nospace -o default -D -F _python_argcomplete_global
