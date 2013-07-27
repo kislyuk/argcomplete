@@ -145,7 +145,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
 
     ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
     if len(ifs) != 1:
-        debug("Invalid value for IFS, quitting".format(v=ifs))
+        debug("Invalid value for IFS, quitting [{v}]".format(v=ifs))
         exit_method(1)
 
     comp_line = os.environ['COMP_LINE']
