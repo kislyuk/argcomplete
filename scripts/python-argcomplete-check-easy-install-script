@@ -26,7 +26,7 @@ with open(args.wrapper_script) as fh:
             dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
             import pkgutil
             module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
-            with open(pkgutil.get_loader(module_name).filename) as mod_fh:
+            with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:
                 if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                     exit(0)
 
