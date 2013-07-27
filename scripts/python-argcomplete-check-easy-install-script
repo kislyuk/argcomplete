@@ -38,9 +38,7 @@ with open(args.wrapper_script) as fh:
             dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
             import pkgutil
             module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
-            filename = pkgutil.get_loader(module_name).filename
-            if os.path.isdir(filename):
-                filename = os.path.join(filename, '__init__.py')
+            filename = pkgutil.get_loader(module_name).get_filename()
             printv('opening ' + filename, end=' ')
             with open(filename) as mod_fh:
                 if OK in mod_fh.read(1024):
