@@ -2,11 +2,26 @@
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 import os
+import sys
 import subprocess
 
 def _wrapcall(*args, **kargs):
     try:
-        return subprocess.check_output(*args,**kargs).decode().splitlines()
+        if sys.version_info > (2,7):
+            return subprocess.check_output(*args,**kargs).decode().splitlines()
+        # no check_output in 2.6,
+        if 'stdout' in kargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(
+            stdout=subprocess.PIPE, *args, **kargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kargs.get("args")
+            if cmd is None:
+                cmd = args[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output.decode().splitlines()
     except subprocess.CalledProcessError:
         return []
 
