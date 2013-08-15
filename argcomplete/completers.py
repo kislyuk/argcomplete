@@ -7,8 +7,14 @@ import subprocess
 
 def _wrapcall(*args, **kargs):
     try:
-        if sys.version_info > (2,7):
-            return subprocess.check_output(*args,**kargs).decode().splitlines()
+        return subprocess.check_output(*args,**kargs).decode().splitlines()
+    except AttributeError:
+        return _wrapcall_2_6(*args, **kargs)
+    except subprocess.CalledProcessError:
+        return []
+
+def _wrapcall_2_6(*args, **kargs):
+    try:
         # no check_output in 2.6,
         if 'stdout' in kargs:
             raise ValueError('stdout argument not allowed, it will be overridden.')
