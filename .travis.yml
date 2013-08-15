@@ -6,9 +6,9 @@ python:
 
 before_install:
     - pip install --quiet --use-mirrors coverage
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install --quiet --use-mirrors unittest2; fi
 
 install:
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install --quiet --use-mirrors unittest2; fi
     - python setup.py install
 
 script:
