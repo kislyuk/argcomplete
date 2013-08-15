@@ -128,22 +128,23 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
-    @unittest.skip("currently works on either 2 or 3, but not both")
-    def test_non_ascii(self):
-        def make_parser():
-            parser = argparse.ArgumentParser()
-            parser.add_argument('--книга', choices=['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу'])
-            return parser
+    if sys.version_info >= (2, 7):
+        @unittest.skip("currently works on either 2 or 3, but not both")
+        def test_non_ascii(self):
+            def make_parser():
+                parser = argparse.ArgumentParser()
+                parser.add_argument('--книга', choices=['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу'])
+                return parser
 
-        expected_outputs = (("prog ", ['--книга', '-h', '--help']),
-            ("prog --книга ", ['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу']),
-            ("prog --книга П", ['Парень из преисподней', 'Понедельник начинается в субботу']),
-            ("prog --книга Пу", ['']),
-            )
+            expected_outputs = (("prog ", ['--книга', '-h', '--help']),
+                ("prog --книга ", ['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу']),
+                ("prog --книга П", ['Парень из преисподней', 'Понедельник начинается в субботу']),
+                ("prog --книга Пу", ['']),
+                )
 
-        for cmd, output in expected_outputs:
-            output = [o.decode(locale.getpreferredencoding()) for o in output]
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            for cmd, output in expected_outputs:
+                output = [o.decode(locale.getpreferredencoding()) for o in output]
+                self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
 if __name__ == '__main__':
     unittest.main()
