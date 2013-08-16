@@ -3,7 +3,10 @@
 import locale
 import os
 import sys
-import unittest
+if sys.version_info >= (2, 7):
+    import unittest
+else:
+    import unittest2 as unittest
 import shutil
 from tempfile import TemporaryFile, mkdtemp
 
