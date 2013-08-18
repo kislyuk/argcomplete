@@ -40,14 +40,11 @@ class TempDir(object):
 
 
 class TestArgcomplete(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
+
+    def setUp(self):
         os.environ['_ARGCOMPLETE'] = "yes"
         os.environ['_ARC_DEBUG'] = "yes"
         os.environ['IFS'] = IFS
-
-    def setUp(self):
-        pass
 
     def tearDown(self):
         pass
