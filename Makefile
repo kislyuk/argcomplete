@@ -1,7 +1,7 @@
 # TODO: pyflakes?
 test:
 	-pylint -E argcomplete
-	./test/test.py -v
+	./setup.py test --test-suite test.test.TestArgcomplete
 
 test3:
 	python3 ./test/test.py -v
