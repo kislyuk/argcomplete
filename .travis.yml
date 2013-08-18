@@ -6,7 +6,7 @@ python:
     - pypy
 
 before_install:
-    - pip install --quiet coverage
+    - pip install --quiet coverage unittest2
 
 install:
     - python setup.py install
