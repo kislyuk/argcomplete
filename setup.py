@@ -3,12 +3,20 @@
 import glob
 from setuptools import setup, find_packages
 
-install_requires = []
+install_requires, tests_require = [], []
 
 try:
     import argparse
 except ImportError:
     install_requires.append('argparse')
+
+try:
+    import unittest
+except ImportError:
+    try:
+        import unittest2
+    except ImportError:
+        tests_require.append('unittest2')
 
 setup(
     name='argcomplete',
@@ -20,6 +28,7 @@ setup(
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
     install_requires=install_requires,
+    tests_require=tests_require,
     packages = find_packages(),
     scripts = glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
