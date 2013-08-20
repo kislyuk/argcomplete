@@ -6,15 +6,14 @@ python:
     - pypy
 
 before_install:
-    - if [ "$TRAVIS_PYTHON_VERSION" == "2.6" ]; then pip --quiet install unittest2; fi
-    - pip install --quiet coverage
+    - pip install --quiet coverage --use-mirrors
 
 install:
     - python setup.py install
 
 script:
     - make test
-    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
+    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test_argcomplete.py
     - coverage report --show-missing
 
 after_success:
