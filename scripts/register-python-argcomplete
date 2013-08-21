@@ -29,7 +29,7 @@ _python_argcomplete() {
         unset COMPREPLY
     fi
 }
-complete -o nospace -o default -F _python_argcomplete "%s"
+complete -o default -F _python_argcomplete "%s"
 '''
 
 parser = argparse.ArgumentParser(description=__doc__,
