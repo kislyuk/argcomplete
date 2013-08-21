@@ -71,6 +71,23 @@ class TestArgcomplete(unittest.TestCase):
         completions = self.run_completer(p, "prog ")
         assert(set(completions) == set(['-h', '--help', '--foo', '--bar']))
 
+    def test_action_activation(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument('var', choices=['bus', 'car'])
+            parser.add_argument('value', choices=['orange', 'apple'])
+            return parser
+
+        expected_outputs = (("prog ", ['bus', 'car', '-h', '--help']),
+            ("prog bu", ['bus ']),
+            ("prog bus ", ['apple', 'orange', '-h', '--help']),
+            ("prog bus appl", ['apple ']),
+            ("prog bus apple ", ['-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_completers(self):
         def c_url(prefix, parsed_args, **kwargs):
             return [ "http://url1", "http://url2" ]

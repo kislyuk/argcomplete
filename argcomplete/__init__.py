@@ -38,7 +38,7 @@ safe_actions = (argparse._StoreAction,
                 argparse._CountAction)
 
 from . import completers
-from .my_argparse import IntrospectiveArgumentParser
+from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open
 
 @contextlib.contextmanager
 def mute_stdout():
@@ -54,16 +54,6 @@ def mute_stderr():
     yield
     sys.stderr.close()
     sys.stderr = stderr
-
-def action_is_satisfied(action):
-    num_consumed_args = getattr(action, 'num_consumed_args', 0)
-    if action.nargs == argparse.ONE_OR_MORE and num_consumed_args < 1:
-        return False
-    else:
-        try:
-            return num_consumed_args == action.nargs
-        except:
-            return True
 
 class ArgcompleteException(Exception):
     pass
@@ -233,6 +223,11 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         # Only run completers if current word does not start with - (is not an optional)
         if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
             for active_action in parser.active_actions:
+                if not action.option_strings: # action is a positional
+                    if action_is_satisfied(active_action) and not action_is_open(active_action):
+                        debug("Skipping", active_action)
+                        continue
+
                 debug("Activating completion for", active_action, active_action._orig_class)
                 #completer = getattr(active_action, 'completer', DefaultCompleter())
                 completer = getattr(active_action, 'completer', None)
