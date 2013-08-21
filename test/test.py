@@ -114,7 +114,7 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['--help', 'eggs', '-h', 'spam', '--age']),
-            ("prog --age 1 eggs", ['eggs ']),
+            ("prog --age 1 eggs", ['eggs']),
             ("prog --age 2 eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs \"on a", ['\"on a train', '\"on a boat']),
