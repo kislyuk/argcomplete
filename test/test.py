@@ -76,9 +76,9 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['bus', 'car', '-h', '--help']),
-            ("prog bu", ['bus ']),
+            ("prog bu", ['bus']),
             ("prog bus ", ['apple', 'orange', '-h', '--help']),
-            ("prog bus appl", ['apple ']),
+            ("prog bus appl", ['apple']),
             ("prog bus apple ", ['-h', '--help']),
             )
 
