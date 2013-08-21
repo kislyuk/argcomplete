@@ -5,6 +5,26 @@ from argparse import ArgumentParser, ArgumentError, SUPPRESS
 from argparse import OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
 from argparse import _get_action_name, _
 
+def action_is_satisfied(action):
+    ''' Returns False if the parse would raise an error if no more arguments are given to this action, True otherwise.
+    '''
+    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+
+    if action.nargs == ONE_OR_MORE and num_consumed_args < 1:
+        return False
+    else:
+        if action.nargs is None:
+            action.nargs = 1
+        try:
+            return num_consumed_args == action.nargs
+        except:
+            return True
+
+def action_is_open(action):
+    ''' Returns True if action could consume more arguments (i.e., its pattern is open).
+    '''
+    return action.nargs in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]
+
 class IntrospectiveArgumentParser(ArgumentParser):
     ''' The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
@@ -146,7 +166,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     # Begin added by argcomplete
                     # If the pattern is not open (e.g. no + at the end), remove the action from active actions (since
                     # it wouldn't be able to consume any more args)
-                    if action.nargs not in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]:
+                    if not action_is_open(action):
                         self.active_actions.remove(action)
                     elif action.nargs == OPTIONAL and len(args) == 1:
                         self.active_actions.remove(action)
@@ -183,6 +203,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     self.active_actions.append(action) # Added by argcomplete
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
+                action.num_consumed_args = len(args)
                 take_action(action, args)
 
             # slice off the Positionals that we just parsed and return the
