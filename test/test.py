@@ -76,9 +76,9 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['bus', 'car', '-h', '--help']),
-            ("prog bu", ['bus ']),
+            ("prog bu", ['bus']),
             ("prog bus ", ['apple', 'orange', '-h', '--help']),
-            ("prog bus appl", ['apple ']),
+            ("prog bus appl", ['apple']),
             ("prog bus apple ", ['-h', '--help']),
             )
 
@@ -131,7 +131,7 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['--help', 'eggs', '-h', 'spam', '--age']),
-            ("prog --age 1 eggs", ['eggs ']),
+            ("prog --age 1 eggs", ['eggs']),
             ("prog --age 2 eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs \"on a", ['\"on a train', '\"on a boat']),
