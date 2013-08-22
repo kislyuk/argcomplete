@@ -290,12 +290,6 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                 completions = [c.replace(char, '\\'+char) for c in completions]
         completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
 
-    # If there's only one completion, and it's not open-quoted and doesn't end with a continuation char, add a space
-    continuation_chars = '=/:'
-    if len(completions) == 1 and completions[0][-1] not in continuation_chars:
-        if cword_prequote == '' and not completions[0].endswith(' '):
-            completions[0] += ' '
-
     # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
