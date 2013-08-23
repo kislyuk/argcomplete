@@ -20,7 +20,7 @@ _python_argcomplete_global() {
         COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
-            COMP_WORDBREAKS="$COMP_WORDBREAKS" \
+            _COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
             "$1" 8>&1 9>&2 1>/dev/null 2>&1) )
         if [[ $? != 0 ]]; then

@@ -54,7 +54,7 @@ class TestArgcomplete(unittest.TestCase):
             #os.environ['COMP_LINE'] = command.encode(locale.getpreferredencoding())
             os.environ['COMP_LINE'] = command
             os.environ['COMP_POINT'] = point if point else str(len(command))
-            os.environ['COMP_WORDBREAKS'] = '"\'@><=;|&(:'
+            os.environ['_COMP_WORDBREAKS'] = '"\'@><=;|&(:'
             self.assertRaises(SystemExit, autocomplete, parser, output_stream=t,
                               exit_method=sys.exit)
             t.seek(0)

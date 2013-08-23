@@ -130,7 +130,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
             exit_method(1)
 
     # print >>debug_stream, ""
-    # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', 'COMP_WORDBREAKS', 'COMP_WORDS':
+    # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', '_COMP_WORDBREAKS', 'COMP_WORDS':
     #     print >>debug_stream, v, os.environ[v]
 
     ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
@@ -139,7 +139,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         exit_method(1)
 
     comp_line = os.environ['COMP_LINE']
-    comp_wordbreaks = os.environ['COMP_WORDBREAKS']
+    comp_wordbreaks = os.environ['_COMP_WORDBREAKS']
     comp_point = int(os.environ['COMP_POINT'])
 
     cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
