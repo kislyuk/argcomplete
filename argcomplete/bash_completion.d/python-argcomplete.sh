@@ -13,6 +13,9 @@ _python_argcomplete_global() {
     elif (which "$1" && head -c 1024 $(which "$1") | egrep --quiet "(EASY-INSTALL-SCRIPT|EASY-INSTALL-ENTRY-SCRIPT)" \
         && python-argcomplete-check-easy-install-script $(which "$1")) >/dev/null 2>&1; then
         local ARGCOMPLETE=1
+    elif (which "$1" && head -c 1024 $(which "$1") | grep --quiet "export PYENV_ROOT" \
+        && python-argcomplete-check-easy-install-script $(pyenv which "$1")) >/dev/null 2>&1; then
+        local ARGCOMPLETE=1
     fi
 
     if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
