@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Try to reset encoding to a sane value
-# Note: This is incompatible with pypy
-try:
-    import sys, locale
-    reload(sys).setdefaultencoding(locale.getdefaultlocale()[1])
-except:
-    pass
+import os, sys, shutil
 
-import os, shutil
+python2 = True if sys.version_info < (3, 0) else False
+
+if python2:
+    # Try to reset default encoding to a sane value
+    # Note: This is incompatible with pypy
+    import platform
+    if platform.python_implementation() != "PyPy":
+        try:
+            import locale
+            reload(sys).setdefaultencoding(locale.getdefaultlocale()[1])
+        except:
+            pass
 
 if sys.version_info >= (2, 7):
     import unittest
@@ -22,8 +27,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from argparse import ArgumentParser
 from argcomplete import *
-
-python2 = True if sys.version_info < (3, 0) else False
 
 IFS = '\013'
 
