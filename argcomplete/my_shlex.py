@@ -1,7 +1,8 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 
 # This copy of shlex.py is distributed with argcomplete.
-# It incorporates changes proposed in http://bugs.python.org/issue1521950.
+# It incorporates changes proposed in http://bugs.python.org/issue1521950 and changes to allow it to match Unicode
+# word characters.
 
 """A lexical analyzer class for simple shell-like syntaxes."""
 
@@ -12,17 +13,14 @@
 # iterator interface by Gustavo Niemeyer, April 2003.
 # changes to tokenize more like Posix shells by Vinay Sajip, January 2012.
 
-import os.path
-import sys
+import os.path, sys, re
 from collections import deque
 
+# Note: cStringIO is not compatible with Unicode
 try:
-    from cStringIO import StringIO
+    from StringIO import StringIO
 except ImportError:
-    try:
-        from StringIO import StringIO
-    except ImportError:
-        from io import StringIO
+    from io import StringIO
 
 try:
     basestring
@@ -30,6 +28,16 @@ except NameError:
     basestring = str
 
 __all__ = ["shlex", "split"]
+
+class UnicodeWordchars:
+    ''' A replacement for shlex.wordchars that also matches (__contains__) any Unicode wordchars.
+    '''
+    def __init__(self, wordchars):
+        self.wordchars = wordchars
+        self.uw_regex = re.compile('\w', flags=re.UNICODE)
+
+    def __contains__(self, c):
+        return c in self.wordchars or self.uw_regex.match(c)
 
 class shlex:
     "A lexical analyzer class for simple shell-like syntaxes."
@@ -50,9 +58,6 @@ class shlex:
         self.commenters = '#'
         self.wordchars = ('abcdfeghijklmnopqrstuvwxyz'
                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_')
-        if self.posix:
-            self.wordchars += ('ßàáâãäåæçèéêëìíîïğñòóôõöøùúûüışÿ'
-                               'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖØÙÚÛÜİŞ')
         self.whitespace = ' \t\r\n'
         self.whitespace_split = False
         self.quotes = '\'"'
@@ -82,6 +87,9 @@ class shlex:
             for c in punctuation_chars:
                 if c in self.wordchars:
                     self.wordchars.remove(c)
+
+        if self.posix:
+            self.wordchars = UnicodeWordchars(self.wordchars)
 
         self.first_colon_pos = None
 

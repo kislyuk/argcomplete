@@ -7,10 +7,12 @@ import os, sys, argparse, contextlib, subprocess, locale, re
 
 from . import my_shlex as shlex
 
-try:
-    basestring
-except NameError:
+python2 = True if sys.version_info < (3, 0) else False
+
+if not python2:
     basestring = str
+
+sys_encoding = locale.getpreferredencoding()
 
 _DEBUG = '_ARC_DEBUG' in os.environ
 
@@ -142,11 +144,21 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     comp_wordbreaks = os.environ['_ARGCOMPLETE_COMP_WORDBREAKS']
     comp_point = int(os.environ['COMP_POINT'])
 
+    # Adjust comp_point for wide chars
+    if python2:
+        comp_point = len(comp_line[:comp_point].decode(sys_encoding))
+    else:
+        comp_point = len(comp_line.encode(sys_encoding)[:comp_point].decode(sys_encoding))
+
+    if python2:
+        comp_line = comp_line.decode(sys_encoding)
+        comp_wordbreaks = comp_wordbreaks.decode(sys_encoding)
+
     cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
 
     if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
         comp_words.pop(0)
-    debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
+    debug(u"\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), u"\nSUFFIX: '{s}'".format(s=cword_suffix), u"\nWORDS:", comp_words)
 
     active_parsers = [argument_parser]
     parsed_args = argparse.Namespace()
@@ -262,15 +274,24 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                     debug("Completer not available, falling back")
                     try:
                         # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                        completions += subprocess.check_output(['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]).decode().splitlines()
+                        bashcomp_cmd = ['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]
+                        completions += subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
                     except subprocess.CalledProcessError:
                         pass
+
+    # On Python 2, we have to make sure all completions are unicode objects before we process them.
+    # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will try
+    # to implicitly decode string objects using ascii, and fail.
+    if python2:
+        for i in range(len(completions)):
+            if type(completions[i]) != unicode:
+                completions[i] = completions[i].decode(sys_encoding)
 
     # De-duplicate completions
     seen = set()
     completions = [c for c in completions if c not in seen and not seen.add(c)]
 
-    punctuation_chars = '();<>|&!`'
+    punctuation_chars = u'();<>|&!`'
     for char in punctuation_chars:
         if char not in comp_wordbreaks:
             comp_wordbreaks += char
@@ -294,16 +315,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # print ifs.join([pipes.quote(c) for c in completions])
     # print ifs.join([escape_completion_name_str(c) for c in completions])
 
-    # On Python 2, we have to make sure all completions are unicode objects before we encode them.
-    # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will try
-    # to implicitly decode string objects using ascii, and fail.
-    try:
-        completions = [c.decode(locale.getpreferredencoding()) for c in completions]
-    except:
-        pass
-
     debug("\nReturning completions:", completions)
-    output_stream.write(ifs.join(completions).encode(locale.getpreferredencoding()))
+    output_stream.write(ifs.join(completions).encode(sys_encoding))
     output_stream.flush()
     # os.fsync(output_stream.fileno()) - this raises an error, why?
     debug_stream.flush()

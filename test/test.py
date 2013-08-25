@@ -1,19 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import locale
-import os
-import sys
+
+# Try to reset encoding to a sane value
+# Note: This is incompatible with pypy
+try:
+    import sys, locale
+    reload(sys).setdefaultencoding(locale.getdefaultlocale()[1])
+except:
+    pass
+
+import os, shutil
+
 if sys.version_info >= (2, 7):
     import unittest
 else:
     import unittest2 as unittest
-import shutil
+
 from tempfile import TemporaryFile, mkdtemp
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from argparse import ArgumentParser
 from argcomplete import *
+
+python2 = True if sys.version_info < (3, 0) else False
 
 IFS = '\013'
 
@@ -50,10 +60,18 @@ class TestArgcomplete(unittest.TestCase):
         pass
 
     def run_completer(self, parser, command, point=None):
+        if python2:
+            command = unicode(command)
+        if point is None:
+            if python2:
+                point = str(len(command))
+            else:
+                # Adjust point for wide chars
+                point = str(len(command.encode(locale.getpreferredencoding())))
         with TemporaryFile() as t:
             #os.environ['COMP_LINE'] = command.encode(locale.getpreferredencoding())
             os.environ['COMP_LINE'] = command
-            os.environ['COMP_POINT'] = point if point else str(len(command))
+            os.environ['COMP_POINT'] = point
             os.environ['_ARGCOMPLETE_COMP_WORDBREAKS'] = '"\'@><=;|&(:'
             self.assertRaises(SystemExit, autocomplete, parser, output_stream=t,
                               exit_method=sys.exit)
@@ -67,6 +85,22 @@ class TestArgcomplete(unittest.TestCase):
 
         completions = self.run_completer(p, "prog ")
         assert(set(completions) == set(['-h', '--help', '--foo', '--bar']))
+
+    def test_choices(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument('--ship', choices=['submarine', 'speedboat'])
+            return parser
+
+        expected_outputs = (("prog ", ['--ship', '-h', '--help']),
+            ("prog --shi", ['--ship']),
+            ("prog --ship ", ['submarine', 'speedboat']),
+            ("prog --ship s", ['submarine', 'speedboat']),
+            ("prog --ship su", ['submarine']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
     def test_action_activation(self):
         def make_parser():
@@ -161,23 +195,24 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
-    if sys.version_info >= (2, 7):
-        @unittest.skip("currently works on either 2 or 3, but not both")
-        def test_non_ascii(self):
-            def make_parser():
-                parser = argparse.ArgumentParser()
-                parser.add_argument('--книга', choices=['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу'])
-                return parser
+    @unittest.skipIf(python2 and sys.getdefaultencoding() != locale.getdefaultlocale()[1],
+        "Skip for python 2 due to its text encoding deficiencies")
+    def test_non_ascii(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument(u'--книга', choices=[u'Трудно быть богом', u'Парень из преисподней', u'Понедельник начинается в субботу'])
+            return parser
 
-            expected_outputs = (("prog ", ['--книга', '-h', '--help']),
-                ("prog --книга ", ['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу']),
-                ("prog --книга П", ['Парень из преисподней', 'Понедельник начинается в субботу']),
-                ("prog --книга Пу", ['']),
-                )
+        expected_outputs = (("prog ", [u'--книга', '-h', '--help']),
+            (u"prog --книга ", [u'Трудно быть богом', u'Парень из преисподней', u'Понедельник начинается в субботу']),
+            (u"prog --книга П", [u'Парень из преисподней', u'Понедельник начинается в субботу']),
+            (u"prog --книга Пу", ['']),
+            )
 
-            for cmd, output in expected_outputs:
+        for cmd, output in expected_outputs:
+            if python2:
                 output = [o.decode(locale.getpreferredencoding()) for o in output]
-                self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
 if __name__ == '__main__':
     unittest.main()
