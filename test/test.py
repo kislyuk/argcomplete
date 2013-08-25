@@ -203,7 +203,9 @@ class TestArgcomplete(unittest.TestCase):
     def test_non_ascii(self):
         def make_parser():
             parser = argparse.ArgumentParser()
-            parser.add_argument(u'--книга', choices=[u'Трудно быть богом', u'Парень из преисподней', u'Понедельник начинается в субботу'])
+            parser.add_argument(u'--книга', choices=[u'Трудно быть богом',
+                                                     u'Парень из преисподней',
+                                                     u'Понедельник начинается в субботу'])
             return parser
 
         expected_outputs = (("prog ", [u'--книга', '-h', '--help']),
