@@ -223,7 +223,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         # Only run completers if current word does not start with - (is not an optional)
         if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
             for active_action in parser.active_actions:
-                if not action.option_strings: # action is a positional
+                if not active_action.option_strings: # action is a positional
                     if action_is_satisfied(active_action) and not action_is_open(active_action):
                         debug("Skipping", active_action)
                         continue

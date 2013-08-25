@@ -85,6 +85,25 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_action_activation_with_subparser(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            subparsers = parser.add_subparsers(title='subcommands', metavar='subcommand')
+            subparser_build = subparsers.add_parser('build')
+            subparser_build.add_argument('var', choices=['bus', 'car'])
+            subparser_build.add_argument('--profile', nargs=1)
+            return parser
+
+        expected_outputs = (("prog ", ['build', '-h', '--help']),
+            ("prog bu", ['build']),
+            ("prog build ", ['bus', 'car', '--profile', '-h', '--help']),
+            ("prog build ca", ['car']),
+            ("prog build car ", ['--profile', '-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_completers(self):
         def c_url(prefix, parsed_args, **kwargs):
             return [ "http://url1", "http://url2" ]
