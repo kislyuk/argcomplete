@@ -13,7 +13,7 @@ _python_argcomplete_global() {
     elif (which "$1" && head -c 1024 $(which "$1") | egrep --quiet "(EASY-INSTALL-SCRIPT|EASY-INSTALL-ENTRY-SCRIPT)" \
         && python-argcomplete-check-easy-install-script $(which "$1")) >/dev/null 2>&1; then
         local ARGCOMPLETE=1
-    elif (which "$1" && head -c 1024 $(which "$1") | grep --quiet "export PYENV_ROOT" \
+    elif (type -t pyenv && [[ $(which "$1") = $(pyenv root)/shims/* ]] \
         && python-argcomplete-check-easy-install-script $(pyenv which "$1")) >/dev/null 2>&1; then
         local ARGCOMPLETE=1
     fi
@@ -30,7 +30,7 @@ _python_argcomplete_global() {
             unset COMPREPLY
         fi
     else
-        type -t _completion_loader | grep -q 'function' && _completion_loader "$@" 
+        type -t _completion_loader | grep -q 'function' && _completion_loader "$@"
     fi
 }
 complete -o default -D -F _python_argcomplete_global
