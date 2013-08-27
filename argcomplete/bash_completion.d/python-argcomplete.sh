@@ -8,14 +8,17 @@ _python_argcomplete_global() {
             local ARGCOMPLETE=2
             set -- "${COMP_WORDS[1]}"
         fi
-    elif (which "$1" && head -c 1024 $(which "$1") | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
-        local ARGCOMPLETE=1
-    elif (which "$1" && head -c 1024 $(which "$1") | egrep --quiet "(EASY-INSTALL-SCRIPT|EASY-INSTALL-ENTRY-SCRIPT)" \
-        && python-argcomplete-check-easy-install-script $(which "$1")) >/dev/null 2>&1; then
-        local ARGCOMPLETE=1
-    elif (type -t pyenv && [[ $(which "$1") = $(pyenv root)/shims/* ]] \
-        && python-argcomplete-check-easy-install-script $(pyenv which "$1")) >/dev/null 2>&1; then
-        local ARGCOMPLETE=1
+    elif which "$1" >/dev/null 2>&1; then
+        local SCRIPT_NAME=$(which "$1")
+        if (type -t pyenv && [[ "$SCRIPT_NAME" = $(pyenv root)/shims/* ]]) >/dev/null 2>&1; then
+            local SCRIPT_NAME=$(pyenv which "$1")
+        fi
+        if (head -c 1024 "$SCRIPT_NAME" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
+            local ARGCOMPLETE=1
+        elif (head -c 1024 "$SCRIPT_NAME" | egrep --quiet "(EASY-INSTALL-SCRIPT|EASY-INSTALL-ENTRY-SCRIPT)" \
+            && python-argcomplete-check-easy-install-script "$SCRIPT_NAME") >/dev/null 2>&1; then
+            local ARGCOMPLETE=1
+        fi
     fi
 
     if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
