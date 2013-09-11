@@ -141,7 +141,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         exit_method(1)
 
     comp_line = os.environ['COMP_LINE']
-    comp_wordbreaks = os.environ['_ARGCOMPLETE_COMP_WORDBREAKS']
+    comp_wordbreaks = os.environ.get('_ARGCOMPLETE_COMP_WORDBREAKS', os.environ['COMP_WORDBREAKS'])
     comp_point = int(os.environ['COMP_POINT'])
 
     # Adjust comp_point for wide chars
