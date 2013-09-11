@@ -134,7 +134,7 @@ organization and complete their names, then prints the member description:
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
 
-    pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json())
+    pprint.pprint(requests.get("https://api.github.com/users/{m}".format(m=args.member)).json())
 
 `Try it <https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py>`_ like this::
 

@@ -13,4 +13,4 @@ parser.add_argument("--member", help="GitHub member").completer = github_org_mem
 argcomplete.autocomplete(parser)
 args = parser.parse_args()
 
-pprint.pprint(requests.get("https://api.github.com/users/" + args.member).json())
+pprint.pprint(requests.get("https://api.github.com/users/{m}".format(m=args.member)).json())
