@@ -6,8 +6,7 @@ python:
     - pypy
 
 before_install:
-    - if [ "$TRAVIS_PYTHON_VERSION" == "2.6" ]; then pip --quiet install unittest2; fi
-    - pip install --quiet coverage
+    - pip install --quiet coverage --use-mirrors
 
 install:
     - python setup.py install

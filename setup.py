@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import glob
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Command
 
 install_requires = []
 
@@ -9,6 +9,17 @@ try:
     import argparse
 except ImportError:
     install_requires.append('argparse')
+
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys,subprocess
+        errno = subprocess.call([sys.executable, '-m', 'pytest', 'test/test.py'])
+        raise SystemExit(errno)
 
 setup(
     name='argcomplete',
@@ -26,6 +37,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
+    cmdclass = { 'test': PyTest },
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Developers',

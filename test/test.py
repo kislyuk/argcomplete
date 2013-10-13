@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, sys, shutil
+import os, sys
+import pytest
 
 python2 = True if sys.version_info < (3, 0) else False
 
@@ -16,13 +17,6 @@ if python2:
         except:
             pass
 
-if sys.version_info >= (2, 7):
-    import unittest
-else:
-    import unittest2 as unittest
-
-from tempfile import TemporaryFile, mkdtemp
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from argparse import ArgumentParser
@@ -30,66 +24,35 @@ from argcomplete import *
 
 IFS = '\013'
 
-class TempDir(object):
-    """temporary directory for testing FilesCompletion
+class TestArgcomplete(object):
 
-    usage:
-    with TempDir(prefix="temp_fc") as t:
-        print('tempdir', t)
-        # you are not chdir-ed to the temporary directory
-        # everything created here will be deleted
-    """
-    def __init__(self, suffix="", prefix='tmpdir', dir=None):
-        self.tmp_dir = mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
-        self.old_dir = os.getcwd()
-
-    def __enter__(self):
-        os.chdir(self.tmp_dir)
-        return self.tmp_dir
-
-    def __exit__(self, *err):
-        os.chdir(self.old_dir)
-        shutil.rmtree(self.tmp_dir)
-
-
-class TestArgcomplete(unittest.TestCase):
-
-    def setUp(self):
-        os.environ['_ARGCOMPLETE'] = "yes"
-        os.environ['_ARC_DEBUG'] = "yes"
-        os.environ['IFS'] = IFS
-
-    def tearDown(self):
-        pass
-
-    def run_completer(self, parser, command, point=None):
-        if python2:
-            command = unicode(command)
-        if point is None:
-            if python2:
-                point = str(len(command))
-            else:
-                # Adjust point for wide chars
-                point = str(len(command.encode(locale.getpreferredencoding())))
-        with TemporaryFile() as t:
-            #os.environ['COMP_LINE'] = command.encode(locale.getpreferredencoding())
-            os.environ['COMP_LINE'] = command
-            os.environ['COMP_POINT'] = point
-            os.environ['_ARGCOMPLETE_COMP_WORDBREAKS'] = '"\'@><=;|&(:'
-            self.assertRaises(SystemExit, autocomplete, parser, output_stream=t,
+    def run_completer(self, parser, command, point=None,
+                      tmpdir=None, monkeypatch=None):
+        with open('testfile', 'wb+') as t:
+            if monkeypatch is not None:
+                monkeypatch.setenv('_ARGCOMPLETE', "yes")
+                monkeypatch.setenv('_ARC_DEBUG', "yes")
+                monkeypatch.setenv('IFS', IFS)
+                #os.environ['COMP_LINE'] = command.encode(locale.getpreferredencoding())
+                monkeypatch.setenv('COMP_LINE', command)
+                monkeypatch.setenv('COMP_POINT', point if point else str(len(command)))
+                monkeypatch.setenv('_ARGCOMPLETE_COMP_WORDBREAKS', '"\'@><=;|&(:')
+            with pytest.raises(SystemExit):
+                autocomplete(parser, output_stream=t,
                               exit_method=sys.exit)
             t.seek(0)
             return t.read().decode(locale.getpreferredencoding()).split(IFS)
 
-    def test_basic_completion(self):
+    def test_basic_completion(self, tmpdir, monkeypatch):
         p = ArgumentParser()
         p.add_argument("--foo")
         p.add_argument("--bar")
 
-        completions = self.run_completer(p, "prog ")
+        completions = self.run_completer(p, "prog ", tmpdir=tmpdir,
+                                         monkeypatch=monkeypatch)
         assert(set(completions) == set(['-h', '--help', '--foo', '--bar']))
 
-    def test_choices(self):
+    def test_choices(self, tmpdir, monkeypatch):
         def make_parser():
             parser = argparse.ArgumentParser()
             parser.add_argument('--ship', choices=['submarine', 'speedboat'])
@@ -103,9 +66,10 @@ class TestArgcomplete(unittest.TestCase):
             )
 
         for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            assert set(self.run_completer(make_parser(), cmd, tmpdir=tmpdir,
+                       monkeypatch=monkeypatch)) == set(output)
 
-    def test_action_activation(self):
+    def test_action_activation(self, tmpdir, monkeypatch):
         def make_parser():
             parser = argparse.ArgumentParser()
             parser.add_argument('var', choices=['bus', 'car'])
@@ -120,9 +84,10 @@ class TestArgcomplete(unittest.TestCase):
             )
 
         for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            assert set(self.run_completer(make_parser(), cmd, tmpdir=tmpdir,
+                       monkeypatch=monkeypatch)) == set(output)
 
-    def test_action_activation_with_subparser(self):
+    def test_action_activation_with_subparser(self, tmpdir, monkeypatch):
         def make_parser():
             parser = argparse.ArgumentParser()
             subparsers = parser.add_subparsers(title='subcommands', metavar='subcommand')
@@ -139,9 +104,10 @@ class TestArgcomplete(unittest.TestCase):
             )
 
         for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            assert set(self.run_completer(make_parser(), cmd, tmpdir=tmpdir,
+                       monkeypatch=monkeypatch)) == set(output)
 
-    def test_completers(self):
+    def test_completers(self, tmpdir, monkeypatch):
         def c_url(prefix, parsed_args, **kwargs):
             return [ "http://url1", "http://url2" ]
 
@@ -161,21 +127,24 @@ class TestArgcomplete(unittest.TestCase):
             )
 
         for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            assert set(self.run_completer(make_parser(), cmd,
+                                          tmpdir=tmpdir,
+                                          monkeypatch=monkeypatch),
+                       ) == set(output)
 
-    def test_file_completion(self):
+    def test_file_completion(self, tmpdir):
         # setup and teardown should probably be in class
         from argcomplete.completers import FilesCompleter
-        with TempDir(prefix='test_dir_fc', dir='.') as t:
-            fc = FilesCompleter()
-            os.makedirs(os.path.join('abcdef', 'klm'))
-            self.assertEqual(fc('a'), ['abcdef/'])
-            os.makedirs(os.path.join('abcaha', 'klm'))
-            with open('abcxyz', 'w') as fp:
-                fp.write('test')
-            self.assertEqual(set(fc('a')), set(['abcdef/', 'abcaha/', 'abcxyz']))
+        tmpdir.chdir()
+        fc = FilesCompleter()
+        os.makedirs(os.path.join('abcdef', 'klm'))
+        assert fc('a') == ['abcdef/']
+        os.makedirs(os.path.join('abcaha', 'klm'))
+        with open('abcxyz', 'w') as fp:
+            fp.write('test')
+        assert set(fc('a')) == set(['abcdef/', 'abcaha/', 'abcxyz'])
 
-    def test_subparsers(self):
+    def test_subparsers(self, tmpdir, monkeypatch):
         def make_parser():
             parser = argparse.ArgumentParser()
             parser.add_argument("--age", type=int)
@@ -196,28 +165,32 @@ class TestArgcomplete(unittest.TestCase):
             )
 
         for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            assert set(self.run_completer(make_parser(), cmd,
+                                          tmpdir=tmpdir,
+                                          monkeypatch=monkeypatch)
+                       ) == set(output)
 
-    @unittest.skipIf(python2 and sys.getdefaultencoding() != locale.getdefaultlocale()[1],
-        "Skip for python 2 due to its text encoding deficiencies")
-    def test_non_ascii(self):
-        def make_parser():
-            parser = argparse.ArgumentParser()
-            parser.add_argument(u'--книга', choices=[u'Трудно быть богом',
-                                                     u'Парень из преисподней',
-                                                     u'Понедельник начинается в субботу'])
-            return parser
+        @pytest.mark.skipif(sys.version_info >= (2, 6))
+        #currently works on either 2 or 3, but not both
+        def test_non_ascii(self, tmpdir, monkeypatch):
+            def make_parser():
+                parser = argparse.ArgumentParser()
+                parser.add_argument('--книга', choices=['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу'])
+                return parser
 
-        expected_outputs = (("prog ", [u'--книга', '-h', '--help']),
-            (u"prog --книга ", [u'Трудно быть богом', u'Парень из преисподней', u'Понедельник начинается в субботу']),
-            (u"prog --книга П", [u'Парень из преисподней', u'Понедельник начинается в субботу']),
-            (u"prog --книга Пу", ['']),
-            )
+            expected_outputs = (("prog ", ['--книга', '-h', '--help']),
+                ("prog --книга ", ['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу']),
+                ("prog --книга П", ['Парень из преисподней', 'Понедельник начинается в субботу']),
+                ("prog --книга Пу", ['']),
+                )
 
         for cmd, output in expected_outputs:
             if python2:
                 output = [o.decode(locale.getpreferredencoding()) for o in output]
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+                assert set(self.run_completer(make_parser(), cmd,
+                                          tmpdir=tmpdir,
+                                          monkeypatch=monkeypatch)
+                           ) == set(output)
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()
