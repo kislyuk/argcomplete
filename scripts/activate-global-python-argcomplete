@@ -20,8 +20,12 @@ args = parser.parse_args()
 
 if args.user:
     args.dest = os.path.expanduser("~/.bash_completion.d/")
-
-if not os.path.exists(args.dest) and args.dest != '-':
+    if not os.path.exists(args.dest):
+        try:
+            os.mkdir(args.dest)
+        except Exception as e:
+            parser.error("Path {d} does not exist and could not be created: {e}".format(d=args.dest, e=e))
+elif not os.path.exists(args.dest) and args.dest != '-':
     parser.error("Path {d} does not exist".format(d=args.dest))
 
 activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete.sh')
