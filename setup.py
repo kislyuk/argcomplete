@@ -23,7 +23,7 @@ class PyTest(Command):
 
 setup(
     name='argcomplete',
-    version='0.6.4',
+    version='0.6.5',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',
