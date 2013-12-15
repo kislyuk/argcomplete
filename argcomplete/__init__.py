@@ -121,6 +121,7 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         # not an argument completion invocation
         return
 
+    global debug_stream
     try:
         debug_stream = os.fdopen(9, 'w')
     except:
