@@ -16,10 +16,7 @@ sys_encoding = locale.getpreferredencoding()
 
 _DEBUG = '_ARC_DEBUG' in os.environ
 
-try:
-    debug_stream = os.fdopen(9, 'w')
-except:
-    debug_stream = sys.stderr
+debug_stream = sys.stderr
 
 def warn(*args):
     print("\n", file=debug_stream, *args)
@@ -123,6 +120,11 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     if '_ARGCOMPLETE' not in os.environ:
         # not an argument completion invocation
         return
+
+    try:
+        debug_stream = os.fdopen(9, 'w')
+    except:
+        debug_stream = sys.stderr
 
     if output_stream is None:
         try:
