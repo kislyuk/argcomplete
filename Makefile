@@ -1,10 +1,10 @@
 # TODO: pyflakes?
 test:
 	-pylint -E argcomplete
-	./setup.py test
+	./test/test.py -v
 
 test3:
-	python3 setup.py test
+	python3 ./test/test.py -v
 
 release: docs
 	python setup.py sdist upload -s -i D2069255
