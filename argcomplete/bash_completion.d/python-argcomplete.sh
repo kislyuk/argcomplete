@@ -36,4 +36,4 @@ _python_argcomplete_global() {
         type -t _completion_loader | grep -q 'function' && _completion_loader "$@"
     fi
 }
-complete -o default -D -F _python_argcomplete_global
+complete -o default -o bashdefault -D -F _python_argcomplete_global
