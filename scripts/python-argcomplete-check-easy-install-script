@@ -18,8 +18,8 @@ with open(args.wrapper_script) as fh:
     line1, lines = fh.read(1024).split("\n", 1)[:2]
     assert(line1.startswith('#') and 'py' in line1)
     for line in lines.split("\n", 10):
-        if line.startswith("# EASY-INSTALL-SCRIPT"):
-            dist, script = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line).groups()
+        if line.startswith("# EASY-INSTALL-SCRIPT") or line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
+            wt, dist, script = re.match("# EASY-INSTALL-(SCRIPT|DEV-SCRIPT): '(.+)','(.+)'", line).groups()
             if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata('scripts/'+script):
                 exit(0)
         elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
