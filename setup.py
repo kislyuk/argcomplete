@@ -20,7 +20,7 @@ setup(
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
     install_requires=install_requires,
-    packages = ['argcomplete'],
+    packages = find_packages(exclude=['test']),
     scripts = glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
     zip_safe=False,
