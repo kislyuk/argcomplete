@@ -29,5 +29,12 @@ with open(args.wrapper_script) as fh:
             with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:
                 if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                     exit(0)
+        elif line.startswith("# PBR Generated"):
+            module = re.search("from (.*) import", lines).groups()[0]
+            import pkgutil
+            file_name = pkgutil.get_loader(module).filename
+            with open(file_name) as mod_fh:
+                if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
+                    exit(0)
 
 exit(1)
