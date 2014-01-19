@@ -6,7 +6,7 @@
 '''
 Check if an EASY-INSTALL-SCRIPT wrapper redirects to a script that contains "PYTHON_ARGCOMPLETE_OK"
 '''
-import os, sys, re, argparse, pkg_resources
+import re, argparse
 
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -15,25 +15,34 @@ parser.add_argument("wrapper_script", help="Wrapper script to examine")
 args = parser.parse_args()
 
 with open(args.wrapper_script) as fh:
-    line1, lines = fh.read(1024).split("\n", 1)[:2]
+    line1, head = fh.read(1024).split("\n", 1)[:2]
     if line1.startswith('#') and ('py' in line1 or 'Py' in line1):
-        for line in lines.split("\n", 10):
-            if line.startswith("# EASY-INSTALL-SCRIPT") or line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
-                wt, dist, script = re.match("# EASY-INSTALL-(SCRIPT|DEV-SCRIPT): '(.+)','(.+)'", line).groups()
+        
+        lines = head.split("\n", 12)
+        for line in lines:
+            if line.startswith("# EASY-INSTALL-SCRIPT"):
+                import pkg_resources
+                dist, script = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line).groups()
                 if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata('scripts/'+script):
                     exit(0)
             elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
                 dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
-                import pkgutil
+                import pkg_resources, pkgutil
                 module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
                 with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:
                     if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                         exit(0)
+            elif line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
+                for line2 in lines:
+                    if line2.startswith('__file__'):
+                        filename = re.match("__file__ = '(.+)'", line2).group(1)
+                        with open(filename) as mod_fh:
+                            if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
+                                exit(0)
             elif line.startswith("# PBR Generated"):
-                module = re.search("from (.*) import", lines).groups()[0]
-                import pkgutil
-                file_name = pkgutil.get_loader(module).filename
-                with open(file_name) as mod_fh:
+                module = re.search("from (.*) import", head).groups()[0]
+                import pkg_resources, pkgutil
+                with open(pkgutil.get_loader(module).get_filename()) as mod_fh:
                     if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                         exit(0)
 
