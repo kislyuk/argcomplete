@@ -53,7 +53,6 @@ class TempDir(object):
 
 
 class TestArgcomplete(unittest.TestCase):
-
     def setUp(self):
         os.environ['_ARGCOMPLETE'] = "yes"
         os.environ['_ARC_DEBUG'] = "yes"
@@ -62,7 +61,7 @@ class TestArgcomplete(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def run_completer(self, parser, command, point=None):
+    def run_completer(self, parser, command, point=None, **kwargs):
         if python2:
             command = unicode(command)
         if point is None:
@@ -77,7 +76,7 @@ class TestArgcomplete(unittest.TestCase):
             os.environ['COMP_POINT'] = point
             os.environ['_ARGCOMPLETE_COMP_WORDBREAKS'] = '"\'@><=;|&(:'
             self.assertRaises(SystemExit, autocomplete, parser, output_stream=t,
-                              exit_method=sys.exit)
+                              exit_method=sys.exit, **kwargs)
             t.seek(0)
             return t.read().decode(locale.getpreferredencoding()).split(IFS)
 
@@ -197,6 +196,9 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=['-h'])), set(output) - set(['-h']))
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=['-h', '--help'])),
+                             set(output) - set(['-h', '--help']))
 
     @unittest.skipIf(python2 and sys.getdefaultencoding() != locale.getdefaultlocale()[1],
         "Skip for python 2 due to its text encoding deficiencies")

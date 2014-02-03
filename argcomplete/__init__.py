@@ -101,7 +101,8 @@ def split_line(line, point):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
-def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None):
+def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
+                 exclude=None):
     '''
     :param argument_parser: The argument parser to autocomplete on
     :type argument_parser: :class:`argparse.ArgumentParser`
@@ -109,6 +110,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     :type always_complete_options: boolean
     :param exit_method: Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
     :type exit_method: method
+    :param exclude: List of strings representing options to be omitted from autocompletion
+    :type exclude: iterable
 
     Produces tab completions for ``argument_parser``. See module docs for more info.
 
@@ -290,8 +293,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
             if type(completions[i]) != unicode:
                 completions[i] = completions[i].decode(sys_encoding)
 
-    # De-duplicate completions
-    seen = set()
+    # De-duplicate completions and remove excluded ones
+    if exclude is None:
+        exclude = set()
+    seen = set(exclude)
     completions = [c for c in completions if c not in seen and not seen.add(c)]
 
     punctuation_chars = u'();<>|&!`'
