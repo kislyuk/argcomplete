@@ -1,3 +1,8 @@
+Version 0.7.0 (2014-01-19)
+--------------------------
+- New keyword option "argcomplete.autocomplete(exclude=[...])" to suppress options (Issue #74).
+- More speedups to code path for global completion hook negative result.
+
 Version 0.6.9 (2014-01-19)
 --------------------------
 - Fix handling of development mode script wrappers. Thanks to @jmlopez-rod and @dcosson (Issue #69).
