@@ -213,7 +213,7 @@ Links
 -----
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
 * `Documentation (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
-* `Package distribution (PyPI) <http://pypi.python.org/pypi/argcomplete>`_
+* `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 
 Bugs
 ~~~~
@@ -226,6 +226,6 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
 .. image:: https://travis-ci.org/kislyuk/argcomplete.png
         :target: https://travis-ci.org/kislyuk/argcomplete
 .. image:: https://pypip.in/v/argcomplete/badge.png
-        :target: http://pypi.python.org/pypi/argcomplete
+        :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://pypip.in/d/argcomplete/badge.png
-        :target: http://pypi.python.org/pypi/argcomplete
+        :target: https://pypi.python.org/pypi/argcomplete
