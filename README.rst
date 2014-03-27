@@ -140,6 +140,9 @@ organization and complete their names, then prints the member description:
 
     ./describe_github_user.py --organization heroku --member <TAB>
 
+If you have a useful completer to add to the `completer library
+<https://github.com/kislyuk/argcomplete/blob/master/argcomplete/completers.py>`_, send a pull request!
+
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
