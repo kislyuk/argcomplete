@@ -225,6 +225,19 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
 
+Debugging
+---------
+
+To debug your calls, here's a fancy one-liner::
+
+    PROGNAME=./{YOUR_PY_SCRIPT} TEST_ARGS='some_arguments with autocompl' _ARC_DEBUG=1 COMP_LINE="$PROGNAME $TEST_ARGS" COMP_POINT=31 _ARGCOMPLETE=1 $PROGNAME 8>&1 9>>~/autocomplete_debug.log
+
+Then tail::
+
+    tail -f ~/autocomplete_debug.log
+
+
+
 Acknowledgments
 ---------------
 Inspired and informed by the optcomplete_ module by Martin Blais.
