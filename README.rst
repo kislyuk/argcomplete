@@ -143,6 +143,25 @@ organization and complete their names, then prints the member description:
 If you have a useful completer to add to the `completer library
 <https://github.com/kislyuk/argcomplete/blob/master/argcomplete/completers.py>`_, send a pull request!
 
+Using other validators
+----------------------
+There is also possibility to add your own flavour of option validation.
+The default way of validation is checking if the current input starts with one of the options.
+
+If you wish to change this it's fairly simple to change this in your autocompleter. You can first write your own validator like so:
+
+.. code-block:: python
+
+    def my_validator(current_input, keyword_to_check_against):
+        return True # If you want ALL options even if they don't all start with 'current_input'
+
+And then add that to your autocompleter function call:
+
+.. code-block:: python
+
+    argcomplete.autocomplete(parser, validator=my_validator)
+
+
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
