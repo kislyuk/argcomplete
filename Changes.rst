@@ -1,3 +1,8 @@
+Version 0.7.1 (2014-03-29)
+--------------------------
+- New keyword option "argcomplete.autocomplete(validator=...)" to supply a custom validator or bypass default validation. Thanks to @thijsdezoete (Issue #77).
+- Document debug options.
+
 Version 0.7.0 (2014-01-19)
 --------------------------
 - New keyword option "argcomplete.autocomplete(exclude=[...])" to suppress options (Issue #74).
