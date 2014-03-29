@@ -101,8 +101,11 @@ def split_line(line, point):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
+def default_validator(c, my_word):
+    return c.startswith(my_word)
+
 def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None):
+        exclude=None, validator=default_validator):
     '''
     :param argument_parser: The argument parser to autocomplete on
     :type argument_parser: :class:`argparse.ArgumentParser`
@@ -262,10 +265,20 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
                             debug("Resetting completions because", active_action, "is unsatisfied")
                             completions = []
                     try:
-                        completions += [c for c in completer(prefix=cword_prefix,
-                                                             parser=parser,
-                                                             action=active_action,
-                                                             parsed_args=parsed_args) if c.startswith(cword_prefix)]
+                        completions += [c for c in completer(
+                            prefix=cword_prefix,
+                            action=active_action,
+                            parsed_args=parsed_args) 
+                            if validator(c, cword_prefix)
+                        ]
+                    except (SyntaxError, NameError):
+                        # Validator has problems...
+                        # Skip validator in list comprehension
+                        completions += [c for c in completer(
+                            prefix=cword_prefix,
+                            action=active_action,
+                            parsed_args=parsed_args)
+                        ]
                     except (AttributeError, TypeError):
                         # If completer is not callable, try the readline completion protocol instead
                         debug("Could not call completer, trying readline protocol instead")

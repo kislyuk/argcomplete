@@ -143,6 +143,25 @@ organization and complete their names, then prints the member description:
 If you have a useful completer to add to the `completer library
 <https://github.com/kislyuk/argcomplete/blob/master/argcomplete/completers.py>`_, send a pull request!
 
+Using other validators
+----------------------
+There is also possibility to add your own flavour of option validation.
+The default way of validation is checking if the current input starts with one of the options.
+
+If you wish to change this it's fairly simple to change this in your autocompleter. You can first write your own validator like so:
+
+.. code-block:: python
+
+    def my_validator(current_input, keyword_to_check_against):
+        return True # If you want ALL options even if they don't all start with 'current_input'
+
+And then add that to your autocompleter function call:
+
+.. code-block:: python
+
+    argcomplete.autocomplete(parser, validator=my_validator)
+
+
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
@@ -205,6 +224,19 @@ Otherwise, you can redirect its shellcode output into a file::
 The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
+
+Debugging
+---------
+
+To debug your calls, here's a fancy one-liner::
+
+    PROGNAME=./{YOUR_PY_SCRIPT} TEST_ARGS='some_arguments with autocompl' _ARC_DEBUG=1 COMP_LINE="$PROGNAME $TEST_ARGS" COMP_POINT=31 _ARGCOMPLETE=1 $PROGNAME 8>&1 9>>~/autocomplete_debug.log
+
+Then tail::
+
+    tail -f ~/autocomplete_debug.log
+
+
 
 Acknowledgments
 ---------------

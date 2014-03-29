@@ -221,5 +221,46 @@ class TestArgcomplete(unittest.TestCase):
                 output = [o.decode(locale.getpreferredencoding()) for o in output]
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_custom_validator(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument('var', choices=['bus', 'car'])
+            parser.add_argument('value', choices=['orange', 'apple'])
+            return parser
+
+        expected_outputs = (("prog ", ['-h', '--help']),
+            ("prog bu", ['']),
+            ("prog bus ", ['-h', '--help']),
+            ("prog bus appl", ['']),
+            ("prog bus apple ", ['-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, validator=lambda x,y: False) ), set(output))
+
+    def test_different_validators(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument('var', choices=['bus', 'car'])
+            parser.add_argument('value', choices=['orange', 'apple'])
+            return parser
+
+        validators = (
+                lambda x,y: False,
+                lambda x,y: True,
+                lambda x,y: x.startswith(y),
+        )
+
+        expected_outputs = (("prog ", ['-h', '--help'], validators[0]),
+            ("prog ", ['bus', 'car', '-h', '--help'], validators[1]),
+            ("prog bu", ['bus'], validators[1]),
+            ("prog bus ", ['apple', 'orange', '-h', '--help'], validators[1]),
+            ("prog bus appl", ['apple'], validators[2]),
+            ("prog bus cappl", [''], validators[2]),
+            ("prog bus pple ", ['-h', '--help'], validators[2]),
+            )
+
+        for cmd, output, validator in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, validator=validator) ), set(output))
 if __name__ == '__main__':
     unittest.main()
