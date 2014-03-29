@@ -143,25 +143,6 @@ organization and complete their names, then prints the member description:
 If you have a useful completer to add to the `completer library
 <https://github.com/kislyuk/argcomplete/blob/master/argcomplete/completers.py>`_, send a pull request!
 
-Using other validators
-----------------------
-There is also possibility to add your own flavour of option validation.
-The default way of validation is checking if the current input starts with one of the options.
-
-If you wish to change this it's fairly simple to change this in your autocompleter. You can first write your own validator like so:
-
-.. code-block:: python
-
-    def my_validator(current_input, keyword_to_check_against):
-        return True # If you want ALL options even if they don't all start with 'current_input'
-
-And then add that to your autocompleter function call:
-
-.. code-block:: python
-
-    argcomplete.autocomplete(parser, validator=my_validator)
-
-
 Readline-style completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The readline_ module defines a completer protocol in rlcompleter_. Readline-style completers are also supported by
@@ -191,6 +172,19 @@ appropriate to print information about why completions generation failed. To do 
         if login_failed:
             warn("Please log in to Awesome Web Service to use autocompletion")
         return completions
+
+Using a custom completion validator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+By default, argcomplete validates your completions by checking if they start with the prefix given to the completer. You
+can override this validation check by supplying the ``validator`` keyword to ``argcomplete.autocomplete()``:
+
+.. code-block:: python
+
+    def my_validator(current_input, keyword_to_check_against):
+        # Pass through ALL options even if they don't all start with 'current_input'
+        return True
+
+    argcomplete.autocomplete(parser, validator=my_validator)
 
 Global completion
 -----------------
@@ -227,16 +221,15 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 Debugging
 ---------
-
-To debug your calls, here's a fancy one-liner::
+Set the ``ARC_DEBUG`` variable in your shell to enable verbose debugging every time argcomplete runs. Alternatively, you
+can bypass the bash completion shellcode altogether and interact with the Python code directly with something like
+this::
 
     PROGNAME=./{YOUR_PY_SCRIPT} TEST_ARGS='some_arguments with autocompl' _ARC_DEBUG=1 COMP_LINE="$PROGNAME $TEST_ARGS" COMP_POINT=31 _ARGCOMPLETE=1 $PROGNAME 8>&1 9>>~/autocomplete_debug.log
 
 Then tail::
 
     tail -f ~/autocomplete_debug.log
-
-
 
 Acknowledgments
 ---------------
