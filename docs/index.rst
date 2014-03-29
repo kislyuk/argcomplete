@@ -8,6 +8,7 @@ API documentation
 
 .. toctree::
    :maxdepth: 5
+
    index
 
 Indices and tables
