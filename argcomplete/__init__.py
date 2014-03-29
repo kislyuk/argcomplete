@@ -112,10 +112,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     :param always_complete_options: Whether or not to autocomplete options even if an option string opening character (normally ``-``) has not been entered
     :type always_complete_options: boolean
     :param exit_method: Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
-    :type exit_method: method
+    :type exit_method: callable
     :param exclude: List of strings representing options to be omitted from autocompletion
     :type exclude: iterable
-    :param validator: Function to filter all completions through before returning (return value is evaluated as a boolean)
+    :param validator: Function to filter all completions through before returning (called with two string arguments, completion and prefix; return value is evaluated as a boolean)
     :type validator: callable
 
     Produces tab completions for ``argument_parser``. See module docs for more info.
