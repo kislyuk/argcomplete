@@ -101,11 +101,11 @@ def split_line(line, point):
             else:
                 raise ArgcompleteException("unexpected state? TODO")
 
-def default_validator(c, my_word):
-    return c.startswith(my_word)
+def default_validator(completion, prefix):
+    return completion.startswith(prefix)
 
 def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-        exclude=None, validator=default_validator):
+                 exclude=None, validator=None):
     '''
     :param argument_parser: The argument parser to autocomplete on
     :type argument_parser: :class:`argparse.ArgumentParser`
@@ -115,6 +115,8 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     :type exit_method: method
     :param exclude: List of strings representing options to be omitted from autocompletion
     :type exclude: iterable
+    :param validator: Function to filter all completions through before returning (return value is evaluated as a boolean)
+    :type validator: callable
 
     Produces tab completions for ``argument_parser``. See module docs for more info.
 
@@ -139,6 +141,9 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
         except:
             debug("Unable to open fd 8 for writing, quitting")
             exit_method(1)
+
+    if validator is None:
+        validator = default_validator
 
     # print >>debug_stream, ""
     # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', '_ARGCOMPLETE_COMP_WORDBREAKS', 'COMP_WORDS':

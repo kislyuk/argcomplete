@@ -221,8 +221,8 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 Debugging
 ---------
-Set the ``ARC_DEBUG`` variable in your shell to enable verbose debugging every time argcomplete runs. Alternatively, you
-can bypass the bash completion shellcode altogether and interact with the Python code directly with something like
+Set the ``ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. Alternatively,
+you can bypass the bash completion shellcode altogether, and interact with the Python code directly with something like
 this::
 
     PROGNAME=./{YOUR_PY_SCRIPT} TEST_ARGS='some_arguments with autocompl' _ARC_DEBUG=1 COMP_LINE="$PROGNAME $TEST_ARGS" COMP_POINT=31 _ARGCOMPLETE=1 $PROGNAME 8>&1 9>>~/autocomplete_debug.log
