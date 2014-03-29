@@ -18,9 +18,6 @@ _DEBUG = '_ARC_DEBUG' in os.environ
 
 debug_stream = sys.stderr
 
-def warn(*args):
-    print("\n", file=debug_stream, *args)
-
 def debug(*args):
     if _DEBUG:
         print(file=debug_stream, *args)
@@ -349,3 +346,10 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     # os.fsync(debug_stream.fileno())
 
     exit_method(0)
+
+def warn(*args):
+    '''
+    Prints **args** to standard error when running completions. This will interrupt the user's command line interaction;
+    use it to indicate an error condition that is preventing your completer from working.
+    '''
+    print("\n", file=debug_stream, *args)
