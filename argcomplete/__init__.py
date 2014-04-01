@@ -102,7 +102,7 @@ def default_validator(completion, prefix):
     return completion.startswith(prefix)
 
 def autocomplete(argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None, validator=None):
+                 exclude=None, validator=None, escape_symbols=True):
     '''
     :param argument_parser: The argument parser to autocomplete on
     :type argument_parser: :class:`argparse.ArgumentParser`
@@ -314,25 +314,26 @@ def autocomplete(argument_parser, always_complete_options=True, exit_method=os._
     seen = set(exclude)
     completions = [c for c in completions if c not in seen and not seen.add(c)]
 
-    punctuation_chars = u'();<>|&!`'
-    for char in punctuation_chars:
-        if char not in comp_wordbreaks:
-            comp_wordbreaks += char
+    if escape_symbols:
+        punctuation_chars = u'();<>|&!`'
+        for char in punctuation_chars:
+            if char not in comp_wordbreaks:
+                comp_wordbreaks += char
 
-    # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
-    # Otherwise, escape all COMP_WORDBREAKS chars
-    if cword_prequote == '':
-        # Bash mangles completions which contain colons. This workaround has the same effect as __ltrim_colon_completions in bash_completion.
-        if first_colon_pos:
-            completions = [c[first_colon_pos+1:] for c in completions]
+        # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
+        # Otherwise, escape all COMP_WORDBREAKS chars
+        if cword_prequote == '':
+            # Bash mangles completions which contain colons. This workaround has the same effect as __ltrim_colon_completions in bash_completion.
+            if first_colon_pos:
+                completions = [c[first_colon_pos + 1:] for c in completions]
 
-        for wordbreak_char in comp_wordbreaks:
-            completions = [c.replace(wordbreak_char, '\\'+wordbreak_char) for c in completions]
-    else:
-        if cword_prequote == '"':
-            for char in '`$!':
-                completions = [c.replace(char, '\\'+char) for c in completions]
-        completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
+            for wordbreak_char in comp_wordbreaks:
+                completions = [c.replace(wordbreak_char, '\\' + wordbreak_char) for c in completions]
+        else:
+            if cword_prequote == '"':
+                for char in '`$!':
+                    completions = [c.replace(char, '\\' + char) for c in completions]
+            completions = [cword_prequote + c.replace(cword_prequote, '\\' + cword_prequote) for c in completions]
 
     # print >>debug_stream, "\nReturning completions:", [pipes.quote(c) for c in completions]
     # print ifs.join([pipes.quote(c) for c in completions])
