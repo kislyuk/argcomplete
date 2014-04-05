@@ -249,6 +249,8 @@ class CompletionFinder(object):
         '''
         Visits the active parsers and their actions, executes their completers or introspects them to collect their
         option strings. Returns the resulting completions as a list of strings.
+
+        This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         completions = []
         for parser in active_parsers:
@@ -320,6 +322,8 @@ class CompletionFinder(object):
         '''
         Ensures collected completions are Unicode text, de-duplicates them, and excludes those specified by ``exclude``.
         Returns the filtered completions as an iterable.
+
+        This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         # On Python 2, we have to make sure all completions are unicode objects before we continue and output them.
         # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will try
@@ -341,6 +345,8 @@ class CompletionFinder(object):
         occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.
         Otherwise, escapes all characters that bash splits words on (``COMP_WORDBREAKS``), and removes portions of
         completions before the first colon.
+
+        This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         comp_wordbreaks = os.environ.get('_ARGCOMPLETE_COMP_WORDBREAKS', os.environ.get('COMP_WORDBREAKS', " \t\"'@><=;|&(:."))
         if USING_PYTHON2:
@@ -368,6 +374,7 @@ class CompletionFinder(object):
         return completions
 
 autocomplete = CompletionFinder()
+autocomplete.__doc__ = ''' Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. '''
 
 def warn(*args):
     '''

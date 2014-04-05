@@ -3,6 +3,8 @@
 API documentation
 =================
 
+.. autofunction:: argcomplete.autocomplete
+
 .. automodule:: argcomplete
    :members:
    :special-members:
