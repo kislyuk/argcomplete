@@ -5,6 +5,8 @@ API documentation
 
 .. automodule:: argcomplete
    :members:
+   :special-members:
+   :exclude-members: __weakref__
 
 Table of Contents
 =================
