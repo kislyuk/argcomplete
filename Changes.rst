@@ -1,3 +1,7 @@
+Version 0.8.0 (2014-04-07)
+--------------------------
+- Refactor main body of code into a class to enable subclassing and overriding of functionality (Issue #78).
+
 Version 0.7.1 (2014-03-29)
 --------------------------
 - New keyword option "argcomplete.autocomplete(validator=...)" to supply a custom validator or bypass default validation. Thanks to @thijsdezoete (Issue #77).
