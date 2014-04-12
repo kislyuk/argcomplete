@@ -157,9 +157,9 @@ class CompletionFinder(object):
         self.always_complete_options = always_complete_options
         self.exclude = exclude
 
-        # print >>debug_stream, ""
+        # print("", stream=debug_stream)
         # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', '_ARGCOMPLETE_COMP_WORDBREAKS', 'COMP_WORDS':
-        #     print >>debug_stream, v, os.environ[v]
+        #     print(v, os.environ[v], stream=debug_stream)
 
         ifs = os.environ.get('_ARGCOMPLETE_IFS', '\013')
         if len(ifs) != 1:
