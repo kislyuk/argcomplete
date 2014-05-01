@@ -221,7 +221,7 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 Debugging
 ---------
-Set the ``ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. Alternatively,
+Set the ``_ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. Alternatively,
 you can bypass the bash completion shellcode altogether, and interact with the Python code directly with something like
 this::
 
