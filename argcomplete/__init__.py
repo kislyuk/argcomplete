@@ -1,7 +1,7 @@
 # Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import os, sys, argparse, contextlib, subprocess, locale, re
 
