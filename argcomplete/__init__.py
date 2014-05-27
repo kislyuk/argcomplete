@@ -96,7 +96,7 @@ def split_line(line, point):
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:
-                raise ArgcompleteException("unexpected state? TODO")
+                raise ArgcompleteException("Unexpected internal state. Please report this bug at https://github.com/kislyuk/argcomplete/issues.")
 
 def default_validator(completion, prefix):
     return completion.startswith(prefix)
