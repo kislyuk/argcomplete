@@ -197,6 +197,8 @@ completion for, and if it's found, follow the rest of the argcomplete protocol a
  Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older
  systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
  ``echo $BASH_VERSION``.
+ 
+ Global completion is not currently compatible with zsh.
 
 .. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
  argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
