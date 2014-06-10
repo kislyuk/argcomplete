@@ -357,10 +357,11 @@ class CompletionFinder(object):
             if char not in comp_wordbreaks:
                 comp_wordbreaks += char
 
-        # If the word under the cursor was quoted, escape the quote char and add the leading quote back in
-        # Otherwise, escape all COMP_WORDBREAKS chars
+        # If the word under the cursor was quoted, escape the quote char and add the leading quote back in.
+        # Otherwise, escape all COMP_WORDBREAKS chars.
         if cword_prequote == '':
-            # Bash mangles completions which contain colons. This workaround has the same effect as __ltrim_colon_completions in bash_completion.
+            # Bash mangles completions which contain colons.
+            # This workaround has the same effect as __ltrim_colon_completions in bash_completion.
             if first_colon_pos:
                 completions = [c[first_colon_pos+1:] for c in completions]
 
