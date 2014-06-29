@@ -194,9 +194,10 @@ completion for, and if it's found, follow the rest of the argcomplete protocol a
 
 .. admonition:: Bash version compatibility
 
- Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On older
+ Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On OS X or older Linux
  systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
- ``echo $BASH_VERSION``.
+ ``echo $BASH_VERSION``. On OS X, install bash via `Homebrew <http://brew.sh/>`_ (``brew install bash``), add
+ ``/usr/local/bin/bash`` to ``/etc/shells``, and run ``chsh`` to change your shell.
  
  Global completion is not currently compatible with zsh.
 
