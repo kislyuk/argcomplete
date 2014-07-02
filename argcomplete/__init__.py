@@ -182,7 +182,7 @@ class CompletionFinder(object):
 
         if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
             comp_words.pop(0)
-        debug(u"\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), u"\nSUFFIX: '{s}'".format(s=cword_suffix), u"\nWORDS:", comp_words)
+        debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
 
         active_parsers = [argument_parser]
         parsed_args = argparse.Namespace()
@@ -355,7 +355,7 @@ class CompletionFinder(object):
         if USING_PYTHON2:
             comp_wordbreaks = comp_wordbreaks.decode(sys_encoding)
 
-        punctuation_chars = u'();<>|&!`'
+        punctuation_chars = '();<>|&!`'
         for char in punctuation_chars:
             if char not in comp_wordbreaks:
                 comp_wordbreaks += char
