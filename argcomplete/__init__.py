@@ -346,6 +346,9 @@ class CompletionFinder(object):
         Otherwise, escapes all characters that bash splits words on (``COMP_WORDBREAKS``), and removes portions of
         completions before the first colon.
 
+        If there is only one completion, and it doesn't end with a **continuation character** (``/``, ``:``, or ``=``),
+        adds a space after the completion.
+
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         comp_wordbreaks = os.environ.get('_ARGCOMPLETE_COMP_WORDBREAKS', os.environ.get('COMP_WORDBREAKS', " \t\"'@><=;|&(:."))
@@ -372,6 +375,15 @@ class CompletionFinder(object):
                 for char in '`$!':
                     completions = [c.replace(char, '\\'+char) for c in completions]
             completions = [cword_prequote+c.replace(cword_prequote, '\\'+cword_prequote) for c in completions]
+
+        # Note: similar functionality in bash is turned off by supplying the "-o nospace" option to complete.
+        # We can't use that functionality because bash is not smart enough to recognize continuation characters (/) for
+        # which no space should be added.
+        continuation_chars = '=/:'
+        if len(completions) == 1 and completions[0][-1] not in continuation_chars:
+            if cword_prequote == '' and not completions[0].endswith(' '):
+                completions[0] += ' '
+
         return completions
 
 autocomplete = CompletionFinder()

@@ -95,10 +95,10 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['--ship', '-h', '--help']),
-            ("prog --shi", ['--ship']),
+            ("prog --shi", ['--ship ']),
             ("prog --ship ", ['submarine', 'speedboat']),
             ("prog --ship s", ['submarine', 'speedboat']),
-            ("prog --ship su", ['submarine']),
+            ("prog --ship su", ['submarine ']),
             )
 
         for cmd, output in expected_outputs:
@@ -112,9 +112,9 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['bus', 'car', '-h', '--help']),
-            ("prog bu", ['bus']),
+            ("prog bu", ['bus ']),
             ("prog bus ", ['apple', 'orange', '-h', '--help']),
-            ("prog bus appl", ['apple']),
+            ("prog bus appl", ['apple ']),
             ("prog bus apple ", ['-h', '--help']),
             )
 
@@ -131,9 +131,9 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['build', '-h', '--help']),
-            ("prog bu", ['build']),
+            ("prog bu", ['build ']),
             ("prog build ", ['bus', 'car', '--profile', '-h', '--help']),
-            ("prog build ca", ['car']),
+            ("prog build ca", ['car ']),
             ("prog build car ", ['--profile', '-h', '--help']),
             )
 
@@ -186,7 +186,7 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (("prog ", ['--help', 'eggs', '-h', 'spam', '--age']),
-            ("prog --age 1 eggs", ['eggs']),
+            ("prog --age 1 eggs", ['eggs ']),
             ("prog --age 2 eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs ", ['on a train', 'with a goat', 'on a boat', 'in the rain', '--help', '-h']),
             ("prog eggs \"on a", ['\"on a train', '\"on a boat']),
@@ -253,9 +253,9 @@ class TestArgcomplete(unittest.TestCase):
 
         expected_outputs = (("prog ", ['-h', '--help'], validators[0]),
             ("prog ", ['bus', 'car', '-h', '--help'], validators[1]),
-            ("prog bu", ['bus'], validators[1]),
+            ("prog bu", ['bus '], validators[1]),
             ("prog bus ", ['apple', 'orange', '-h', '--help'], validators[1]),
-            ("prog bus appl", ['apple'], validators[2]),
+            ("prog bus appl", ['apple '], validators[2]),
             ("prog bus cappl", [''], validators[2]),
             ("prog bus pple ", ['-h', '--help'], validators[2]),
             )
