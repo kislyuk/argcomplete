@@ -1,3 +1,7 @@
+Version 0.8.1 (2014-07-02)
+--------------------------
+- Use complete --nospace to avoid issues with directory completion.
+
 Version 0.8.0 (2014-04-07)
 --------------------------
 - Refactor main body of code into a class to enable subclassing and overriding of functionality (Issue #78).
