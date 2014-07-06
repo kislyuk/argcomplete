@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function, unicode_literals
+
 import os, sys, shutil
 
 python2 = True if sys.version_info < (3, 0) else False
@@ -200,20 +202,18 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=['-h', '--help'])),
                              set(output) - set(['-h', '--help']))
 
-    @unittest.skipIf(python2 and sys.getdefaultencoding() != locale.getdefaultlocale()[1],
-        "Skip for python 2 due to its text encoding deficiencies")
     def test_non_ascii(self):
         def make_parser():
             parser = argparse.ArgumentParser()
-            parser.add_argument(u'--книга', choices=[u'Трудно быть богом',
-                                                     u'Парень из преисподней',
-                                                     u'Понедельник начинается в субботу'])
+            parser.add_argument('--книга', choices=['Трудно быть богом',
+                                                    'Парень из преисподней',
+                                                    'Понедельник начинается в субботу'])
             return parser
 
-        expected_outputs = (("prog ", [u'--книга', '-h', '--help']),
-            (u"prog --книга ", [u'Трудно быть богом', u'Парень из преисподней', u'Понедельник начинается в субботу']),
-            (u"prog --книга П", [u'Парень из преисподней', u'Понедельник начинается в субботу']),
-            (u"prog --книга Пу", ['']),
+        expected_outputs = (("prog ", ['--книга', '-h', '--help']),
+            ("prog --книга ", ['Трудно быть богом', 'Парень из преисподней', 'Понедельник начинается в субботу']),
+            ("prog --книга П", ['Парень из преисподней', 'Понедельник начинается в субботу']),
+            ("prog --книга Пу", ['']),
             )
 
         for cmd, output in expected_outputs:
