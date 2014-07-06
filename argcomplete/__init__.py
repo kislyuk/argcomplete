@@ -180,21 +180,50 @@ class CompletionFinder(object):
 
         cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
 
-        if os.environ['_ARGCOMPLETE'] == "2": # Hook recognized the first word as the interpreter
+        if os.environ['_ARGCOMPLETE'] == "2":
+            # Shell hook recognized the first word as the interpreter; discard it
             comp_words.pop(0)
-        debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix), "\nSUFFIX: '{s}'".format(s=cword_suffix), "\nWORDS:", comp_words)
 
-        active_parsers = [argument_parser]
-        parsed_args = argparse.Namespace()
-        visited_actions = []
+        debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix),
+              "\nSUFFIX: '{s}'".format(s=cword_suffix),
+              "\nWORDS:", comp_words)
 
+        completions = self._get_completions(argument_parser, comp_words, cword_prefix, cword_prequote, first_colon_pos)
+
+        debug("\nReturning completions:", completions)
+        output_stream.write(ifs.join(completions).encode(sys_encoding))
+        output_stream.flush()
+        debug_stream.flush()
+        exit_method(0)
+
+    def _get_completions(self, argument_parser, comp_words, cword_prefix, cword_prequote, first_colon_pos):
+        active_parsers, parsed_args = self._patch_argument_parser(argument_parser)
+
+        try:
+            debug("invoking parser with", comp_words[1:])
+            with mute_stderr():
+                a = argument_parser.parse_known_args(comp_words[1:], namespace=parsed_args)
+            debug("parsed args:", a)
+        except BaseException as e:
+            debug("\nexception", type(e), str(e), "while parsing args")
+
+        completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
+        completions = self.filter_completions(completions)
+        completions = self.quote_completions(completions, cword_prequote, first_colon_pos)
+        return completions
+
+    def _patch_argument_parser(self, argument_parser):
         '''
         Since argparse doesn't support much introspection, we monkey-patch it to replace the parse_known_args method and
         all actions with hooks that tell us which action was last taken or about to be taken, and let us have the parser
         figure out which subparsers need to be activated (then recursively monkey-patch those).
         We save all active ArgumentParsers to extract all their possible option names later.
         '''
-        def patchArgumentParser(parser):
+        active_parsers = [argument_parser]
+        parsed_args = argparse.Namespace()
+        visited_actions = []
+
+        def patch(parser):
             parser.__class__ = IntrospectiveArgumentParser
             for action in parser._actions:
                 # TODO: accomplish this with super
@@ -210,7 +239,7 @@ class CompletionFinder(object):
                         if self._orig_class == argparse._SubParsersAction:
                             debug('orig class is a subparsers action: patching and running it')
                             active_subparser = self._name_parser_map[values[0]]
-                            patchArgumentParser(active_subparser)
+                            patch(active_subparser)
                             active_parsers.append(active_subparser)
                             self._orig_callable(parser, namespace, values, option_string=option_string)
                         elif self._orig_class in safe_actions:
@@ -221,29 +250,13 @@ class CompletionFinder(object):
                 action._orig_callable = action.__call__
                 action.__class__ = IntrospectAction
 
-        patchArgumentParser(argument_parser)
-
-        try:
-            debug("invoking parser with", comp_words[1:])
-            with mute_stderr():
-                a = argument_parser.parse_known_args(comp_words[1:], namespace=parsed_args)
-            debug("parsed args:", a)
-        except BaseException as e:
-            debug("\nexception", type(e), str(e), "while parsing args")
+        patch(argument_parser)
 
         debug("Active parsers:", active_parsers)
         debug("Visited actions:", visited_actions)
         debug("Parse result namespace:", parsed_args)
 
-        completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
-        completions = self.filter_completions(completions)
-        completions = self.quote_completions(completions, cword_prequote, first_colon_pos)
-
-        debug("\nReturning completions:", completions)
-        output_stream.write(ifs.join(completions).encode(sys_encoding))
-        output_stream.flush()
-        debug_stream.flush()
-        exit_method(0)
+        return active_parsers, parsed_args
 
     def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
         '''
