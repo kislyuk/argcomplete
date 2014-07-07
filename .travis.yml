@@ -14,7 +14,7 @@ install:
     - python setup.py install
 
 script:
-    - make test
+    - export PYTHONIOENCODING=UTF-8; make test
     - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
     - coverage report --show-missing
 
