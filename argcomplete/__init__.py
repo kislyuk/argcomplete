@@ -54,7 +54,9 @@ def mute_stderr():
 class ArgcompleteException(Exception):
     pass
 
-def split_line(line, point):
+def split_line(line, point=None):
+    if point is None:
+        point = len(line)-1
     lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
     words = []
 
@@ -107,8 +109,8 @@ class CompletionFinder(object):
     directly (it's a convenience instance of this class). It has the same signature as
     :meth:`CompletionFinder.__call__()`.
     '''
-    def __init__(self):
-        pass
+    def __init__(self, argument_parser=None):
+        self._parser = argument_parser
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None):
@@ -132,6 +134,7 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
         execution is otherwise desirable.
         '''
+        self.__init__(argument_parser)
 
         if '_ARGCOMPLETE' not in os.environ:
             # not an argument completion invocation
@@ -188,7 +191,7 @@ class CompletionFinder(object):
               "\nSUFFIX: '{s}'".format(s=cword_suffix),
               "\nWORDS:", comp_words)
 
-        completions = self._get_completions(argument_parser, comp_words, cword_prefix, cword_prequote, first_colon_pos)
+        completions = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions).encode(sys_encoding))
@@ -196,13 +199,13 @@ class CompletionFinder(object):
         debug_stream.flush()
         exit_method(0)
 
-    def _get_completions(self, argument_parser, comp_words, cword_prefix, cword_prequote, first_colon_pos):
-        active_parsers, parsed_args = self._patch_argument_parser(argument_parser)
+    def _get_completions(self, comp_words, cword_prefix, cword_prequote, first_colon_pos):
+        active_parsers, parsed_args = self._patch_argument_parser()
 
         try:
             debug("invoking parser with", comp_words[1:])
             with mute_stderr():
-                a = argument_parser.parse_known_args(comp_words[1:], namespace=parsed_args)
+                a = self._parser.parse_known_args(comp_words[1:], namespace=parsed_args)
             debug("parsed args:", a)
         except BaseException as e:
             debug("\nexception", type(e), str(e), "while parsing args")
@@ -212,14 +215,14 @@ class CompletionFinder(object):
         completions = self.quote_completions(completions, cword_prequote, first_colon_pos)
         return completions
 
-    def _patch_argument_parser(self, argument_parser):
+    def _patch_argument_parser(self):
         '''
         Since argparse doesn't support much introspection, we monkey-patch it to replace the parse_known_args method and
         all actions with hooks that tell us which action was last taken or about to be taken, and let us have the parser
         figure out which subparsers need to be activated (then recursively monkey-patch those).
         We save all active ArgumentParsers to extract all their possible option names later.
         '''
-        active_parsers = [argument_parser]
+        active_parsers = [self._parser]
         parsed_args = argparse.Namespace()
         visited_actions = []
 
@@ -250,7 +253,7 @@ class CompletionFinder(object):
                 action._orig_callable = action.__call__
                 action.__class__ = IntrospectAction
 
-        patch(argument_parser)
+        patch(self._parser)
 
         debug("Active parsers:", active_parsers)
         debug("Visited actions:", visited_actions)
@@ -398,6 +401,38 @@ class CompletionFinder(object):
                 completions[0] += ' '
 
         return completions
+
+    def complete(self, text, state):
+        '''
+        Alternate entry point for using the argcomplete completer in a readline-based REPL. See also
+        `rlcompleter <https://docs.python.org/2/library/rlcompleter.html#completer-objects>`_.
+
+        Usage:
+
+        .. code-block:: python
+
+            import argcomplete, argparse, readline
+            parser = argparse.ArgumentParser()
+            ...
+            completer = argcomplete.CompletionFinder(parser)
+            readline.set_completer(completer.complete)
+            readline.parse_and_bind("tab: complete")
+            result = input("prompt> ")
+
+        (Use ``raw_input`` instead of ``input`` on Python 2, or use `eight <https://github.com/kislyuk/eight>`_).
+        '''
+        if state == 0:
+            print("Retrieving matches for", text)
+            cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
+            print("Split line into prequote={}, prefix={}, suffix={}, words={}, fcp={}".format(cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos))
+            comp_words.insert(0, "prog")
+            self.matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
+            print("Set matches to", self.matches)
+        if state < len(self.matches):
+            print("Returning", self.matches[state])
+            return self.matches[state]
+        else:
+            return None
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = ''' Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. '''
