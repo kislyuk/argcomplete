@@ -109,8 +109,10 @@ class CompletionFinder(object):
     directly (it's a convenience instance of this class). It has the same signature as
     :meth:`CompletionFinder.__call__()`.
     '''
-    def __init__(self, argument_parser=None):
+    def __init__(self, argument_parser=None, always_complete_options=True, exclude=None):
         self._parser = argument_parser
+        self.always_complete_options = always_complete_options
+        self.exclude = exclude
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None):
@@ -134,7 +136,7 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
         execution is otherwise desirable.
         '''
-        self.__init__(argument_parser)
+        self.__init__(argument_parser, always_complete_options, exclude)
 
         if '_ARGCOMPLETE' not in os.environ:
             # not an argument completion invocation
@@ -156,9 +158,6 @@ class CompletionFinder(object):
         if validator is None:
             validator = default_validator
         self.validator = validator
-
-        self.always_complete_options = always_complete_options
-        self.exclude = exclude
 
         # print("", stream=debug_stream)
         # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', '_ARGCOMPLETE_COMP_WORDBREAKS', 'COMP_WORDS':
