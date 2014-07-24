@@ -56,7 +56,7 @@ class ArgcompleteException(Exception):
 
 def split_line(line, point=None):
     if point is None:
-        point = len(line)-1
+        point = len(line)
     lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
     words = []
 
@@ -109,10 +109,13 @@ class CompletionFinder(object):
     directly (it's a convenience instance of this class). It has the same signature as
     :meth:`CompletionFinder.__call__()`.
     '''
-    def __init__(self, argument_parser=None, always_complete_options=True, exclude=None):
+    def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
         self.exclude = exclude
+        if validator is None:
+            validator = default_validator
+        self.validator = validator
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None):
@@ -136,7 +139,7 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
         execution is otherwise desirable.
         '''
-        self.__init__(argument_parser, always_complete_options, exclude)
+        self.__init__(argument_parser, always_complete_options, exclude, validator)
 
         if '_ARGCOMPLETE' not in os.environ:
             # not an argument completion invocation
@@ -154,10 +157,6 @@ class CompletionFinder(object):
             except:
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
-
-        if validator is None:
-            validator = default_validator
-        self.validator = validator
 
         # print("", stream=debug_stream)
         # for v in 'COMP_CWORD', 'COMP_LINE', 'COMP_POINT', 'COMP_TYPE', 'COMP_KEY', '_ARGCOMPLETE_COMP_WORDBREAKS', 'COMP_WORDS':
@@ -421,14 +420,11 @@ class CompletionFinder(object):
         (Use ``raw_input`` instead of ``input`` on Python 2, or use `eight <https://github.com/kislyuk/eight>`_).
         '''
         if state == 0:
-            print("Retrieving matches for", text)
             cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
-            print("Split line into prequote={}, prefix={}, suffix={}, words={}, fcp={}".format(cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos))
-            comp_words.insert(0, "prog")
+            comp_words.insert(0, sys.argv[0])
             self.matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
-            print("Set matches to", self.matches)
+
         if state < len(self.matches):
-            print("Returning", self.matches[state])
             return self.matches[state]
         else:
             return None

@@ -262,5 +262,24 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output, validator in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd, validator=validator) ), set(output))
+
+    def test_readline_entry_point(self):
+        def get_readline_completions(completer, text):
+            completions = []
+            for i in range(9999):
+                completion = completer.complete(text, i)
+                if completion is None:
+                    break
+                completions.append(completion)
+            return completions
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument('rover', choices=['sojourner', 'spirit', 'opportunity', 'curiosity'])
+        parser.add_argument('antenna', choices=['low gain', 'high gain'])
+        completer = CompletionFinder(parser)
+        self.assertEqual(get_readline_completions(completer, ""), ['-h', '--help', 'sojourner', 'spirit', 'opportunity', 'curiosity'])
+        self.assertEqual(get_readline_completions(completer, "s"), ['sojourner', 'spirit'])
+        self.assertEqual(get_readline_completions(completer, "x"), [])
+
 if __name__ == '__main__':
     unittest.main()
