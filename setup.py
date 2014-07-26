@@ -39,6 +39,9 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 5 - Production/Stable',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: System :: Shells',
+        'Topic :: Terminals'
     ]
 )
