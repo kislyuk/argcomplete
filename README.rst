@@ -260,3 +260,5 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
         :target: https://warehouse.python.org/project/argcomplete/
 .. image:: https://pypip.in/d/argcomplete/badge.png
         :target: https://warehouse.python.org/project/argcomplete/
+.. image:: https://readthedocs.org/projects/httpnext/badge/?version=latest
+        :target: https://argcomplete.readthedocs.org/
