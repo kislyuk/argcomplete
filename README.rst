@@ -244,7 +244,7 @@ Links
 -----
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
 * `Documentation (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
-* `Package distribution (PyPI) <https://warehouse.python.org/project/argcomplete/>`_
+* `Package distribution <https://warehouse.python.org/project/argcomplete/>`_  `(PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 
 Bugs
 ~~~~
