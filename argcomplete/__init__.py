@@ -358,7 +358,7 @@ class CompletionFinder(object):
         If the word under the cursor started with a quote (as indicated by a nonempty ``cword_prequote``), escapes
         occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.
         Otherwise, escapes all characters that bash splits words on (``COMP_WORDBREAKS``), and removes portions of
-        completions before the first colon.
+        completions before the first colon if (``COMP_WORDBREAKS``) contains a colon.
 
         If there is only one completion, and it doesn't end with a **continuation character** (``/``, ``:``, or ``=``),
         adds a space after the completion.
@@ -377,9 +377,9 @@ class CompletionFinder(object):
         # If the word under the cursor was quoted, escape the quote char and add the leading quote back in.
         # Otherwise, escape all COMP_WORDBREAKS chars.
         if cword_prequote == '':
-            # Bash mangles completions which contain colons.
+            # Bash mangles completions which contain colons if COMP_WORDBREAKS contains a colon.
             # This workaround has the same effect as __ltrim_colon_completions in bash_completion.
-            if first_colon_pos:
+            if ':' in comp_wordbreaks and first_colon_pos:
                 completions = [c[first_colon_pos+1:] for c in completions]
 
             for wordbreak_char in comp_wordbreaks:
