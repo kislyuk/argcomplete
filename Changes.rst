@@ -1,3 +1,7 @@
+Version 0.8.2 (2014-11-03)
+--------------------------
+- Don't strip colon prefix in completion results if COMP_WORDBREAKS does not contain a colon. Thanks to @berezv (pull request #88).
+
 Version 0.8.1 (2014-07-02)
 --------------------------
 - Use complete --nospace to avoid issues with directory completion.
