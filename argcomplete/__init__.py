@@ -259,7 +259,7 @@ class CompletionFinder(object):
 
                         if not completer.completing:
                             self._orig_callable(parser, namespace, values, option_string=option_string)
-                        if self._orig_class == argparse._SubParsersAction:
+                        elif self._orig_class == argparse._SubParsersAction:
                             debug('orig class is a subparsers action: patching and running it')
                             patch(self._name_parser_map[values[0]])
                             self._orig_callable(parser, namespace, values, option_string=option_string)
