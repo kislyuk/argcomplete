@@ -116,6 +116,7 @@ class CompletionFinder(object):
         if validator is None:
             validator = default_validator
         self.validator = validator
+        self.completing = False
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None):
@@ -198,7 +199,10 @@ class CompletionFinder(object):
         exit_method(0)
 
     def _get_completions(self, comp_words, cword_prefix, cword_prequote, first_colon_pos):
-        active_parsers, parsed_args = self._patch_argument_parser()
+        active_parsers = self._patch_argument_parser()
+
+        parsed_args = argparse.Namespace()
+        self.completing = True
 
         try:
             debug("invoking parser with", comp_words[1:])
@@ -207,6 +211,8 @@ class CompletionFinder(object):
             debug("parsed args:", a)
         except BaseException as e:
             debug("\nexception", type(e), str(e), "while parsing args")
+
+        self.completing = False
 
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
         completions = self.filter_completions(completions)
@@ -220,13 +226,27 @@ class CompletionFinder(object):
         figure out which subparsers need to be activated (then recursively monkey-patch those).
         We save all active ArgumentParsers to extract all their possible option names later.
         '''
-        active_parsers = [self._parser]
-        parsed_args = argparse.Namespace()
+        active_parsers = []
         visited_actions = []
 
+        completer = self
+
         def patch(parser):
-            parser.__class__ = IntrospectiveArgumentParser
+            active_parsers.append(parser)
+
+            if isinstance(parser, IntrospectiveArgumentParser):
+                return
+
+            parser.__class__ = type(
+                str("MonkeyPatchedIntrospectiveArgumentParser"),
+                (IntrospectiveArgumentParser, parser.__class__),
+                {})
+
             for action in parser._actions:
+
+                if hasattr(action, "_orig_class"):
+                    continue
+
                 # TODO: accomplish this with super
                 class IntrospectAction(action.__class__):
                     def __call__(self, parser, namespace, values, option_string=None):
@@ -237,16 +257,15 @@ class CompletionFinder(object):
 
                         visited_actions.append(self)
 
+                        if not completer.completing:
+                            self._orig_callable(parser, namespace, values, option_string=option_string)
                         if self._orig_class == argparse._SubParsersAction:
                             debug('orig class is a subparsers action: patching and running it')
-                            active_subparser = self._name_parser_map[values[0]]
-                            patch(active_subparser)
-                            active_parsers.append(active_subparser)
+                            patch(self._name_parser_map[values[0]])
                             self._orig_callable(parser, namespace, values, option_string=option_string)
                         elif self._orig_class in safe_actions:
                             self._orig_callable(parser, namespace, values, option_string=option_string)
-                if getattr(action, "_orig_class", None):
-                    debug("Action", action, "already patched")
+
                 action._orig_class = action.__class__
                 action._orig_callable = action.__call__
                 action.__class__ = IntrospectAction
@@ -255,9 +274,8 @@ class CompletionFinder(object):
 
         debug("Active parsers:", active_parsers)
         debug("Visited actions:", visited_actions)
-        debug("Parse result namespace:", parsed_args)
 
-        return active_parsers, parsed_args
+        return active_parsers
 
     def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
         '''
