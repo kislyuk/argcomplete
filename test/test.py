@@ -281,5 +281,54 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(get_readline_completions(completer, "s"), ['sojourner', 'spirit'])
         self.assertEqual(get_readline_completions(completer, "x"), [])
 
+
+class TestArgcompleteREPL(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def run_completer(self, parser, completer, command, point=None, **kwargs):
+
+        (cword_prequote, cword_prefix, cword_suffix,
+         comp_words, first_colon_pos) = split_line(command)
+
+        comp_words.insert(0, sys.argv[0])
+
+        completions = completer._get_completions(
+            comp_words, cword_prefix, cword_prequote, first_colon_pos)
+
+        return completions
+
+    def test_repl_multiple_complete(self):
+
+        p = ArgumentParser()
+        p.add_argument("--foo")
+        p.add_argument("--bar")
+
+        c = CompletionFinder(p, always_complete_options=True)
+
+        completions = self.run_completer(p, c, "prog ")
+        assert(set(completions) == set(['-h', '--help', '--foo', '--bar']))
+
+        completions = self.run_completer(p, c, "prog --")
+        assert(set(completions) == set(['--help', '--foo', '--bar']))
+
+    def test_repl_parse_after_complete(self):
+
+        p = ArgumentParser()
+        p.add_argument("--foo")
+        p.add_argument("--bar")
+
+        c = CompletionFinder(p, always_complete_options=True)
+
+        completions = self.run_completer(p, c, "prog ")
+        assert(set(completions) == set([u'-h', u'--help', u'--foo', u'--bar']))
+
+        args = p.parse_args(["--foo", "spam"])
+        assert(args.foo == "spam")
+
+
 if __name__ == '__main__':
     unittest.main()
