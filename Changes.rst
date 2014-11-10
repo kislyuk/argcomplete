@@ -1,3 +1,7 @@
+Version 0.8.3 (2014-11-09)
+--------------------------
+- Fix multiple issues related to using argcomplete in a REPL environement. Thanks to @wapiflapi (pull request #90).
+
 Version 0.8.2 (2014-11-03)
 --------------------------
 - Don't strip colon prefix in completion results if COMP_WORDBREAKS does not contain a colon. Thanks to @berezv (pull request #88).
