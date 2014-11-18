@@ -12,13 +12,10 @@ def action_is_satisfied(action):
 
     if action.nargs == ONE_OR_MORE and num_consumed_args < 1:
         return False
+    elif action.nargs is None:
+        return num_consumed_args == 1
     else:
-        if action.nargs is None:
-            action.nargs = 1
-        try:
-            return num_consumed_args == action.nargs
-        except:
-            return True
+        return num_consumed_args == action.nargs
 
 def action_is_open(action):
     ''' Returns True if action could consume more arguments (i.e., its pattern is open).
