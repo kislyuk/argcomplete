@@ -1,3 +1,7 @@
+Version 0.8.4 (2014-12-11)
+--------------------------
+- Fix issue related to using argcomplete in a REPL environement. Thanks to @wapiflapi (pull request #91).
+
 Version 0.8.3 (2014-11-09)
 --------------------------
 - Fix multiple issues related to using argcomplete in a REPL environement. Thanks to @wapiflapi (pull request #90).
