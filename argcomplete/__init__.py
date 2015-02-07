@@ -489,7 +489,8 @@ class CompletionFinder(object):
         if state == 0:
             # `text` may empty, so we read line from readline.
             import readline
-            line = readline.get_line_buffer()
+            # ignore word after tab-complete scope.
+            line = readline.get_line_buffer()[:readline.get_endidx()]
 
             cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(line)
             comp_words.insert(0, sys.argv[0])
