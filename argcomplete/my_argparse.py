@@ -1,7 +1,7 @@
 # Copyright 2012-2013, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-from argparse import ArgumentParser, ArgumentError, SUPPRESS
+from argparse import ArgumentParser, ArgumentError, SUPPRESS, _SubParsersAction
 from argparse import OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
 from argparse import _get_action_name, _
 
@@ -91,7 +91,9 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
             # take the action if we didn't receive a SUPPRESS value
             # (e.g. from a default)
-            if argument_values is not SUPPRESS:
+            # argcomplete: we should walk through sub-commands.
+            if argument_values is not SUPPRESS \
+                    or isinstance(action, _SubParsersAction):
                 action(self, namespace, argument_values, option_string)
 
         # function to convert arg_strings into an optional action

@@ -226,13 +226,13 @@ class CompletionFinder(object):
         figure out which subparsers need to be activated (then recursively monkey-patch those).
         We save all active ArgumentParsers to extract all their possible option names later.
         '''
-        active_parsers = []
+        self.active_parsers = []
         visited_actions = []
 
         completer = self
 
         def patch(parser):
-            active_parsers.append(parser)
+            completer.active_parsers.append(parser)
 
             if isinstance(parser, IntrospectiveArgumentParser):
                 return
@@ -272,10 +272,10 @@ class CompletionFinder(object):
 
         patch(self._parser)
 
-        debug("Active parsers:", active_parsers)
+        debug("Active parsers:", self.active_parsers)
         debug("Visited actions:", visited_actions)
 
-        return active_parsers
+        return self.active_parsers
 
     def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
         '''
@@ -284,24 +284,19 @@ class CompletionFinder(object):
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
-        completions = []
-        for parser in active_parsers:
-            debug("Examining parser", parser)
-            for action in parser._actions:
-                debug("Examining action", action)
-                if isinstance(action, argparse._SubParsersAction):
-                    subparser_activated = False
-                    for subparser in action._name_parser_map.values():
-                        if subparser in active_parsers:
-                            subparser_activated = True
-                    if subparser_activated:
-                        # Parent parser completions are not valid in the subparser, so flush them
-                        completions = []
-                    else:
-                        completions += [subcmd for subcmd in action.choices.keys() if subcmd.startswith(cword_prefix)]
-                elif self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars):
-                    completions += [option for option in action.option_strings if option.startswith(cword_prefix)]
+        def get_subparser_completions(parser, cword_prefix):
+            return [subcmd for action in parser._actions
+                    if isinstance(action, argparse._SubParsersAction)
+                    for subcmd in action.choices.keys()
+                    if subcmd.startswith(cword_prefix)]
 
+        def get_option_completions(parser, cword_prefix):
+            return [option for action in parser._actions
+                    if not isinstance(action, argparse._SubParsersAction)
+                    for option in action.option_strings
+                    if option.startswith(cword_prefix)]
+
+        def complete_active_option(parser, cword_prefix, parsed_args, completions):
             debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
             # Only run completers if current word does not start with - (is not an optional)
@@ -348,6 +343,30 @@ class CompletionFinder(object):
                             completions += subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
                         except subprocess.CalledProcessError:
                             pass
+
+            return completions
+
+        completions = []
+        """
+        for active_parser in active_parsers[:-1]:
+            debug('active_parser:', active_parser)
+            if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
+                completions += get_option_completions(active_parser, cword_prefix)
+                debug('completions options:', completions)
+
+            completions = complete_active_option(active_parser, cword_prefix, parsed_args, completions)
+        """
+
+        debug('all active parser:', active_parsers)
+        active_parser = active_parsers[-1]
+        debug('active_parser:', active_parser)
+
+        completions += get_subparser_completions(active_parser, cword_prefix)
+        completions += get_option_completions(active_parser, cword_prefix)
+        debug('completions options:', completions)
+        completions = complete_active_option(active_parser, cword_prefix, parsed_args, completions)
+        debug('completions options:', completions)
+
         return completions
 
     def filter_completions(self, completions):
@@ -441,6 +460,48 @@ class CompletionFinder(object):
             cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
             comp_words.insert(0, sys.argv[0])
             self.matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
+
+        if state < len(self.matches):
+            return self.matches[state]
+        else:
+            return None
+
+    def rl_complete(self, text, state):
+        """
+        A complete function for readline.
+        Usage:
+
+        .. code-block:: python
+
+            import argcomplete, argparse, readline
+            parser = argparse.ArgumentParser()
+            ...
+            completer = argcomplete.CompletionFinder(parser)
+            readline.set_completer(completer.rl_complete)
+            readline.set_completer_delims(' \t\n=')
+            readline.parse_and_bind('"\M-OA": previous-history')
+            readline.parse_and_bind("tab: complete")
+            result = input("prompt> ")
+
+        (Use ``raw_input`` instead of ``input`` on Python 2, or use `eight <https://github.com/kislyuk/eight>`_).
+        """
+        debug('text:[{0}]'.format(text), ', state:', state)
+        if state == 0:
+            # `text` may empty, so we read line from readline.
+            import readline
+            line = readline.get_line_buffer()
+
+            cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(line)
+            comp_words.insert(0, sys.argv[0])
+            self.matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
+
+            # Complete for `list-node` with input `list-`
+            # but get unexpected result `list-list-node`
+            trim_len = len(cword_prefix) - len(text)
+            if trim_len > 0:
+                self.matches = [x[trim_len:] for x in self.matches]
+
+            debug('matches', self.matches)
 
         if state < len(self.matches):
             return self.matches[state]

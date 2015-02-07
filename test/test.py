@@ -329,6 +329,38 @@ class TestArgcompleteREPL(unittest.TestCase):
         args = p.parse_args(["--foo", "spam"])
         assert(args.foo == "spam")
 
+    def test_repl_subcommand(self):
+
+        p = ArgumentParser()
+        p.add_argument("--foo")
+        p.add_argument("--bar")
+
+        s = p.add_subparsers()
+        s.add_parser('list')
+        s.add_parser('set')
+        show = s.add_parser('show')
+
+        def abc():
+            pass
+
+        show.add_argument('--test')
+        ss = show.add_subparsers()
+        de = ss.add_parser('depth')
+        de.set_defaults(func=abc)
+
+        c = CompletionFinder(p, always_complete_options=True)
+
+        expected_outputs = (
+            ("", ['-h', '--help', '--foo', '--bar', 'list', 'show', 'set']),
+            ("li", ['list ']),
+            ("s", ['show', 'set']),
+            ("show ", ['--test', 'depth', '-h', '--help']),
+            ("show d", ['depth ']),
+            ("show depth ", ['-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(p, c, cmd)), set(output))
 
 if __name__ == '__main__':
     unittest.main()
