@@ -126,17 +126,24 @@ class TestArgcomplete(unittest.TestCase):
     def test_action_activation_with_subparser(self):
         def make_parser():
             parser = argparse.ArgumentParser()
+            parser.add_argument('name', nargs=2, choices=['a', 'b', 'c'])
             subparsers = parser.add_subparsers(title='subcommands', metavar='subcommand')
             subparser_build = subparsers.add_parser('build')
             subparser_build.add_argument('var', choices=['bus', 'car'])
             subparser_build.add_argument('--profile', nargs=1)
             return parser
 
-        expected_outputs = (("prog ", ['build', '-h', '--help']),
-            ("prog bu", ['build ']),
-            ("prog build ", ['bus', 'car', '--profile', '-h', '--help']),
-            ("prog build ca", ['car ']),
-            ("prog build car ", ['--profile', '-h', '--help']),
+        expected_outputs = (
+            ("prog ", ['a', 'b', 'c', '-h', '--help']),
+            ("prog b", ['b ']),
+            ("prog b ", ['a', 'b', 'c', '-h', '--help']),
+            ("prog c b ", ['build', '-h', '--help']),
+            ("prog c b bu", ['build ']),
+            ("prog c b build ", ['bus', 'car', '--profile', '-h', '--help']),
+            ("prog c b build ca", ['car ']),
+            ("prog c b build car ", ['--profile', '-h', '--help']),
+            ("prog build car ", ['-h', '--help']),
+            ("prog a build car ", ['-h', '--help']),
             )
 
         for cmd, output in expected_outputs:

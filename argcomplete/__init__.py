@@ -227,11 +227,12 @@ class CompletionFinder(object):
         We save all active ArgumentParsers to extract all their possible option names later.
         '''
         self.active_parsers = []
-        visited_actions = []
+        self.visited_positionals = []
 
         completer = self
 
         def patch(parser):
+            completer.visited_positionals.append(parser)
             completer.active_parsers.append(parser)
 
             if isinstance(parser, IntrospectiveArgumentParser):
@@ -255,8 +256,6 @@ class CompletionFinder(object):
                         debug('\torig class:', self._orig_class)
                         debug('\torig callable:', self._orig_callable)
 
-                        visited_actions.append(self)
-
                         if not completer.completing:
                             self._orig_callable(parser, namespace, values, option_string=option_string)
                         elif self._orig_class == argparse._SubParsersAction:
@@ -264,6 +263,9 @@ class CompletionFinder(object):
                             patch(self._name_parser_map[values[0]])
                             self._orig_callable(parser, namespace, values, option_string=option_string)
                         elif self._orig_class in safe_actions:
+                            if not self.option_strings:
+                                completer.visited_positionals.append(self)
+
                             self._orig_callable(parser, namespace, values, option_string=option_string)
 
                 action._orig_class = action.__class__
@@ -273,7 +275,7 @@ class CompletionFinder(object):
         patch(self._parser)
 
         debug("Active parsers:", self.active_parsers)
-        debug("Visited actions:", visited_actions)
+        debug("Visited positionals:", self.visited_positionals)
 
         return self.active_parsers
 
@@ -285,9 +287,7 @@ class CompletionFinder(object):
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         def get_subparser_completions(parser, cword_prefix):
-            return [subcmd for action in parser._actions
-                    if isinstance(action, argparse._SubParsersAction)
-                    for subcmd in action.choices.keys()
+            return [subcmd for subcmd in parser.choices.keys()
                     if subcmd.startswith(cword_prefix)]
 
         def get_option_completions(parser, cword_prefix):
@@ -296,13 +296,18 @@ class CompletionFinder(object):
                     for option in action.option_strings
                     if option.startswith(cword_prefix)]
 
-        def complete_active_option(parser, cword_prefix, parsed_args, completions):
+        def complete_active_option(parser, next_positional,
+                                   cword_prefix, parsed_args, completions):
             debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
             # Only run completers if current word does not start with - (is not an optional)
             if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
                 for active_action in parser.active_actions:
                     if not active_action.option_strings: # action is a positional
+                        # show next positional only
+                        if active_action != next_positional:
+                            continue
+
                         if action_is_satisfied(active_action) and not action_is_open(active_action):
                             debug("Skipping", active_action)
                             continue
@@ -347,27 +352,49 @@ class CompletionFinder(object):
             return completions
 
         completions = []
-        """
-        for active_parser in active_parsers[:-1]:
-            debug('active_parser:', active_parser)
-            if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
-                completions += get_option_completions(active_parser, cword_prefix)
-                debug('completions options:', completions)
-
-            completions = complete_active_option(active_parser, cword_prefix, parsed_args, completions)
-        """
 
         debug('all active parser:', active_parsers)
         active_parser = active_parsers[-1]
         debug('active_parser:', active_parser)
-
-        completions += get_subparser_completions(active_parser, cword_prefix)
         completions += get_option_completions(active_parser, cword_prefix)
-        debug('completions options:', completions)
-        completions = complete_active_option(active_parser, cword_prefix, parsed_args, completions)
-        debug('completions options:', completions)
+        debug('optional options:', completions)
+
+
+        next_positional = self._get_next_positional()
+        if isinstance(next_positional, argparse._SubParsersAction):
+            completions += get_subparser_completions(next_positional, cword_prefix)
+
+        debug('next_positional:', next_positional)
+        completions = complete_active_option(active_parser, next_positional,
+                                             cword_prefix, parsed_args,
+                                             completions)
+        debug('active options:', completions)
 
         return completions
+
+    def _get_next_positional(self):
+        """
+        Get the next positional action if exist.
+        """
+        active_parser = self.active_parsers[-1]
+        last_positional = self.visited_positionals[-1]
+
+        all_positional = active_parser._get_positional_actions()
+        if not all_positional:
+            return None
+
+        if active_parser == last_positional:
+            return all_positional[0]
+
+        i = 0
+        for i in range(len(all_positional)):
+            if all_positional[i] == last_positional:
+                break
+
+        if i + 1 < len(all_positional):
+            return all_positional[i + 1]
+
+        return None
 
     def filter_completions(self, completions):
         '''
