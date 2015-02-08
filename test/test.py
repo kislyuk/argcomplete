@@ -288,6 +288,36 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(get_readline_completions(completer, "s"), ['sojourner', 'spirit'])
         self.assertEqual(get_readline_completions(completer, "x"), [])
 
+    def test_display_completions(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('rover', choices=['sojourner', 'spirit', 'opportunity', 'curiosity'], help='help for rover ')
+        parser.add_argument('antenna', choices=['low gain', 'high gain'], help='help for antenna')
+        sub = parser.add_subparsers()
+        p = sub.add_parser('list')
+        p.add_argument('-o', '--oh', help='ttt')
+        p.add_argument('-c', '--ch', help='ccc')
+        sub2 = p.add_subparsers()
+        sub2.add_parser('cat', help='list cat')
+        sub2.add_parser('dog', help='list dog')
+
+        completer = CompletionFinder(parser)
+
+        completer.complete('', 0)
+        disp = completer.get_display_completions()
+        self.assertEqual('help for rover ', disp.get('spirit', ''))
+        self.assertEqual('help for rover ', disp.get('sojourner', ''))
+        self.assertEqual('', disp.get('low gain', ''))
+
+        completer.complete('opportunity "low gain" list ', 0)
+        disp = completer.get_display_completions()
+        self.assertEqual('ttt', disp.get('-o --oh', ''))
+        self.assertEqual('list cat', disp.get('cat', ''))
+
+        completer.complete('opportunity low\\ gain list --', 0)
+        disp = completer.get_display_completions()
+        self.assertEqual('ttt', disp.get('--oh', ''))
+        self.assertEqual('ccc', disp.get('--ch', ''))
+
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):

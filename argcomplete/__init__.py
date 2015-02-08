@@ -214,6 +214,9 @@ class CompletionFinder(object):
 
         self.completing = False
 
+        # key: complete word, value: description.
+        self._display_completions = {}
+
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
         completions = self.filter_completions(completions)
         completions = self.quote_completions(completions, cword_prequote, first_colon_pos)
@@ -287,10 +290,28 @@ class CompletionFinder(object):
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         def get_subparser_completions(parser, cword_prefix):
+            """ """
+            def filter_aliases(metavar, dest, prefix):
+                if not metavar:
+                    return dest
+
+                a = metavar.replace(',', '').split()
+                return ' '.join(x for x in a if x.startswith(prefix))
+
+            self._display_completions.update(
+                [[filter_aliases(action.metavar, action.dest, cword_prefix),action.help]
+                 for action in parser._get_subactions()])
+
             return [subcmd for subcmd in parser.choices.keys()
                     if subcmd.startswith(cword_prefix)]
 
         def get_option_completions(parser, cword_prefix):
+
+            self._display_completions.update(
+                [[' '.join(x for x in action.option_strings if x.startswith(cword_prefix)), action.help]
+                 for action in parser._actions
+                 if action.option_strings])
+
             return [option for action in parser._actions
                     if not isinstance(action, argparse._SubParsersAction)
                     for option in action.option_strings
@@ -326,11 +347,21 @@ class CompletionFinder(object):
                                 # This means the current action will fail to parse if the word under the cursor is not given
                                 # to it, so give it exclusive control over completions (flush previous completions)
                                 debug("Resetting completions because", active_action, "is unsatisfied")
+                                self._display_completions = {}
                                 completions = []
                         if callable(completer):
-                            completions += [c for c in completer(prefix=cword_prefix, action=active_action,
+                            comp = [c for c in completer(prefix=cword_prefix, action=active_action,
                                                                  parsed_args=parsed_args)
                                             if self.validator(c, cword_prefix)]
+
+                            if comp:
+                                completions += comp
+                                if isinstance(completer, completers.ChoicesCompleter):
+                                    self._display_completions.update(
+                                        [[x, active_action.help] for x in comp])
+                                else:
+                                    self._display_completions.update(
+                                        [[x, ''] for x in comp])
                         else:
                             debug("Completer is not callable, trying the readline completer protocol instead")
                             for i in range(9999):
@@ -338,6 +369,7 @@ class CompletionFinder(object):
                                 if next_completion is None:
                                     break
                                 if self.validator(next_completion, cword_prefix):
+                                    self._display_completions.update({next_completion: ''})
                                     completions.append(next_completion)
                         debug("Completions:", completions)
                     elif not isinstance(active_action, argparse._SubParsersAction):
@@ -345,7 +377,10 @@ class CompletionFinder(object):
                         try:
                             # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
                             bashcomp_cmd = ['bash', '-c', "compgen -A file -- '{p}'".format(p=cword_prefix)]
-                            completions += subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
+                            comp = subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
+                            if comp:
+                                self._display_completions.update([[x, ''] for x in comp])
+                                completions += comp
                         except subprocess.CalledProcessError:
                             pass
 
@@ -361,14 +396,18 @@ class CompletionFinder(object):
 
 
         next_positional = self._get_next_positional()
+        debug('next_positional:', next_positional)
+
         if isinstance(next_positional, argparse._SubParsersAction):
             completions += get_subparser_completions(next_positional, cword_prefix)
 
-        debug('next_positional:', next_positional)
         completions = complete_active_option(active_parser, next_positional,
                                              cword_prefix, parsed_args,
                                              completions)
         debug('active options:', completions)
+
+        self._display_completions.pop('', None)
+        debug('display completions:', self._display_completions)
 
         return completions
 
@@ -535,6 +574,43 @@ class CompletionFinder(object):
             return self.matches[state]
         else:
             return None
+
+    def get_display_completions(self):
+        """
+        This function return complete key and description for customize display hook.
+
+        Usage:
+
+        .. code-block:: python
+
+            def display_completions(substitution, matches, longest_match_length):
+                _display_completions = argcomplete.autocomplete.get_display_completions()
+                print('')
+                if _display_completions:
+                    help_len = [len(x) for x in _display_completions.values() if x]
+
+                    if help_len:
+                        maxlen = max([len(x) for x in _display_completions])
+                        print('\n'.join('{0:{2}} -- {1}'.format(k, v, maxlen)
+                                        for k, v in sorted(_display_completions.items())))
+                    else:
+                        print('    '.join(k for k in sorted(_display_completions)))
+                else:
+                    print(' '.join(x for x in sorted(matches)))
+
+                import readline
+                print('cli /> {0}'.format(readline.get_line_buffer()), end='')
+                readline.redisplay()
+
+            ...
+            readline.set_completion_display_matches_hook(display_completions)
+
+        """
+        if hasattr(self, '_display_completions'):
+            return self._display_completions
+
+        return {}
+
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = ''' Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. '''
