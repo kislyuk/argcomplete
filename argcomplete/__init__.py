@@ -290,20 +290,21 @@ class CompletionFinder(object):
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         '''
         def get_subparser_completions(parser, cword_prefix):
-            """ """
             def filter_aliases(metavar, dest, prefix):
                 if not metavar:
-                    return dest
+                    return dest if dest and dest.startswith(prefix) else ''
 
+                # metavar combines dest and aliases with ','.
                 a = metavar.replace(',', '').split()
                 return ' '.join(x for x in a if x.startswith(prefix))
 
-            self._display_completions.update(
-                [[filter_aliases(action.metavar, action.dest, cword_prefix),action.help]
-                 for action in parser._get_subactions()])
+            for action in parser._get_subactions():
+                subcmd_with_aliases = filter_aliases(action.metavar, action.dest, cword_prefix)
+                if subcmd_with_aliases:
+                    self._display_completions[subcmd_with_aliases] = action.help
 
-            return [subcmd for subcmd in parser.choices.keys()
-                    if subcmd.startswith(cword_prefix)]
+            completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
+            return completions
 
         def get_option_completions(parser, cword_prefix):
 
@@ -325,10 +326,6 @@ class CompletionFinder(object):
             if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
                 for active_action in parser.active_actions:
                     if not active_action.option_strings: # action is a positional
-                        # show next positional only
-                        if active_action != next_positional:
-                            continue
-
                         if action_is_satisfied(active_action) and not action_is_open(active_action):
                             debug("Skipping", active_action)
                             continue
@@ -350,18 +347,18 @@ class CompletionFinder(object):
                                 self._display_completions = {}
                                 completions = []
                         if callable(completer):
-                            comp = [c for c in completer(prefix=cword_prefix, action=active_action,
-                                                                 parsed_args=parsed_args)
-                                            if self.validator(c, cword_prefix)]
+                            completions_from_callable = [c for c in completer(
+                                prefix=cword_prefix, action=active_action, parsed_args=parsed_args)
+                                if self.validator(c, cword_prefix)]
 
-                            if comp:
-                                completions += comp
+                            if completions_from_callable:
+                                completions += completions_from_callable
                                 if isinstance(completer, completers.ChoicesCompleter):
                                     self._display_completions.update(
-                                        [[x, active_action.help] for x in comp])
+                                        [[x, active_action.help] for x in completions_from_callable])
                                 else:
                                     self._display_completions.update(
-                                        [[x, ''] for x in comp])
+                                        [[x, ''] for x in completions_from_callable])
                         else:
                             debug("Completer is not callable, trying the readline completer protocol instead")
                             for i in range(9999):
@@ -388,12 +385,11 @@ class CompletionFinder(object):
 
         completions = []
 
-        debug('all active parser:', active_parsers)
+        debug('all active parsers:', active_parsers)
         active_parser = active_parsers[-1]
         debug('active_parser:', active_parser)
         completions += get_option_completions(active_parser, cword_prefix)
         debug('optional options:', completions)
-
 
         next_positional = self._get_next_positional()
         debug('next_positional:', next_positional)
@@ -413,25 +409,25 @@ class CompletionFinder(object):
 
     def _get_next_positional(self):
         """
-        Get the next positional action if exist.
+        Get the next positional action if it exists.
         """
         active_parser = self.active_parsers[-1]
         last_positional = self.visited_positionals[-1]
 
-        all_positional = active_parser._get_positional_actions()
-        if not all_positional:
+        all_positionals = active_parser._get_positional_actions()
+        if not all_positionals:
             return None
 
         if active_parser == last_positional:
-            return all_positional[0]
+            return all_positionals[0]
 
         i = 0
-        for i in range(len(all_positional)):
-            if all_positional[i] == last_positional:
+        for i in range(len(all_positionals)):
+            if all_positionals[i] == last_positional:
                 break
 
-        if i + 1 < len(all_positional):
-            return all_positional[i + 1]
+        if i + 1 < len(all_positionals):
+            return all_positionals[i + 1]
 
         return None
 
@@ -553,7 +549,7 @@ class CompletionFinder(object):
         """
         debug('text:[{0}]'.format(text), ', state:', state)
         if state == 0:
-            # `text` may empty, so we read line from readline.
+            # `text` may be empty, so we read line from readline.
             import readline
             # ignore word after tab-complete scope.
             line = readline.get_line_buffer()[:readline.get_endidx()]
@@ -577,7 +573,7 @@ class CompletionFinder(object):
 
     def get_display_completions(self):
         """
-        This function return complete key and description for customize display hook.
+        This function returns a mapping of option names to their help strings for displaying to the user
 
         Usage:
 
