@@ -318,26 +318,6 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual('ttt', disp.get('--oh', ''))
         self.assertEqual('ccc', disp.get('--ch', ''))
 
-    @unittest.expectedFailure
-    def test_nargs_one_or_more(self):
-        def make_parser():
-            parser = argparse.ArgumentParser()
-            parser.add_argument('h1', choices=['c', 'd'])
-            parser.add_argument('var', choices=['bus', 'car'], nargs='+')
-            parser.add_argument('value', choices=['orange', 'apple'])
-            return parser
-
-        expected_outputs = (("prog ", ['c', 'd', '-h', '--help']),
-            ("prog c bu", ['bus ']),
-            ("prog c bus ", ['bus', 'car', 'apple', 'orange', '-h', '--help']),
-            ("prog c bus car ", ['bus', 'car', 'apple', 'orange', '-h', '--help']),
-            ("prog c bus appl", ['apple ']),
-            ("prog c bus apple ", ['-h', '--help']),
-            )
-
-        for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
-
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
@@ -418,23 +398,6 @@ class TestArgcompleteREPL(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(p, c, cmd)), set(output))
-
-    @unittest.expectedFailure
-    def test_repl_reuse_parser_with_positional(self):
-        p = ArgumentParser()
-        p.add_argument("foo", choices=['aa', 'bb', 'cc'])
-        p.add_argument("bar", choices=['d', 'e'])
-
-        c = CompletionFinder(p, always_complete_options=True)
-
-        self.assertEqual(set(self.run_completer(p, c, "")),
-                         set(['-h', '--help', 'aa', 'bb', 'cc']))
-
-        self.assertEqual(set(self.run_completer(p, c, "aa ")),
-                         set(['-h', '--help', 'd', 'e']))
-
-        self.assertEqual(set(self.run_completer(p, c, "")),
-                         set(['-h', '--help', 'aa', 'bb', 'cc']))
 
 if __name__ == '__main__':
     unittest.main()
