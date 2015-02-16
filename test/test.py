@@ -126,17 +126,24 @@ class TestArgcomplete(unittest.TestCase):
     def test_action_activation_with_subparser(self):
         def make_parser():
             parser = argparse.ArgumentParser()
+            parser.add_argument('name', nargs=2, choices=['a', 'b', 'c'])
             subparsers = parser.add_subparsers(title='subcommands', metavar='subcommand')
             subparser_build = subparsers.add_parser('build')
             subparser_build.add_argument('var', choices=['bus', 'car'])
             subparser_build.add_argument('--profile', nargs=1)
             return parser
 
-        expected_outputs = (("prog ", ['build', '-h', '--help']),
-            ("prog bu", ['build ']),
-            ("prog build ", ['bus', 'car', '--profile', '-h', '--help']),
-            ("prog build ca", ['car ']),
-            ("prog build car ", ['--profile', '-h', '--help']),
+        expected_outputs = (
+            ("prog ", ['a', 'b', 'c', '-h', '--help']),
+            ("prog b", ['b ']),
+            ("prog b ", ['a', 'b', 'c', '-h', '--help']),
+            ("prog c b ", ['build', '-h', '--help']),
+            ("prog c b bu", ['build ']),
+            ("prog c b build ", ['bus', 'car', '--profile', '-h', '--help']),
+            ("prog c b build ca", ['car ']),
+            ("prog c b build car ", ['--profile', '-h', '--help']),
+            ("prog build car ", ['-h', '--help']),
+            ("prog a build car ", ['-h', '--help']),
             )
 
         for cmd, output in expected_outputs:
@@ -281,6 +288,56 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(get_readline_completions(completer, "s"), ['sojourner', 'spirit'])
         self.assertEqual(get_readline_completions(completer, "x"), [])
 
+    def test_display_completions(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('rover', choices=['sojourner', 'spirit', 'opportunity', 'curiosity'], help='help for rover ')
+        parser.add_argument('antenna', choices=['low gain', 'high gain'], help='help for antenna')
+        sub = parser.add_subparsers()
+        p = sub.add_parser('list')
+        p.add_argument('-o', '--oh', help='ttt')
+        p.add_argument('-c', '--ch', help='ccc')
+        sub2 = p.add_subparsers()
+        sub2.add_parser('cat', help='list cat')
+        sub2.add_parser('dog', help='list dog')
+
+        completer = CompletionFinder(parser)
+
+        completer.complete('', 0)
+        disp = completer.get_display_completions()
+        self.assertEqual('help for rover ', disp.get('spirit', ''))
+        self.assertEqual('help for rover ', disp.get('sojourner', ''))
+        self.assertEqual('', disp.get('low gain', ''))
+
+        completer.complete('opportunity "low gain" list ', 0)
+        disp = completer.get_display_completions()
+        self.assertEqual('ttt', disp.get('-o --oh', ''))
+        self.assertEqual('list cat', disp.get('cat', ''))
+
+        completer.complete('opportunity low\\ gain list --', 0)
+        disp = completer.get_display_completions()
+        self.assertEqual('ttt', disp.get('--oh', ''))
+        self.assertEqual('ccc', disp.get('--ch', ''))
+
+    @unittest.expectedFailure
+    def test_nargs_one_or_more(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument('h1', choices=['c', 'd'])
+            parser.add_argument('var', choices=['bus', 'car'], nargs='+')
+            parser.add_argument('value', choices=['orange', 'apple'])
+            return parser
+
+        expected_outputs = (("prog ", ['c', 'd', '-h', '--help']),
+            ("prog c bu", ['bus ']),
+            ("prog c bus ", ['bus', 'car', 'apple', 'orange', '-h', '--help']),
+            ("prog c bus car ", ['bus', 'car', 'apple', 'orange', '-h', '--help']),
+            ("prog c bus appl", ['apple ']),
+            ("prog c bus apple ", ['-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
@@ -329,6 +386,55 @@ class TestArgcompleteREPL(unittest.TestCase):
         args = p.parse_args(["--foo", "spam"])
         assert(args.foo == "spam")
 
+    def test_repl_subcommand(self):
+
+        p = ArgumentParser()
+        p.add_argument("--foo")
+        p.add_argument("--bar")
+
+        s = p.add_subparsers()
+        s.add_parser('list')
+        s.add_parser('set')
+        show = s.add_parser('show')
+
+        def abc():
+            pass
+
+        show.add_argument('--test')
+        ss = show.add_subparsers()
+        de = ss.add_parser('depth')
+        de.set_defaults(func=abc)
+
+        c = CompletionFinder(p, always_complete_options=True)
+
+        expected_outputs = (
+            ("", ['-h', '--help', '--foo', '--bar', 'list', 'show', 'set']),
+            ("li", ['list ']),
+            ("s", ['show', 'set']),
+            ("show ", ['--test', 'depth', '-h', '--help']),
+            ("show d", ['depth ']),
+            ("show depth ", ['-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(p, c, cmd)), set(output))
+
+    @unittest.expectedFailure
+    def test_repl_reuse_parser_with_positional(self):
+        p = ArgumentParser()
+        p.add_argument("foo", choices=['aa', 'bb', 'cc'])
+        p.add_argument("bar", choices=['d', 'e'])
+
+        c = CompletionFinder(p, always_complete_options=True)
+
+        self.assertEqual(set(self.run_completer(p, c, "")),
+                         set(['-h', '--help', 'aa', 'bb', 'cc']))
+
+        self.assertEqual(set(self.run_completer(p, c, "aa ")),
+                         set(['-h', '--help', 'd', 'e']))
+
+        self.assertEqual(set(self.run_completer(p, c, "")),
+                         set(['-h', '--help', 'aa', 'bb', 'cc']))
 
 if __name__ == '__main__':
     unittest.main()
