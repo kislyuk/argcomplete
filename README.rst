@@ -91,7 +91,7 @@ way to do this at definition time is:
     argcomplete.autocomplete(parser)
 
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
-used for completions. 
+used for completions.
 
 A completer that is initialized with a set of all possible choices of values for its action might look like this:
 
@@ -112,6 +112,11 @@ The following two ways to specify a static set of choices are equivalent for com
 
     parser.add_argument("--protocol", choices=('http', 'https', 'ssh', 'rsync', 'wss'))
     parser.add_argument("--proto").completer=ChoicesCompleter(('http', 'https', 'ssh', 'rsync', 'wss'))
+
+Note that if you use the ``choices=<completions>`` option, argparse will show
+all these choices in the ``--help`` output by default. To prevent this, set
+``metavar`` (like ``parser.add_argument("--protocol", metavar="PROTOCOL",
+choices=('http', 'https', 'ssh', 'rsync', 'wss'))``).
 
 The following `script <https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py>`_ uses
 ``parsed_args`` and `Requests <http://python-requests.org/>`_ to query GitHub for publicly known members of an
@@ -198,7 +203,7 @@ completion for, and if it's found, follow the rest of the argcomplete protocol a
  systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
  ``echo $BASH_VERSION``. On OS X, install bash via `Homebrew <http://brew.sh/>`_ (``brew install bash``), add
  ``/usr/local/bin/bash`` to ``/etc/shells``, and run ``chsh`` to change your shell.
- 
+
  Global completion is not currently compatible with zsh.
 
 .. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
