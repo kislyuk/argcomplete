@@ -85,7 +85,7 @@ class _FilteredFilesCompleter(object):
         A predicate accepts as its only argument a candidate path and either 
         accepts it or rejects it.
         '''
-        assert predicate and callable(predicate), 'Expected a callable predicate'
+        assert predicate, 'Expected a callable predicate'
         self.predicate = predicate
 
     def __call__(self, prefix, **kwargs):
