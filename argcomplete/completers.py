@@ -85,7 +85,7 @@ class _FilteredFilesCompleter(object):
         A predicate accepts as its only argument a candidate path and either 
         accepts it or rejects it.
         '''
-        assert predicate, 'Expected a predicate function'
+        assert predicate and callable(predicate), 'Expected a callable predicate'
         self.predicate = predicate
 
     def __call__(self, prefix, **kwargs):
@@ -96,15 +96,15 @@ class _FilteredFilesCompleter(object):
             names = os.listdir(target_dir or '.')
         except:
             return # empty iterator
-        incomplete_part = os.path.basename(prefix);
+        incomplete_part = os.path.basename(prefix)
         # Iterate on target_dir entries and filter on given predicate
         for name in names:
             if not name.startswith(incomplete_part):
-                continue;
+                continue
             candidate = os.path.join(target_dir, name)
             if not self.predicate(candidate):
-                continue;
-            yield candidate + '/' if os.path.isdir(candidate) else candidate;
+                continue
+            yield candidate + '/' if os.path.isdir(candidate) else candidate
 
 class DirectoriesCompleter(_FilteredFilesCompleter):
     
