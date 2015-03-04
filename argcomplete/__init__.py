@@ -468,7 +468,7 @@ class CompletionFinder(object):
         if USING_PYTHON2:
             comp_wordbreaks = comp_wordbreaks.decode(sys_encoding)
 
-        punctuation_chars = '();<>|&!`'
+        punctuation_chars = '();<>|&!`=,#$%^+{}[]'
         for char in punctuation_chars:
             if char not in comp_wordbreaks:
                 comp_wordbreaks += char
