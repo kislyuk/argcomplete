@@ -35,4 +35,4 @@ nosetests.xml
 .pydevproject
 
 # vim python-mode plugin
-.ropeproject/
+.ropeproject
