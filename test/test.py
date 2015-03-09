@@ -183,6 +183,30 @@ class TestArgcomplete(unittest.TestCase):
                 fp.write('test')
             self.assertEqual(set(fc('a')), set(['abcdef/', 'abcaha/', 'abcxyz']))
 
+    def test_directory_completion(self):
+        from argcomplete.completers import DirectoriesCompleter
+        completer = DirectoriesCompleter()
+        c = lambda prefix: set(completer(prefix))
+        with TempDir(prefix='test_dir', dir='.') as temp_dir:
+            # Create some temporary dirs and files (files must be ignored)
+            os.makedirs(os.path.join('abc', 'baz'))
+            os.makedirs(os.path.join('abb', 'baz'))
+            os.makedirs(os.path.join('abc', 'faz'))
+            os.makedirs(os.path.join('def', 'baz'))
+            with open('abc1', 'w') as fp1, open('def1', 'w') as fp2:
+                fp1.write('A test')
+                fp2.write('Another test')
+            # Test completions
+            self.assertEqual(c('a'), set(['abb/', 'abc/']))
+            self.assertEqual(c('ab'), set(['abc/', 'abb/']))
+            self.assertEqual(c('abc'), set(['abc/']))
+            self.assertEqual(c('abc/'), set(['abc/baz/', 'abc/faz/']))
+            self.assertEqual(c('d'), set(['def/']))
+            self.assertEqual(c('def/'), set(['def/baz/']))
+            self.assertEqual(c('e'), set([]))
+            self.assertEqual(c('def/k'), set([]))
+        return 
+    
     def test_subparsers(self):
         def make_parser():
             parser = argparse.ArgumentParser()

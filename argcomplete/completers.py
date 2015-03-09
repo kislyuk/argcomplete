@@ -77,3 +77,37 @@ class FilesCompleter(object):
                 completion += [f + '/' for f in anticomp]
         return completion
 
+class _FilteredFilesCompleter(object):
+    
+    def __init__(self, predicate):
+        '''Create the completer
+
+        A predicate accepts as its only argument a candidate path and either 
+        accepts it or rejects it.
+        '''
+        assert predicate, 'Expected a callable predicate'
+        self.predicate = predicate
+
+    def __call__(self, prefix, **kwargs):
+        '''Provide completions on prefix
+        '''
+        target_dir = os.path.dirname(prefix)
+        try:
+            names = os.listdir(target_dir or '.')
+        except:
+            return # empty iterator
+        incomplete_part = os.path.basename(prefix)
+        # Iterate on target_dir entries and filter on given predicate
+        for name in names:
+            if not name.startswith(incomplete_part):
+                continue
+            candidate = os.path.join(target_dir, name)
+            if not self.predicate(candidate):
+                continue
+            yield candidate + '/' if os.path.isdir(candidate) else candidate
+
+class DirectoriesCompleter(_FilteredFilesCompleter):
+    
+    def __init__(self):
+        _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
+
