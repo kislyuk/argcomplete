@@ -17,12 +17,12 @@ install:
 
 script:
     - make test
-    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
-    - coverage report --show-missing
+#    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
+#    - coverage report --show-missing
 
-after_success:
-    - pip install --quiet coveralls
-    - coveralls
+#after_success:
+#    - pip install --quiet coveralls
+#    - coveralls
 
 matrix:
   allow_failures:
