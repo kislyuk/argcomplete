@@ -263,6 +263,8 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
         :target: https://travis-ci.org/kislyuk/argcomplete
 .. image:: https://pypip.in/version/argcomplete/badge.svg
         :target: https://pypi.python.org/pypi/argcomplete
+.. image:: https://pypip.in/download/argcomplete/badge.svg
+        :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://pypip.in/py_versions/argcomplete/badge.svg
         :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://pypip.in/license/argcomplete/badge.svg
