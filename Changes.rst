@@ -1,3 +1,9 @@
+Version 0.8.5 (2015-04-07)
+--------------------------
+- Fix issues related to using argcomplete in a REPL environement.
+- New helper method for custom completion display.
+- Expand test suite; formatting cleanup.
+
 Version 0.8.4 (2014-12-11)
 --------------------------
 - Fix issue related to using argcomplete in a REPL environement. Thanks to @wapiflapi (pull request #91).
