@@ -164,6 +164,9 @@ completions like you would get in the IPython shell:
     import IPython
     parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
 
+You can also use `argcomplete.CompletionFinder.rl_complete <https://argcomplete.readthedocs.org/en/latest/#argcomplete.CompletionFinder.rl_complete>`_
+to plug your entire argparse parser as a readline completer.
+
 Printing warnings in completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Normal stdout/stderr output is suspended when argcomplete runs. Sometimes, though, when the user presses ``<TAB>``, it's
