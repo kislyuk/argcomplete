@@ -9,8 +9,8 @@ from . import my_shlex as shlex
 
 USING_PYTHON2 = True if sys.version_info < (3, 0) else False
 
-if not USING_PYTHON2:
-    basestring = str
+if USING_PYTHON2:
+    str = unicode
 
 sys_encoding = locale.getpreferredencoding()
 
@@ -63,7 +63,7 @@ def split_line(line, point=None):
     def split_word(word):
         # TODO: make this less ugly
         point_in_word = len(word) + point - lexer.instream.tell()
-        if isinstance(lexer.state, basestring) and lexer.state in lexer.whitespace:
+        if isinstance(lexer.state, (str, bytes)) and lexer.state in lexer.whitespace:
             point_in_word += 1
         if point_in_word > len(word):
             debug("In trailing whitespace")
@@ -247,10 +247,10 @@ class CompletionFinder(object):
             if isinstance(parser, IntrospectiveArgumentParser):
                 return
 
-            parser.__class__ = type(
-                str("MonkeyPatchedIntrospectiveArgumentParser"),
-                (IntrospectiveArgumentParser, parser.__class__),
-                {})
+            classname = "MonkeyPatchedIntrospectiveArgumentParser"
+            if USING_PYTHON2:
+                classname = bytes(classname)
+            parser.__class__ = type(classname, (IntrospectiveArgumentParser, parser.__class__), {})
 
             for action in parser._actions:
 
@@ -449,7 +449,7 @@ class CompletionFinder(object):
         # to implicitly decode string objects using ascii, and fail.
         if USING_PYTHON2:
             for i in range(len(completions)):
-                if type(completions[i]) != unicode:
+                if isinstance(completions[i], bytes):
                     completions[i] = completions[i].decode(sys_encoding)
 
         # De-duplicate completions and remove excluded ones
