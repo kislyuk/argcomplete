@@ -74,7 +74,7 @@ class _FilteredFilesCompleter(object):
         """
         Create the completer
 
-        A predicate accepts as its only argument a candidate path and either 
+        A predicate accepts as its only argument a candidate path and either
         accepts it or rejects it.
         """
         assert predicate, "Expected a callable predicate"

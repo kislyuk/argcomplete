@@ -313,7 +313,6 @@ class CompletionFinder(object):
             return completions
 
         def get_option_completions(parser, cword_prefix):
-
             self._display_completions.update(
                 [[" ".join(x for x in action.option_strings if x.startswith(cword_prefix)), action.help]
                  for action in parser._actions
@@ -324,8 +323,7 @@ class CompletionFinder(object):
                     for option in action.option_strings
                     if option.startswith(cword_prefix)]
 
-        def complete_active_option(parser, next_positional,
-                                   cword_prefix, parsed_args, completions):
+        def complete_active_option(parser, next_positional, cword_prefix, parsed_args, completions):
             debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
             # Only run completers if current word does not start with - (is not an optional)

@@ -205,8 +205,8 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(c('def/'), set(['def/baz/']))
             self.assertEqual(c('e'), set([]))
             self.assertEqual(c('def/k'), set([]))
-        return 
-    
+        return
+
     def test_subparsers(self):
         def make_parser():
             parser = argparse.ArgumentParser()
