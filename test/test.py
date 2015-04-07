@@ -371,9 +371,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         pass
 
     def run_completer(self, parser, completer, command, point=None, **kwargs):
-
-        (cword_prequote, cword_prefix, cword_suffix,
-         comp_words, first_colon_pos) = split_line(command)
+        cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(command)
 
         comp_words.insert(0, sys.argv[0])
 
@@ -383,7 +381,6 @@ class TestArgcompleteREPL(unittest.TestCase):
         return completions
 
     def test_repl_multiple_complete(self):
-
         p = ArgumentParser()
         p.add_argument("--foo")
         p.add_argument("--bar")
@@ -397,7 +394,6 @@ class TestArgcompleteREPL(unittest.TestCase):
         assert(set(completions) == set(['--help', '--foo', '--bar']))
 
     def test_repl_parse_after_complete(self):
-
         p = ArgumentParser()
         p.add_argument("--foo")
         p.add_argument("--bar")
@@ -411,7 +407,6 @@ class TestArgcompleteREPL(unittest.TestCase):
         assert(args.foo == "spam")
 
     def test_repl_subcommand(self):
-
         p = ArgumentParser()
         p.add_argument("--foo")
         p.add_argument("--bar")
