@@ -3,36 +3,32 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
-import sys
-import subprocess
+import os, sys, subprocess
 
-def _wrapcall(*args, **kargs):
+def _wrapcall(*args, **kwargs):
     try:
-        return subprocess.check_output(*args,**kargs).decode().splitlines()
+        return subprocess.check_output(*args, **kwargs).decode().splitlines()
     except AttributeError:
-        return _wrapcall_2_6(*args, **kargs)
+        return _wrapcall_2_6(*args, **kwargs)
     except subprocess.CalledProcessError:
         return []
 
-def _wrapcall_2_6(*args, **kargs):
+def _wrapcall_2_6(*args, **kwargs):
     try:
-        # no check_output in 2.6,
-        if 'stdout' in kargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(
-            stdout=subprocess.PIPE, *args, **kargs)
+        # no check_output in 2.6
+        if "stdout" in kwargs:
+            raise ValueError("stdout argument not allowed, it will be overridden.")
+        process = subprocess.Popen(stdout=subprocess.PIPE, *args, **kwargs)
         output, unused_err = process.communicate()
         retcode = process.poll()
         if retcode:
-            cmd = kargs.get("args")
+            cmd = kwargs.get("args")
             if cmd is None:
                 cmd = args[0]
             raise subprocess.CalledProcessError(retcode, cmd)
         return output.decode().splitlines()
     except subprocess.CalledProcessError:
         return []
-
 
 class ChoicesCompleter(object):
     def __init__(self, choices=[]):
@@ -45,55 +41,52 @@ def EnvironCompleter(prefix, **kwargs):
     return (v for v in os.environ if v.startswith(prefix))
 
 class FilesCompleter(object):
-    'File completer class, optionally takes a list of allowed extensions'
+    """
+    File completer class, optionally takes a list of allowed extensions
+    """
     def __init__(self,allowednames=(),directories=True):
         # Fix if someone passes in a string instead of a list
         if type(allowednames) is str:
             allowednames = [allowednames]
 
-        self.allowednames = [x.lstrip('*').lstrip('.') for x in allowednames]
+        self.allowednames = [x.lstrip("*").lstrip(".") for x in allowednames]
         self.directories = directories
 
     def __call__(self, prefix, **kwargs):
         completion = []
         if self.allowednames:
             if self.directories:
-                files = _wrapcall(['bash','-c',
-                    "compgen -A directory -- '{p}'".format(p=prefix)])
-                completion += [ f + '/' for f in files]
+                files = _wrapcall(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
+                completion += [ f + "/" for f in files]
             for x in self.allowednames:
-                completion += _wrapcall(['bash', '-c',
-                    "compgen -A file -X '!*.{0}' -- '{p}'".format(x,p=prefix)])
+                completion += _wrapcall(["bash", "-c", "compgen -A file -X '!*.{0}' -- '{p}'".format(x,p=prefix)])
         else:
-            completion += _wrapcall(['bash', '-c',
-                "compgen -A file -- '{p}'".format(p=prefix)])
-
-            anticomp = _wrapcall(['bash', '-c',
-                "compgen -A directory -- '{p}'".format(p=prefix)])
-
+            completion += _wrapcall(["bash", "-c", "compgen -A file -- '{p}'".format(p=prefix)])
+            anticomp = _wrapcall(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
             completion = list( set(completion) - set(anticomp))
 
             if self.directories:
-                completion += [f + '/' for f in anticomp]
+                completion += [f + "/" for f in anticomp]
         return completion
 
 class _FilteredFilesCompleter(object):
-    
     def __init__(self, predicate):
-        '''Create the completer
+        """
+        Create the completer
 
         A predicate accepts as its only argument a candidate path and either 
         accepts it or rejects it.
-        '''
-        assert predicate, 'Expected a callable predicate'
+        """
+        assert predicate, "Expected a callable predicate"
         self.predicate = predicate
 
     def __call__(self, prefix, **kwargs):
-        '''Provide completions on prefix
-        '''
+        """
+        Provide completions on prefix
+        """
         target_dir = os.path.dirname(prefix)
         try:
-            names = os.listdir(target_dir or '.')
+            names = os.listdir(target_dir or ".")
         except:
             return # empty iterator
         incomplete_part = os.path.basename(prefix)
@@ -104,10 +97,8 @@ class _FilteredFilesCompleter(object):
             candidate = os.path.join(target_dir, name)
             if not self.predicate(candidate):
                 continue
-            yield candidate + '/' if os.path.isdir(candidate) else candidate
+            yield candidate + "/" if os.path.isdir(candidate) else candidate
 
 class DirectoriesCompleter(_FilteredFilesCompleter):
-    
     def __init__(self):
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
-
