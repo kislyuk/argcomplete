@@ -29,11 +29,16 @@ _python_argcomplete() {
         unset COMPREPLY
     fi
 }
-complete -o nospace -o default -F _python_argcomplete "%s"
+complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
 '''
 
-parser = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+parser = argparse.ArgumentParser(
+    description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+
+parser.add_argument('--no-defaults', 
+    dest='use_defaults', action='store_false', default=True, 
+    help='When no matches are generated, do not fallback to readline\'s default completion')
+
 parser.add_argument("executable")
 
 if len(sys.argv)==1:
@@ -41,4 +46,8 @@ if len(sys.argv)==1:
     sys.exit(1)
 
 args = parser.parse_args()
-sys.stdout.write(shellcode % args.executable)
+
+sys.stdout.write(shellcode % dict(
+    complete_opts = '-o nospace -o default' if args.use_defaults else '-o nospace',
+    executable = args.executable
+))
