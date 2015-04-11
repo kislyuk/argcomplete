@@ -1,3 +1,7 @@
+Version 0.8.6 (2015-04-11)
+--------------------------
+- Expand tilde in script name, allowing argcomplete to work when invoking scripts from one's home directory. Thanks to @VorpalBlade (Issue 104).
+
 Version 0.8.5 (2015-04-07)
 --------------------------
 - Fix issues related to using argcomplete in a REPL environement.
