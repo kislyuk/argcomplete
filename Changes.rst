@@ -1,3 +1,7 @@
+Version 0.8.7 (2015-04-11)
+--------------------------
+- register-python-argcomplete: add option to avoid default readline completion. Thanks to @drmalex07 (pull request #99).
+
 Version 0.8.6 (2015-04-11)
 --------------------------
 - Expand tilde in script name, allowing argcomplete to work when invoking scripts from one's home directory. Thanks to @VorpalBlade (Issue 104).
