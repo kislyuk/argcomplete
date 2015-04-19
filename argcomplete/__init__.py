@@ -549,7 +549,7 @@ class CompletionFinder(object):
 
                     if help_len:
                         maxlen = max([len(x) for x in _display_completions])
-                        print("\n".join("{0:{2}} -- {1}".format(k, v, maxlen)
+                        print("\\n".join("{0:{2}} -- {1}".format(k, v, maxlen)
                                         for k, v in sorted(_display_completions.items())))
                     else:
                         print("    ".join(k for k in sorted(_display_completions)))
