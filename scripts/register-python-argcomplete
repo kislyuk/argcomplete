@@ -35,9 +35,11 @@ complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
 parser = argparse.ArgumentParser(
     description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
-parser.add_argument('--no-defaults', 
-    dest='use_defaults', action='store_false', default=True, 
+parser.add_argument('--no-defaults',
+    dest='use_defaults', action='store_false', default=True,
     help='When no matches are generated, do not fallback to readline\'s default completion')
+parser.add_argument('--complete-arguments', nargs=argparse.REMAINDER,
+    help='arguments to call complete with; use of this option discards default options')
 
 parser.add_argument("executable")
 
@@ -47,7 +49,12 @@ if len(sys.argv)==1:
 
 args = parser.parse_args()
 
+if args.complete_arguments is None:
+    complete_options = '-o nospace -o default' if args.use_defaults else '-o nospace'
+else:
+    complete_options = " ".join(args.complete_arguments)
+
 sys.stdout.write(shellcode % dict(
-    complete_opts = '-o nospace -o default' if args.use_defaults else '-o nospace',
+    complete_opts = complete_options,
     executable = args.executable
 ))
