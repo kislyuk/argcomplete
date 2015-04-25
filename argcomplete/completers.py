@@ -32,7 +32,7 @@ def _wrapcall_2_6(*args, **kwargs):
 
 class ChoicesCompleter(object):
     def __init__(self, choices=[]):
-        self.choices = choices
+        self.choices = [str(choice) for choice in choices]
 
     def __call__(self, prefix, **kwargs):
         return (c for c in self.choices if c.startswith(prefix))
