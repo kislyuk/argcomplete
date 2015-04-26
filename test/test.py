@@ -106,6 +106,22 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_non_str_choices(self):
+        def make_parser():
+            parser = argparse.ArgumentParser()
+            parser.add_argument('x', type=int, choices=[4, 8, 15, 16, 23, 42])
+            return parser
+
+        expected_outputs = (("prog ", ['4', '8', '15', '16', '23', '42', '-h', '--help']),
+            ("prog 1", ['15', '16']),
+            ("prog 2", ['23 ']),
+            ("prog 4", ['4', '42']),
+            ("prog 4 ", ['-h', '--help']),
+            )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_action_activation(self):
         def make_parser():
             parser = argparse.ArgumentParser()
