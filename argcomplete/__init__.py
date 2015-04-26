@@ -3,16 +3,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, argparse, contextlib, subprocess, locale, re
+import os, sys, argparse, contextlib, subprocess, re
 
 from . import my_shlex as shlex
-
-USING_PYTHON2 = True if sys.version_info < (3, 0) else False
-
-if USING_PYTHON2:
-    str = unicode
-
-sys_encoding = locale.getpreferredencoding()
+from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -183,9 +177,7 @@ class CompletionFinder(object):
         else:
             comp_point = len(comp_line.encode(sys_encoding)[:comp_point].decode(sys_encoding))
 
-        if USING_PYTHON2:
-            comp_line = comp_line.decode(sys_encoding)
-
+        comp_line = ensure_str(comp_line)
         cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
 
         if os.environ["_ARGCOMPLETE"] == "2":
@@ -209,6 +201,10 @@ class CompletionFinder(object):
 
         parsed_args = argparse.Namespace()
         self.completing = True
+
+        if USING_PYTHON2:
+            # Python 2 argparse only properly works with byte strings.
+            comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
             debug("invoking parser with", comp_words[1:])
@@ -314,14 +310,14 @@ class CompletionFinder(object):
 
         def get_option_completions(parser, cword_prefix):
             self._display_completions.update(
-                [[" ".join(x for x in action.option_strings if x.startswith(cword_prefix)), action.help]
+                [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]
                  for action in parser._actions
                  if action.option_strings])
 
-            return [option for action in parser._actions
+            return [ensure_str(option) for action in parser._actions
                     if not isinstance(action, argparse._SubParsersAction)
                     for option in action.option_strings
-                    if option.startswith(cword_prefix)]
+                    if ensure_str(option).startswith(cword_prefix)]
 
         def complete_active_option(parser, next_positional, cword_prefix, parsed_args, completions):
             debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
@@ -445,10 +441,7 @@ class CompletionFinder(object):
         # On Python 2, we have to make sure all completions are unicode objects before we continue and output them.
         # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will try
         # to implicitly decode string objects using ascii, and fail.
-        if USING_PYTHON2:
-            for i in range(len(completions)):
-                if isinstance(completions[i], bytes):
-                    completions[i] = completions[i].decode(sys_encoding)
+        completions = [ensure_str(c) for c in completions]
 
         # De-duplicate completions and remove excluded ones
         if self.exclude is None:
@@ -468,9 +461,9 @@ class CompletionFinder(object):
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        comp_wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", os.environ.get("COMP_WORDBREAKS", " \t\"'@><=;|&(:."))
-        if USING_PYTHON2:
-            comp_wordbreaks = comp_wordbreaks.decode(sys_encoding)
+        comp_wordbreaks = ensure_str(os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS",
+                                                    os.environ.get("COMP_WORDBREAKS",
+                                                                   " \t\"'@><=;|&(:.")))
 
         punctuation_chars = "();<>|&!`"
         for char in punctuation_chars:

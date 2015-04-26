@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os, sys, subprocess
+from .compat import USING_PYTHON2, str, sys_encoding
 
 def _wrapcall(*args, **kwargs):
     try:
@@ -31,8 +32,14 @@ def _wrapcall_2_6(*args, **kwargs):
         return []
 
 class ChoicesCompleter(object):
-    def __init__(self, choices=[]):
-        self.choices = [str(choice) for choice in choices]
+    def __init__(self, choices):
+        self.choices = []
+        for choice in choices:
+            if isinstance(choice, bytes):
+                choice = choice.decode(sys_encoding)
+            if not isinstance(choice, str):
+                choice = str(choice)
+            self.choices.append(choice)
 
     def __call__(self, prefix, **kwargs):
         return (c for c in self.choices if c.startswith(prefix))
@@ -46,7 +53,7 @@ class FilesCompleter(object):
     """
     def __init__(self,allowednames=(),directories=True):
         # Fix if someone passes in a string instead of a list
-        if type(allowednames) is str:
+        if isinstance(allowednames, (str, bytes)):
             allowednames = [allowednames]
 
         self.allowednames = [x.lstrip("*").lstrip(".") for x in allowednames]
