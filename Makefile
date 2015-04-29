@@ -7,8 +7,7 @@ test3:
 	python3 ./test/test.py -v
 
 release: docs
-	python setup.py sdist upload -s -i D2069255
-#	python setup.py upload_docs --upload-dir docs/_build/html -s -i D2069255
+	python setup.py sdist bdist_wheel upload -s -i D2069255
 
 docs:
 	$(MAKE) -C docs html
