@@ -264,13 +264,11 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
 
 .. image:: https://travis-ci.org/kislyuk/argcomplete.png
         :target: https://travis-ci.org/kislyuk/argcomplete
-.. image:: https://pypip.in/version/argcomplete/badge.svg
+.. image:: https://img.shields.io/pypi/v/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://pypip.in/download/argcomplete/badge.svg
+.. image:: https://img.shields.io/pypi/dm/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://pypip.in/py_versions/argcomplete/badge.svg
-        :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://pypip.in/license/argcomplete/badge.svg
+.. image:: https://img.shields.io/pypi/l/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://readthedocs.org/projects/argcomplete/badge/?version=latest
         :target: https://argcomplete.readthedocs.org/
