@@ -1,3 +1,9 @@
+Version 0.8.8 (2015-05-01)
+--------------------------
+- Build and upload universal wheel packages in release.
+- Fix issue with non-string choices for arguments. Thanks to @neizod (pull request #107).
+- Improve non-ascii argparse argument support on Python 2.7.
+
 Version 0.8.7 (2015-04-11)
 --------------------------
 - register-python-argcomplete: add option to avoid default readline completion. Thanks to @drmalex07 (pull request #99).
