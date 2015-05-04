@@ -5,6 +5,7 @@ from argparse import ArgumentParser, ArgumentError, SUPPRESS, _SubParsersAction
 from argparse import OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
 from argparse import _get_action_name, _
 
+
 def action_is_satisfied(action):
     ''' Returns False if the parse would raise an error if no more arguments are given to this action, True otherwise.
     '''
@@ -17,17 +18,20 @@ def action_is_satisfied(action):
     else:
         return num_consumed_args == action.nargs
 
+
 def action_is_open(action):
     ''' Returns True if action could consume more arguments (i.e., its pattern is open).
     '''
     return action.nargs in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]
 
+
 class IntrospectiveArgumentParser(ArgumentParser):
     ''' The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
     '''
+
     def _parse_known_args(self, arg_strings, namespace):
-        self.active_actions = [] # Added by argcomplete
+        self.active_actions = []  # Added by argcomplete
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
             arg_strings = self._read_args_from_files(arg_strings)
@@ -156,8 +160,8 @@ class IntrospectiveArgumentParser(ArgumentParser):
                 else:
                     start = start_index + 1
                     selected_patterns = arg_strings_pattern[start:]
-                    self.active_actions = [action] # Added by argcomplete
-                    action.num_consumed_args = 0 # Added by argcomplete
+                    self.active_actions = [action]  # Added by argcomplete
+                    action.num_consumed_args = 0  # Added by argcomplete
                     arg_count = match_argument(action, selected_patterns)
                     stop = start + arg_count
                     args = arg_strings[start:stop]
@@ -196,10 +200,10 @@ class IntrospectiveArgumentParser(ArgumentParser):
             # slice off the appropriate arg strings for each Positional
             # and add the Positional and its args to the list
             for action, arg_count in zip(positionals, arg_counts):
-                if arg_count > 0: # Added by argcomplete
-                    self.active_actions = [action] # Added by argcomplete
-                else: # Added by argcomplete
-                    self.active_actions.append(action) # Added by argcomplete
+                if arg_count > 0:  # Added by argcomplete
+                    self.active_actions = [action]  # Added by argcomplete
+                else:  # Added by argcomplete
+                    self.active_actions.append(action)  # Added by argcomplete
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
                 action.num_consumed_args = len(args)
@@ -256,7 +260,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         # arg strings supplied.
 
         if positionals:
-            self.active_actions.append(positionals[0]) # Added by argcomplete
+            self.active_actions.append(positionals[0])  # Added by argcomplete
             self.error(_('too few arguments'))
 
         # make sure all required actions were present

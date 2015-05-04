@@ -14,7 +14,8 @@ Example:
     $ eval "$(register-python-argcomplete my-favorite-script.py)"
 '''
 
-import os, sys, argparse
+import sys
+import argparse
 
 shellcode = '''
 _python_argcomplete() {
@@ -35,15 +36,18 @@ complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
 parser = argparse.ArgumentParser(
     description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
-parser.add_argument('--no-defaults',
+parser.add_argument(
+    '--no-defaults',
     dest='use_defaults', action='store_false', default=True,
     help='When no matches are generated, do not fallback to readline\'s default completion')
-parser.add_argument('--complete-arguments', nargs=argparse.REMAINDER,
+parser.add_argument(
+    '--complete-arguments',
+    nargs=argparse.REMAINDER,
     help='arguments to call complete with; use of this option discards default options')
 
 parser.add_argument("executable")
 
-if len(sys.argv)==1:
+if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
@@ -55,6 +59,6 @@ else:
     complete_options = " ".join(args.complete_arguments)
 
 sys.stdout.write(shellcode % dict(
-    complete_opts = complete_options,
-    executable = args.executable
+    complete_opts=complete_options,
+    executable=args.executable
 ))

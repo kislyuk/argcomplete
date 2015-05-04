@@ -3,22 +3,28 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil
+import os
+import shutil
+import sys
+from tempfile import TemporaryFile, mkdtemp
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from argparse import ArgumentParser
+from argcomplete import (
+    autocomplete,
+    CompletionFinder,
+    split_line,
+)
+from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 
 if sys.version_info >= (2, 7):
     import unittest
 else:
     import unittest2 as unittest
 
-from tempfile import TemporaryFile, mkdtemp
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from argparse import ArgumentParser
-from argcomplete import *
-from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
-
 IFS = "\013"
+
 
 class TempDir(object):
     """
@@ -42,6 +48,7 @@ class TempDir(object):
     def __exit__(self, *err):
         os.chdir(self.old_dir)
         shutil.rmtree(self.tmp_dir)
+
 
 class TestArgcomplete(unittest.TestCase):
     def setUp(self):
@@ -76,7 +83,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_choices(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("--ship", choices=["submarine", b"speedboat"])
             return parser
 
@@ -93,7 +100,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_non_str_choices(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("x", type=int, choices=[4, 8, 15, 16, 23, 42])
             return parser
 
@@ -110,7 +117,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_action_activation(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("var", choices=["bus", "car"])
             parser.add_argument("value", choices=["orange", "apple"])
             return parser
@@ -128,7 +135,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_action_activation_with_subparser(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("name", nargs=2, choices=["a", "b", "c"])
             subparsers = parser.add_subparsers(title="subcommands", metavar="subcommand")
             subparser_build = subparsers.add_parser("build")
@@ -154,10 +161,10 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_completers(self):
         def c_url(prefix, parsed_args, **kwargs):
-            return [ "http://url1", "http://url2" ]
+            return ["http://url1", "http://url2"]
 
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("--url").completer = c_url
             parser.add_argument("--email", nargs=3, choices=["a@b.c", "a@b.d", "ab@c.d", "bcd@e.f", "bce@f.g"])
             return parser
@@ -178,7 +185,7 @@ class TestArgcomplete(unittest.TestCase):
     def test_file_completion(self):
         # setup and teardown should probably be in class
         from argcomplete.completers import FilesCompleter
-        with TempDir(prefix="test_dir_fc", dir=".") as t:
+        with TempDir(prefix="test_dir_fc", dir="."):
             fc = FilesCompleter()
             os.makedirs(os.path.join("abcdef", "klm"))
             self.assertEqual(fc("a"), ["abcdef/"])
@@ -191,15 +198,16 @@ class TestArgcomplete(unittest.TestCase):
         from argcomplete.completers import DirectoriesCompleter
         completer = DirectoriesCompleter()
         c = lambda prefix: set(completer(prefix))
-        with TempDir(prefix="test_dir", dir=".") as temp_dir:
+        with TempDir(prefix="test_dir", dir="."):
             # Create some temporary dirs and files (files must be ignored)
             os.makedirs(os.path.join("abc", "baz"))
             os.makedirs(os.path.join("abb", "baz"))
             os.makedirs(os.path.join("abc", "faz"))
             os.makedirs(os.path.join("def", "baz"))
-            with open("abc1", "w") as fp1, open("def1", "w") as fp2:
-                fp1.write("A test")
-                fp2.write("Another test")
+            with open("abc1", "w") as fp1:
+                with open("def1", "w") as fp2:
+                    fp1.write("A test")
+                    fp2.write("Another test")
             # Test completions
             self.assertEqual(c("a"), set(["abb/", "abc/"]))
             self.assertEqual(c("ab"), set(["abc/", "abb/"]))
@@ -213,7 +221,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_subparsers(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("--age", type=int)
             sub = parser.add_subparsers()
             eggs = sub.add_parser("eggs")
@@ -241,12 +249,14 @@ class TestArgcomplete(unittest.TestCase):
     def test_non_ascii(self):
         def make_parser():
             _str = ensure_bytes if USING_PYTHON2 else str
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             # Python 2 argparse only works with byte strings or ascii unicode strings.
             # Python 3 argparse only works with unicode strings.
-            parser.add_argument(_str("--книга"), choices=[_str("Трудно быть богом"),
-                                                          _str("Парень из преисподней"),
-                                                          _str("Понедельник начинается в субботу")])
+            parser.add_argument(_str("--книга"), choices=[
+                _str("Трудно быть богом"),
+                _str("Парень из преисподней"),
+                _str("Понедельник начинается в субботу"),
+            ])
             return parser
 
         expected_outputs = (
@@ -262,7 +272,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_custom_validator(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("var", choices=["bus", "car"])
             parser.add_argument("value", choices=["orange", "apple"])
             return parser
@@ -276,20 +286,22 @@ class TestArgcomplete(unittest.TestCase):
         )
 
         for cmd, output in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd, validator=lambda x,y: False)),
-                             set(output))
+            self.assertEqual(
+                set(self.run_completer(make_parser(), cmd, validator=lambda x, y: False)),
+                set(output)
+            )
 
     def test_different_validators(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("var", choices=["bus", "car"])
             parser.add_argument("value", choices=["orange", "apple"])
             return parser
 
         validators = (
-            lambda x,y: False,
-            lambda x,y: True,
-            lambda x,y: x.startswith(y),
+            lambda x, y: False,
+            lambda x, y: True,
+            lambda x, y: x.startswith(y),
         )
 
         expected_outputs = (
@@ -303,7 +315,7 @@ class TestArgcomplete(unittest.TestCase):
         )
 
         for cmd, output, validator in expected_outputs:
-            self.assertEqual(set(self.run_completer(make_parser(), cmd, validator=validator) ), set(output))
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, validator=validator)), set(output))
 
     def test_readline_entry_point(self):
         def get_readline_completions(completer, text):
@@ -315,7 +327,7 @@ class TestArgcomplete(unittest.TestCase):
                 completions.append(completion)
             return completions
 
-        parser = argparse.ArgumentParser()
+        parser = ArgumentParser()
         parser.add_argument("rover", choices=["sojourner", "spirit", "opportunity", "curiosity"])
         parser.add_argument("antenna", choices=["low gain", "high gain"])
         completer = CompletionFinder(parser)
@@ -325,7 +337,7 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(get_readline_completions(completer, "x"), [])
 
     def test_display_completions(self):
-        parser = argparse.ArgumentParser()
+        parser = ArgumentParser()
         parser.add_argument("rover",
                             choices=["sojourner", "spirit", "opportunity", "curiosity"],
                             help="help for rover ")
@@ -359,7 +371,7 @@ class TestArgcomplete(unittest.TestCase):
     @unittest.expectedFailure
     def test_nargs_one_or_more(self):
         def make_parser():
-            parser = argparse.ArgumentParser()
+            parser = ArgumentParser()
             parser.add_argument("h1", choices=["c", "d"])
             parser.add_argument("var", choices=["bus", "car"], nargs="+")
             parser.add_argument("value", choices=["orange", "apple"])
@@ -376,6 +388,7 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):

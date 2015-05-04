@@ -3,14 +3,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, argparse, contextlib, subprocess, re
-
+import argparse
+import contextlib
+import os
+import subprocess
+import sys
 from . import my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
 debug_stream = sys.stderr
+
 
 def debug(*args):
     if _DEBUG:
@@ -30,6 +34,7 @@ safe_actions = (argparse._StoreAction,
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open
 
+
 @contextlib.contextmanager
 def mute_stdout():
     stdout = sys.stdout
@@ -38,6 +43,7 @@ def mute_stdout():
         yield
     finally:
         sys.stdout = stdout
+
 
 @contextlib.contextmanager
 def mute_stderr():
@@ -49,8 +55,10 @@ def mute_stderr():
         sys.stderr.close()
         sys.stderr = stderr
 
+
 class ArgcompleteException(Exception):
     pass
+
 
 def split_line(line, point=None):
     if point is None:
@@ -73,7 +81,7 @@ def split_line(line, point=None):
         if lexer.state is not None and lexer.state in lexer.quotes:
             prequote = lexer.state
         # non-posix
-        #if len(prefix) > 0 and prefix[0] in lexer.quotes:
+        # if len(prefix) > 0 and prefix[0] in lexer.quotes:
         #    prequote, prefix = prefix[0], prefix[1:]
 
         first_colon_pos = lexer.first_colon_pos if ":" in word else None
@@ -98,8 +106,10 @@ def split_line(line, point=None):
             else:
                 raise ArgcompleteException("Unexpected internal state. Please report this bug at https://github.com/kislyuk/argcomplete/issues.")
 
+
 def default_validator(completion, prefix):
     return completion.startswith(prefix)
+
 
 class CompletionFinder(object):
     """
@@ -136,7 +146,9 @@ class CompletionFinder(object):
             and prefix; return value is evaluated as a boolean)
         :type validator: callable
 
-        .. note:: If you are not subclassing CompletionFinder to override its behaviors, use ``argcomplete.autocomplete()`` directly. It has the same signature as this method.
+        .. note::
+            If you are not subclassing CompletionFinder to override its behaviors,
+            use ``argcomplete.autocomplete()`` directly. It has the same signature as this method.
 
         Produces tab completions for ``argument_parser``. See module docs for more info.
 
@@ -329,13 +341,13 @@ class CompletionFinder(object):
             # Only run completers if current word does not start with - (is not an optional)
             if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
                 for active_action in parser.active_actions:
-                    if not active_action.option_strings: # action is a positional
+                    if not active_action.option_strings:  # action is a positional
                         if action_is_satisfied(active_action) and not action_is_open(active_action):
                             debug("Skipping", active_action)
                             continue
 
                     debug("Activating completion for", active_action, active_action._orig_class)
-                    #completer = getattr(active_action, "completer", DefaultCompleter())
+                    # completer = getattr(active_action, "completer", DefaultCompleter())
                     completer = getattr(active_action, "completer", None)
 
                     if completer is None and active_action.choices is not None:
@@ -343,7 +355,7 @@ class CompletionFinder(object):
                             completer = completers.ChoicesCompleter(active_action.choices)
 
                     if completer:
-                        if len(active_action.option_strings) > 0: # only for optionals
+                        if len(active_action.option_strings) > 0:  # only for optionals
                             if not action_is_satisfied(active_action):
                                 # This means the current action will fail to parse if the word under the cursor is not given
                                 # to it, so give it exclusive control over completions (flush previous completions)
@@ -568,6 +580,7 @@ class CompletionFinder(object):
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
+
 
 def warn(*args):
     """

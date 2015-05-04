@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, locale
+import locale
+import sys
 
 sys_encoding = locale.getpreferredencoding()
 
@@ -11,10 +12,12 @@ if USING_PYTHON2:
 else:
     str = str
 
+
 def ensure_bytes(x, encoding=sys_encoding):
     if not isinstance(x, bytes):
         x = x.encode(encoding)
     return x
+
 
 def ensure_str(x, encoding=sys_encoding):
     if not isinstance(x, str):
