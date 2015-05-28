@@ -34,16 +34,20 @@ from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, actio
 def mute_stdout():
     stdout = sys.stdout
     sys.stdout = open(os.devnull, "w")
-    yield
-    sys.stdout = stdout
+    try:
+        yield
+    finally:
+        sys.stdout = stdout
 
 @contextlib.contextmanager
 def mute_stderr():
     stderr = sys.stderr
     sys.stderr = open(os.devnull, "w")
-    yield
-    sys.stderr.close()
-    sys.stderr = stderr
+    try:
+        yield
+    finally:
+        sys.stderr.close()
+        sys.stderr = stderr
 
 class ArgcompleteException(Exception):
     pass
