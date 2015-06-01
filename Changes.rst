@@ -1,3 +1,8 @@
+Version 0.8.9 (2015-06-01)
+--------------------------
+- Correct doc filename in setup.cfg (fixes bdist_rpm failure, Issue 111).
+- Make context managers exception-safe. Thanks to Mikołaj Siedlarek (pull request #110).
+
 Version 0.8.8 (2015-05-01)
 --------------------------
 - Build and upload universal wheel packages in release.
