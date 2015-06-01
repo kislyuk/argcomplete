@@ -13,6 +13,9 @@ before_install:
     - pip install --quiet coverage
 
 install:
+    - python setup.py build
+    - python setup.py sdist
+    - python setup.py bdist
     - python setup.py install
 
 script:
