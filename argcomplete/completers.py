@@ -3,8 +3,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, subprocess
-from .compat import USING_PYTHON2, str, sys_encoding
+import os
+import subprocess
+from .compat import str, sys_encoding
+
 
 def _wrapcall(*args, **kwargs):
     try:
@@ -13,6 +15,7 @@ def _wrapcall(*args, **kwargs):
         return _wrapcall_2_6(*args, **kwargs)
     except subprocess.CalledProcessError:
         return []
+
 
 def _wrapcall_2_6(*args, **kwargs):
     try:
@@ -31,7 +34,9 @@ def _wrapcall_2_6(*args, **kwargs):
     except subprocess.CalledProcessError:
         return []
 
+
 class ChoicesCompleter(object):
+
     def __init__(self, choices):
         self.choices = []
         for choice in choices:
@@ -44,14 +49,17 @@ class ChoicesCompleter(object):
     def __call__(self, prefix, **kwargs):
         return (c for c in self.choices if c.startswith(prefix))
 
+
 def EnvironCompleter(prefix, **kwargs):
     return (v for v in os.environ if v.startswith(prefix))
+
 
 class FilesCompleter(object):
     """
     File completer class, optionally takes a list of allowed extensions
     """
-    def __init__(self,allowednames=(),directories=True):
+
+    def __init__(self, allowednames=(), directories=True):
         # Fix if someone passes in a string instead of a list
         if isinstance(allowednames, (str, bytes)):
             allowednames = [allowednames]
@@ -64,19 +72,21 @@ class FilesCompleter(object):
         if self.allowednames:
             if self.directories:
                 files = _wrapcall(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
-                completion += [ f + "/" for f in files]
+                completion += [f + "/" for f in files]
             for x in self.allowednames:
-                completion += _wrapcall(["bash", "-c", "compgen -A file -X '!*.{0}' -- '{p}'".format(x,p=prefix)])
+                completion += _wrapcall(["bash", "-c", "compgen -A file -X '!*.{0}' -- '{p}'".format(x, p=prefix)])
         else:
             completion += _wrapcall(["bash", "-c", "compgen -A file -- '{p}'".format(p=prefix)])
             anticomp = _wrapcall(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
-            completion = list( set(completion) - set(anticomp))
+            completion = list(set(completion) - set(anticomp))
 
             if self.directories:
                 completion += [f + "/" for f in anticomp]
         return completion
 
+
 class _FilteredFilesCompleter(object):
+
     def __init__(self, predicate):
         """
         Create the completer
@@ -95,7 +105,7 @@ class _FilteredFilesCompleter(object):
         try:
             names = os.listdir(target_dir or ".")
         except:
-            return # empty iterator
+            return  # empty iterator
         incomplete_part = os.path.basename(prefix)
         # Iterate on target_dir entries and filter on given predicate
         for name in names:
@@ -106,6 +116,8 @@ class _FilteredFilesCompleter(object):
                 continue
             yield candidate + "/" if os.path.isdir(candidate) else candidate
 
+
 class DirectoriesCompleter(_FilteredFilesCompleter):
+
     def __init__(self):
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
