@@ -1,3 +1,7 @@
+Version 0.9.0 (2015-07-03)
+--------------------------
+- Fix always_complete_options=False support (#115).
+
 Version 0.8.9 (2015-06-01)
 --------------------------
 - Correct doc filename in setup.cfg (fixes bdist_rpm failure, Issue 111).
