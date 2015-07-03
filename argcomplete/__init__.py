@@ -125,6 +125,7 @@ class CompletionFinder(object):
             validator = default_validator
         self.validator = validator
         self.completing = False
+        self._display_completions = {}
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None):
@@ -233,7 +234,6 @@ class CompletionFinder(object):
         self.completing = False
 
         # key: complete word, value: description.
-        self._display_completions = {}
 
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
         completions = self.filter_completions(completions)
@@ -300,6 +300,103 @@ class CompletionFinder(object):
 
         return self.active_parsers
 
+    def _get_subparser_completions(self, parser, cword_prefix):
+        def filter_aliases(metavar, dest, prefix):
+            if not metavar:
+                return dest if dest and dest.startswith(prefix) else ""
+
+            # metavar combines dest and aliases with ",".
+            a = metavar.replace(",", "").split()
+            return " ".join(x for x in a if x.startswith(prefix))
+
+        for action in parser._get_subactions():
+            subcmd_with_aliases = filter_aliases(action.metavar, action.dest, cword_prefix)
+            if subcmd_with_aliases:
+                self._display_completions[subcmd_with_aliases] = action.help
+
+        completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
+        return completions
+
+    def _get_option_completions(self, parser, cword_prefix):
+        self._display_completions.update(
+            [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]
+             for action in parser._actions
+             if action.option_strings])
+
+        option_completions = []
+        for action in parser._actions:
+            if not isinstance(action, argparse._SubParsersAction):
+                for option in action.option_strings:
+                    if ensure_str(option).startswith(cword_prefix):
+                        option_completions.append(ensure_str(option))
+        return option_completions
+
+    def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
+        debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
+
+        # Only run completers if current word does not start with - (is not an optional)
+        if len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars:
+            return completions
+
+        for active_action in parser.active_actions:
+            if not active_action.option_strings:  # action is a positional
+                if action_is_satisfied(active_action) and not action_is_open(active_action):
+                    debug("Skipping", active_action)
+                    continue
+
+            debug("Activating completion for", active_action, active_action._orig_class)
+            # completer = getattr(active_action, "completer", DefaultCompleter())
+            completer = getattr(active_action, "completer", None)
+
+            if completer is None and active_action.choices is not None:
+                if not isinstance(active_action, argparse._SubParsersAction):
+                    completer = completers.ChoicesCompleter(active_action.choices)
+
+            if completer:
+                if len(active_action.option_strings) > 0:  # only for optionals
+                    if not action_is_satisfied(active_action):
+                        # This means the current action will fail to parse if the word under the cursor is not given
+                        # to it, so give it exclusive control over completions (flush previous completions)
+                        debug("Resetting completions because", active_action, "is unsatisfied")
+                        self._display_completions = {}
+                        completions = []
+                if callable(completer):
+                    completions_from_callable = [c for c in completer(
+                        prefix=cword_prefix, action=active_action, parsed_args=parsed_args)
+                        if self.validator(c, cword_prefix)]
+
+                    if completions_from_callable:
+                        completions += completions_from_callable
+                        if isinstance(completer, completers.ChoicesCompleter):
+                            self._display_completions.update(
+                                [[x, active_action.help] for x in completions_from_callable])
+                        else:
+                            self._display_completions.update(
+                                [[x, ""] for x in completions_from_callable])
+                else:
+                    debug("Completer is not callable, trying the readline completer protocol instead")
+                    for i in range(9999):
+                        next_completion = completer.complete(cword_prefix, i)
+                        if next_completion is None:
+                            break
+                        if self.validator(next_completion, cword_prefix):
+                            self._display_completions.update({next_completion: ""})
+                            completions.append(next_completion)
+                debug("Completions:", completions)
+            elif not isinstance(active_action, argparse._SubParsersAction):
+                debug("Completer not available, falling back")
+                try:
+                    # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
+                    bashcomp_cmd = ["bash", "-c", "compgen -A file -- '{p}'".format(p=cword_prefix)]
+                    comp = subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
+                    if comp:
+                        self._display_completions.update([[x, ""] for x in comp])
+                        completions += comp
+                except subprocess.CalledProcessError:
+                    pass
+
+        return completions
+
     def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
         """
         Visits the active parsers and their actions, executes their completers or introspects them to collect their
@@ -307,118 +404,24 @@ class CompletionFinder(object):
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        def get_subparser_completions(parser, cword_prefix):
-            def filter_aliases(metavar, dest, prefix):
-                if not metavar:
-                    return dest if dest and dest.startswith(prefix) else ""
-
-                # metavar combines dest and aliases with ",".
-                a = metavar.replace(",", "").split()
-                return " ".join(x for x in a if x.startswith(prefix))
-
-            for action in parser._get_subactions():
-                subcmd_with_aliases = filter_aliases(action.metavar, action.dest, cword_prefix)
-                if subcmd_with_aliases:
-                    self._display_completions[subcmd_with_aliases] = action.help
-
-            completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
-            return completions
-
-        def get_option_completions(parser, cword_prefix):
-            self._display_completions.update(
-                [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]
-                 for action in parser._actions
-                 if action.option_strings])
-
-            return [ensure_str(option) for action in parser._actions
-                    if not isinstance(action, argparse._SubParsersAction)
-                    for option in action.option_strings
-                    if ensure_str(option).startswith(cword_prefix)]
-
-        def complete_active_option(parser, next_positional, cword_prefix, parsed_args, completions):
-            debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
-
-            # Only run completers if current word does not start with - (is not an optional)
-            if len(cword_prefix) == 0 or cword_prefix[0] not in parser.prefix_chars:
-                for active_action in parser.active_actions:
-                    if not active_action.option_strings:  # action is a positional
-                        if action_is_satisfied(active_action) and not action_is_open(active_action):
-                            debug("Skipping", active_action)
-                            continue
-
-                    debug("Activating completion for", active_action, active_action._orig_class)
-                    # completer = getattr(active_action, "completer", DefaultCompleter())
-                    completer = getattr(active_action, "completer", None)
-
-                    if completer is None and active_action.choices is not None:
-                        if not isinstance(active_action, argparse._SubParsersAction):
-                            completer = completers.ChoicesCompleter(active_action.choices)
-
-                    if completer:
-                        if len(active_action.option_strings) > 0:  # only for optionals
-                            if not action_is_satisfied(active_action):
-                                # This means the current action will fail to parse if the word under the cursor is not given
-                                # to it, so give it exclusive control over completions (flush previous completions)
-                                debug("Resetting completions because", active_action, "is unsatisfied")
-                                self._display_completions = {}
-                                completions = []
-                        if callable(completer):
-                            completions_from_callable = [c for c in completer(
-                                prefix=cword_prefix, action=active_action, parsed_args=parsed_args)
-                                if self.validator(c, cword_prefix)]
-
-                            if completions_from_callable:
-                                completions += completions_from_callable
-                                if isinstance(completer, completers.ChoicesCompleter):
-                                    self._display_completions.update(
-                                        [[x, active_action.help] for x in completions_from_callable])
-                                else:
-                                    self._display_completions.update(
-                                        [[x, ""] for x in completions_from_callable])
-                        else:
-                            debug("Completer is not callable, trying the readline completer protocol instead")
-                            for i in range(9999):
-                                next_completion = completer.complete(cword_prefix, i)
-                                if next_completion is None:
-                                    break
-                                if self.validator(next_completion, cword_prefix):
-                                    self._display_completions.update({next_completion: ""})
-                                    completions.append(next_completion)
-                        debug("Completions:", completions)
-                    elif not isinstance(active_action, argparse._SubParsersAction):
-                        debug("Completer not available, falling back")
-                        try:
-                            # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                            bashcomp_cmd = ["bash", "-c", "compgen -A file -- '{p}'".format(p=cword_prefix)]
-                            comp = subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
-                            if comp:
-                                self._display_completions.update([[x, ""] for x in comp])
-                                completions += comp
-                        except subprocess.CalledProcessError:
-                            pass
-
-            return completions
-
         completions = []
 
         debug("all active parsers:", active_parsers)
         active_parser = active_parsers[-1]
         debug("active_parser:", active_parser)
-        completions += get_option_completions(active_parser, cword_prefix)
+        if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
+            completions += self._get_option_completions(active_parser, cword_prefix)
         debug("optional options:", completions)
 
         next_positional = self._get_next_positional()
         debug("next_positional:", next_positional)
 
         if isinstance(next_positional, argparse._SubParsersAction):
-            completions += get_subparser_completions(next_positional, cword_prefix)
+            completions += self._get_subparser_completions(next_positional, cword_prefix)
 
-        completions = complete_active_option(active_parser, next_positional,
-                                             cword_prefix, parsed_args,
-                                             completions)
+        completions = self._complete_active_option(active_parser, next_positional, cword_prefix, parsed_args,
+                                                   completions)
         debug("active options:", completions)
-
-        self._display_completions.pop("", None)
         debug("display completions:", self._display_completions)
 
         return completions
@@ -573,10 +576,7 @@ class CompletionFinder(object):
             readline.set_completion_display_matches_hook(display_completions)
 
         """
-        if hasattr(self, "_display_completions"):
-            return self._display_completions
-
-        return {}
+        return self._display_completions
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
