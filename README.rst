@@ -253,6 +253,7 @@ Links
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
 * `Documentation (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
 * `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
+* `Change log <https://github.com/kislyuk/argcomplete/blob/master/Changes.rst>`_
 
 Bugs
 ~~~~
