@@ -117,18 +117,20 @@ class CompletionFinder(object):
     directly (it's a convenience instance of this class). It has the same signature as
     :meth:`CompletionFinder.__call__()`.
     """
-    def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None):
+    def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
+                 print_suppressed=False):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
         self.exclude = exclude
         if validator is None:
             validator = default_validator
         self.validator = validator
+        self.print_suppressed = print_suppressed
         self.completing = False
         self._display_completions = {}
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None, validator=None):
+                 exclude=None, validator=None, print_suppressed=False):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
@@ -146,6 +148,9 @@ class CompletionFinder(object):
             Function to filter all completions through before returning (called with two string arguments, completion
             and prefix; return value is evaluated as a boolean)
         :type validator: callable
+        :param print_suppressed:
+            Whether or not to autocomplete options that have the ``help=argparse.SUPPRESS`` keyword argument set.
+        :type print_suppressed: boolean
 
         .. note::
             If you are not subclassing CompletionFinder to override its behaviors,
@@ -157,7 +162,7 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
         execution is otherwise desirable.
         """
-        self.__init__(argument_parser, always_complete_options, exclude, validator)
+        self.__init__(argument_parser, always_complete_options, exclude, validator, print_suppressed)
 
         if "_ARGCOMPLETE" not in os.environ:
             # not an argument completion invocation
@@ -325,6 +330,8 @@ class CompletionFinder(object):
 
         option_completions = []
         for action in parser._actions:
+            if action.help == argparse.SUPPRESS and not self.print_suppressed:
+                continue
             if not isinstance(action, argparse._SubParsersAction):
                 for option in action.option_strings:
                     if ensure_str(option).startswith(cword_prefix):

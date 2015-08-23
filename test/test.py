@@ -10,7 +10,7 @@ from tempfile import TemporaryFile, mkdtemp
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, SUPPRESS
 from argcomplete import (
     autocomplete,
     CompletionFinder,
@@ -123,6 +123,29 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_suppress_args(self):
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("--foo")
+            parser.add_argument("--bar", help=SUPPRESS)
+            return parser
+
+        expected_outputs = (
+            ("prog ", ["--foo", "-h", "--help"]),
+            ("prog --b", [""])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+        expected_outputs = (
+            ("prog ", ["--foo", "--bar", "-h", "--help"]),
+            ("prog --b", ["--bar "])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, print_suppressed=True)), set(output))
 
     def test_action_activation(self):
         def make_parser():
