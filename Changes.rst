@@ -1,3 +1,9 @@
+Version 1.0.0 (2015-08-22)
+--------------------------
+- Don't print args with suppressed help by default; add
+  ``argcomplete.autocomplete(print_suppressed=True)`` to control this
+  behavior (#113).
+
 Version 0.9.0 (2015-07-03)
 --------------------------
 - Fix always_complete_options=False support (#115).
