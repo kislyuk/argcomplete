@@ -10,7 +10,7 @@ python:
     - pypy3
 
 before_install:
-    - if [ "$TRAVIS_PYTHON_VERSION" == "2.6" ]; then pip --quiet install unittest2; fi
+    - if [ "$TRAVIS_PYTHON_VERSION" == 2.6 ]; then pip --quiet install unittest2; fi
     - pip --quiet install coverage
 
 install:
