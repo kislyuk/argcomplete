@@ -97,7 +97,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
             # (e.g. from a default)
             # argcomplete: we should walk through sub-commands.
             if argument_values is not SUPPRESS \
-                    or isinstance(action, _SubParsersAction):
+                    or issubclass(action.__class__, _SubParsersAction):
                 action(self, namespace, argument_values, option_string)
 
         # function to convert arg_strings into an optional action
