@@ -284,7 +284,7 @@ class CompletionFinder(object):
 
                         if not completer.completing:
                             self._orig_callable(parser, namespace, values, option_string=option_string)
-                        elif self._orig_class == argparse._SubParsersAction:
+                        elif issubclass(self._orig_class, argparse._SubParsersAction):
                             debug("orig class is a subparsers action: patching and running it")
                             patch(self._name_parser_map[values[0]])
                             self._orig_callable(parser, namespace, values, option_string=option_string)
@@ -332,7 +332,7 @@ class CompletionFinder(object):
         for action in parser._actions:
             if action.help == argparse.SUPPRESS and not self.print_suppressed:
                 continue
-            if not isinstance(action, argparse._SubParsersAction):
+            if not issubclass(action.__class__, argparse._SubParsersAction):
                 for option in action.option_strings:
                     if ensure_str(option).startswith(cword_prefix):
                         option_completions.append(ensure_str(option))
@@ -356,7 +356,7 @@ class CompletionFinder(object):
             completer = getattr(active_action, "completer", None)
 
             if completer is None and active_action.choices is not None:
-                if not isinstance(active_action, argparse._SubParsersAction):
+                if not issubclass(active_action.__class__, argparse._SubParsersAction):
                     completer = completers.ChoicesCompleter(active_action.choices)
 
             if completer:
@@ -390,7 +390,7 @@ class CompletionFinder(object):
                             self._display_completions.update({next_completion: ""})
                             completions.append(next_completion)
                 debug("Completions:", completions)
-            elif not isinstance(active_action, argparse._SubParsersAction):
+            elif not issubclass(active_action.__class__, argparse._SubParsersAction):
                 debug("Completer not available, falling back")
                 try:
                     # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
@@ -423,7 +423,7 @@ class CompletionFinder(object):
         next_positional = self._get_next_positional()
         debug("next_positional:", next_positional)
 
-        if isinstance(next_positional, argparse._SubParsersAction):
+        if issubclass(next_positional.__class__, argparse._SubParsersAction):
             completions += self._get_subparser_completions(next_positional, cword_prefix)
 
         completions = self._complete_active_option(active_parser, next_positional, cword_prefix, parsed_args,
