@@ -9,6 +9,12 @@ python:
     - pypy
     - pypy3
 
+matrix:
+  include:
+    - language: generic
+      python: 2.7
+      os: osx
+
 before_install:
     - if [ "$TRAVIS_PYTHON_VERSION" == 2.6 ]; then pip --quiet install unittest2; fi
     - pip --quiet install coverage
