@@ -214,6 +214,32 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_subparser_completers(self):
+        def c_depends_on_positional_arg1(prefix, parsed_args, **kwargs):
+            return [parsed_args.arg1]
+
+        def c_depends_on_optional_arg5(prefix, parsed_args, **kwargs):
+            return [parsed_args.arg5]
+
+        def make_parser():
+            parser = ArgumentParser()
+            subparsers = parser.add_subparsers()
+            subparser = subparsers.add_parser('subcommand')
+            subparser.add_argument('arg1')
+            subparser.add_argument('arg2').completer = c_depends_on_positional_arg1
+            subparser.add_argument('arg3').completer = c_depends_on_optional_arg5
+            subparser.add_argument('--arg4', required=True)
+            subparser.add_argument('--arg5')
+            return parser
+
+        expected_outputs = (
+            ("prog subcommand val1 ", ["val1", "--arg4", "--arg5", "-h", "--help"]),
+            ("prog subcommand val1 val2 --arg5 val5 ", ["val5", "--arg4", "--arg5", "-h", "--help"]),
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_file_completion(self):
         # setup and teardown should probably be in class
         from argcomplete.completers import FilesCompleter
