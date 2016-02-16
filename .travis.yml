@@ -1,12 +1,12 @@
 language: python
 python:
-    - 2.7
-    - 3.2
-    - 3.3
-    - 3.4
-    - 3.5
-    - pypy
-    - pypy3
+  - 2.7
+  - 3.2
+  - 3.3
+  - 3.4
+  - 3.5
+  - pypy
+  - pypy3
 
 matrix:
   include:
@@ -15,18 +15,20 @@ matrix:
       os: osx
 
 before_install:
-    - if [ "$TRAVIS_PYTHON_VERSION" == 2.6 ]; then pip --quiet install unittest2; fi
-    - pip --quiet install coverage
+  - if [ "$TRAVIS_PYTHON_VERSION" == 2.6 ]; then pip --quiet install unittest2; fi
+  - pip --quiet install coverage
 
 install:
-    - python setup.py build
-    - python setup.py sdist
-    - python setup.py bdist
-    - python setup.py bdist_rpm
-    - python setup.py install
+  - pip install flake8
+  - python setup.py build
+  - python setup.py sdist
+  - python setup.py bdist
+  - python setup.py bdist_rpm
+  - python setup.py install
 
 script:
-    - make test
+  - flake8 argcomplete --ignore=E501,E302,E401
+  - make test
 #    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
 #    - coverage report --show-missing
 

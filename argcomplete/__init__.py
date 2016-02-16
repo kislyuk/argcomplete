@@ -15,7 +15,6 @@ _DEBUG = "_ARC_DEBUG" in os.environ
 
 debug_stream = sys.stderr
 
-
 def debug(*args):
     if _DEBUG:
         print(file=debug_stream, *args)
@@ -34,7 +33,6 @@ safe_actions = (argparse._StoreAction,
 from . import completers
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open
 
-
 @contextlib.contextmanager
 def mute_stdout():
     stdout = sys.stdout
@@ -43,7 +41,6 @@ def mute_stdout():
         yield
     finally:
         sys.stdout = stdout
-
 
 @contextlib.contextmanager
 def mute_stderr():
@@ -55,10 +52,8 @@ def mute_stderr():
         sys.stderr.close()
         sys.stderr = stderr
 
-
 class ArgcompleteException(Exception):
     pass
-
 
 def split_line(line, point=None):
     if point is None:
@@ -106,10 +101,8 @@ def split_line(line, point=None):
             else:
                 raise ArgcompleteException("Unexpected internal state. Please report this bug at https://github.com/kislyuk/argcomplete/issues.")
 
-
 def default_validator(completion, prefix):
     return completion.startswith(prefix)
-
 
 class CompletionFinder(object):
     """
@@ -502,15 +495,15 @@ class CompletionFinder(object):
             # Bash mangles completions which contain colons if COMP_WORDBREAKS contains a colon.
             # This workaround has the same effect as __ltrim_colon_completions in bash_completion.
             if ":" in comp_wordbreaks and first_colon_pos:
-                completions = [c[first_colon_pos+1:] for c in completions]
+                completions = [c[first_colon_pos + 1:] for c in completions]
 
             for wordbreak_char in comp_wordbreaks:
-                completions = [c.replace(wordbreak_char, "\\"+wordbreak_char) for c in completions]
+                completions = [c.replace(wordbreak_char, "\\" + wordbreak_char) for c in completions]
         else:
             if cword_prequote == '"':
                 for char in "`$!":
-                    completions = [c.replace(char, "\\"+char) for c in completions]
-            completions = [cword_prequote+c.replace(cword_prequote, "\\"+cword_prequote) for c in completions]
+                    completions = [c.replace(char, "\\" + char) for c in completions]
+            completions = [cword_prequote + c.replace(cword_prequote, "\\" + cword_prequote) for c in completions]
 
         # Note: similar functionality in bash is turned off by supplying the "-o nospace" option to complete.
         # We can't use that functionality because bash is not smart enough to recognize continuation characters (/) for
@@ -587,7 +580,6 @@ class CompletionFinder(object):
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
-
 
 def warn(*args):
     """
