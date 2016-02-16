@@ -27,7 +27,7 @@ install:
   - python setup.py install
 
 script:
-  - flake8 argcomplete --ignore=E501,E302,E401,E402,W503
+  - flake8 argcomplete --exclude=compat.py --ignore=E501,E302,E401,E402,W503
   - make test
 #    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
 #    - coverage report --show-missing
