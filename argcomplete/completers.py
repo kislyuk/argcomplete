@@ -10,7 +10,7 @@ from .compat import str, sys_encoding
 
 def _wrapcall(*args, **kwargs):
     try:
-        return subprocess.check_output(*args, **kwargs).decode().splitlines()
+        return subprocess.check_output(*args, **kwargs).decode(sys_encoding).splitlines()
     except AttributeError:
         return _wrapcall_2_6(*args, **kwargs)
     except subprocess.CalledProcessError:

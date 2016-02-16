@@ -219,12 +219,12 @@ class TestArgcomplete(unittest.TestCase):
         from argcomplete.completers import FilesCompleter
         with TempDir(prefix="test_dir_fc", dir="."):
             fc = FilesCompleter()
-            os.makedirs(os.path.join("abcdef", "klm"))
-            self.assertEqual(fc("a"), ["abcdef/"])
+            os.makedirs(os.path.join("abcdefж", "klm"))
+            self.assertEqual(fc("a"), ["abcdefж/"])
             os.makedirs(os.path.join("abcaha", "klm"))
             with open("abcxyz", "w") as fp:
                 fp.write("test")
-            self.assertEqual(set(fc("a")), set(["abcdef/", "abcaha/", "abcxyz"]))
+            self.assertEqual(set(fc("a")), set(["abcdefж/", "abcaha/", "abcxyz"]))
 
     def test_directory_completion(self):
         from argcomplete.completers import DirectoriesCompleter
