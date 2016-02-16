@@ -7,36 +7,13 @@ import os
 import subprocess
 from .compat import str, sys_encoding
 
-
-def _wrapcall(*args, **kwargs):
+def _call(*args, **kwargs):
     try:
         return subprocess.check_output(*args, **kwargs).decode(sys_encoding).splitlines()
-    except AttributeError:
-        return _wrapcall_2_6(*args, **kwargs)
     except subprocess.CalledProcessError:
         return []
-
-
-def _wrapcall_2_6(*args, **kwargs):
-    try:
-        # no check_output in 2.6
-        if "stdout" in kwargs:
-            raise ValueError("stdout argument not allowed, it will be overridden.")
-        process = subprocess.Popen(stdout=subprocess.PIPE, *args, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = args[0]
-            raise subprocess.CalledProcessError(retcode, cmd)
-        return output.decode().splitlines()
-    except subprocess.CalledProcessError:
-        return []
-
 
 class ChoicesCompleter(object):
-
     def __init__(self, choices):
         self.choices = []
         for choice in choices:
@@ -49,10 +26,8 @@ class ChoicesCompleter(object):
     def __call__(self, prefix, **kwargs):
         return (c for c in self.choices if c.startswith(prefix))
 
-
 def EnvironCompleter(prefix, **kwargs):
     return (v for v in os.environ if v.startswith(prefix))
-
 
 class FilesCompleter(object):
     """
@@ -71,22 +46,20 @@ class FilesCompleter(object):
         completion = []
         if self.allowednames:
             if self.directories:
-                files = _wrapcall(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
+                files = _call(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
                 completion += [f + "/" for f in files]
             for x in self.allowednames:
-                completion += _wrapcall(["bash", "-c", "compgen -A file -X '!*.{0}' -- '{p}'".format(x, p=prefix)])
+                completion += _call(["bash", "-c", "compgen -A file -X '!*.{0}' -- '{p}'".format(x, p=prefix)])
         else:
-            completion += _wrapcall(["bash", "-c", "compgen -A file -- '{p}'".format(p=prefix)])
-            anticomp = _wrapcall(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
+            completion += _call(["bash", "-c", "compgen -A file -- '{p}'".format(p=prefix)])
+            anticomp = _call(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
             completion = list(set(completion) - set(anticomp))
 
             if self.directories:
                 completion += [f + "/" for f in anticomp]
         return completion
 
-
 class _FilteredFilesCompleter(object):
-
     def __init__(self, predicate):
         """
         Create the completer
@@ -116,8 +89,6 @@ class _FilteredFilesCompleter(object):
                 continue
             yield candidate + "/" if os.path.isdir(candidate) else candidate
 
-
 class DirectoriesCompleter(_FilteredFilesCompleter):
-
     def __init__(self):
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
