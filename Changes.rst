@@ -1,3 +1,10 @@
+Version 1.1.0 (2016-02-21)
+--------------------------
+- Recognize subclasses of argparse._SubParsersAction. Thanks to Stephen Koo (#118).
+- Support parsed_args in custom completers with missing args. Thanks to Dan Kilman (#124).
+- Non-ASCII support in FilesCompleter.
+- Automatically enable FilesCompleter for argparse.FileType arguments.
+
 Version 1.0.0 (2015-08-22)
 --------------------------
 - Don't print args with suppressed help by default; add
