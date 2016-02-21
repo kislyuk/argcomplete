@@ -3,13 +3,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import argparse
-import contextlib
-import os
-import subprocess
-import sys
+import os, sys, argparse, contextlib, subprocess
 from . import my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
+from .completers import FilesCompleter
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -348,9 +345,11 @@ class CompletionFinder(object):
             # completer = getattr(active_action, "completer", DefaultCompleter())
             completer = getattr(active_action, "completer", None)
 
-            if completer is None and active_action.choices is not None:
-                if not isinstance(active_action, argparse._SubParsersAction):
+            if completer is None:
+                if active_action.choices is not None and not isinstance(active_action, argparse._SubParsersAction):
                     completer = completers.ChoicesCompleter(active_action.choices)
+                elif isinstance(active_action.type, argparse.FileType):
+                    completer = FilesCompleter()
 
             if completer:
                 if len(active_action.option_strings) > 0:  # only for optionals

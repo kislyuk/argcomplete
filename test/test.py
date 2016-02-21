@@ -3,9 +3,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
-import shutil
-import sys
+import os, sys, shutil, argparse
 from tempfile import TemporaryFile, mkdtemp
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -16,6 +14,7 @@ from argcomplete import (
     CompletionFinder,
     split_line,
 )
+from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 
 if sys.version_info >= (2, 7):
@@ -242,7 +241,6 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_file_completion(self):
         # setup and teardown should probably be in class
-        from argcomplete.completers import FilesCompleter
         with TempDir(prefix="test_dir_fc", dir="."):
             fc = FilesCompleter()
             os.makedirs(os.path.join("abcdefж", "klm"))
@@ -252,8 +250,29 @@ class TestArgcomplete(unittest.TestCase):
                 fp.write("test")
             self.assertEqual(set(fc("a")), set(["abcdefж/", "abcaha/", "abcxyz"]))
 
+    def test_filescompleter_filetype_integration(self):
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument('--r', type=argparse.FileType('r'))
+            parser.add_argument('--w', type=argparse.FileType('w'))
+            return parser
+
+        with TempDir(prefix="test_dir_fc2", dir="."):
+            os.makedirs(os.path.join("abcdefж", "klm"))
+            os.makedirs(os.path.join("abcaha", "klm"))
+            with open("abcxyz", "w") as fh, open("abcdefж/klm/test", "w") as fh2:
+                fh.write("test")
+                fh2.write("test")
+
+            expected_outputs = (
+                ("prog subcommand --r ", ["abcxyz", "abcdefж/", "abcaha/"]),
+                ("prog subcommand --w abcdefж/klm/t", ["abcdefж/klm/test "]),
+            )
+
+            for cmd, output in expected_outputs:
+                self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_directory_completion(self):
-        from argcomplete.completers import DirectoriesCompleter
         completer = DirectoriesCompleter()
         c = lambda prefix: set(completer(prefix))
         with TempDir(prefix="test_dir", dir="."):
