@@ -28,6 +28,7 @@ def action_is_open(action):
 class IntrospectiveArgumentParser(ArgumentParser):
     ''' The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
+    Lines that contain the string "Disabled by argcomplete" have been commented out.
     '''
 
     def _parse_known_args(self, arg_strings, namespace):
@@ -206,7 +207,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     self.active_actions.append(action)  # Added by argcomplete
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
-                action.num_consumed_args = len(args)
+                action.num_consumed_args = len(args)   # Added by argcomplete
                 take_action(action, args)
 
             # slice off the Positionals that we just parsed and return the
@@ -261,14 +262,16 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
         if positionals:
             self.active_actions.append(positionals[0])  # Added by argcomplete
-            self.error(_('too few arguments'))
+            # self.error(_('too few arguments'))  # Disabled by argcomplete
 
-        # make sure all required actions were present
-        for action in self._actions:
-            if action.required:
-                if action not in seen_actions:
-                    name = _get_action_name(action)
-                    self.error(_('argument %s is required') % name)
+        # Begin disabled by arg complete
+        # # make sure all required actions were present
+        # for action in self._actions:
+        #     if action.required:
+        #         if action not in seen_actions:
+        #             name = _get_action_name(action)
+        #             self.error(_('argument %s is required') % name)
+        # End disabled by argcomplete
 
         # make sure all required groups had one option present
         for group in self._mutually_exclusive_groups:
