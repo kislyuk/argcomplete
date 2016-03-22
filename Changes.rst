@@ -1,3 +1,7 @@
+Version 1.1.1 (2016-03-22)
+--------------------------
+- Use FilesCompleter as default completer fallback (#120).
+
 Version 1.1.0 (2016-02-21)
 --------------------------
 - Recognize subclasses of argparse._SubParsersAction. Thanks to Stephen Koo (#118).
