@@ -348,7 +348,7 @@ class CompletionFinder(object):
             if completer is None:
                 if active_action.choices is not None and not isinstance(active_action, argparse._SubParsersAction):
                     completer = completers.ChoicesCompleter(active_action.choices)
-                elif isinstance(active_action.type, argparse.FileType):
+                elif not isinstance(active_action, argparse._SubParsersAction):
                     completer = FilesCompleter()
 
             if completer:
@@ -382,18 +382,6 @@ class CompletionFinder(object):
                             self._display_completions.update({next_completion: ""})
                             completions.append(next_completion)
                 debug("Completions:", completions)
-            elif not isinstance(active_action, argparse._SubParsersAction):
-                debug("Completer not available, falling back")
-                try:
-                    # TODO: what happens if completions contain newlines? How do I make compgen use IFS?
-                    bashcomp_cmd = ["bash", "-c", "compgen -A file -- '{p}'".format(p=cword_prefix)]
-                    comp = subprocess.check_output(bashcomp_cmd).decode(sys_encoding).splitlines()
-                    if comp:
-                        self._display_completions.update([[x, ""] for x in comp])
-                        completions += comp
-                except subprocess.CalledProcessError:
-                    pass
-
         return completions
 
     def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
