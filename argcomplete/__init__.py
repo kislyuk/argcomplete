@@ -108,7 +108,7 @@ class CompletionFinder(object):
     :meth:`CompletionFinder.__call__()`.
     """
     def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
-                 print_suppressed=False):
+                 print_suppressed=False, default_completer=FilesCompleter()):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
         self.exclude = exclude
@@ -118,6 +118,7 @@ class CompletionFinder(object):
         self.print_suppressed = print_suppressed
         self.completing = False
         self._display_completions = {}
+        self.default_completer = default_completer
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None, print_suppressed=False):
@@ -349,7 +350,7 @@ class CompletionFinder(object):
                 if active_action.choices is not None and not isinstance(active_action, argparse._SubParsersAction):
                     completer = completers.ChoicesCompleter(active_action.choices)
                 elif not isinstance(active_action, argparse._SubParsersAction):
-                    completer = FilesCompleter()
+                    completer = self.default_completer
 
             if completer:
                 if len(active_action.option_strings) > 0:  # only for optionals
