@@ -26,6 +26,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],
+    test_suite='test',
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Developers',
