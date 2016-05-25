@@ -1,3 +1,9 @@
+Version 1.2.0 (2016-05-25)
+--------------------------
+- Fix propagation of partially parsed subparser namespace into parent parser namespace upon subparser failure due to
+  partial args. This allows completers to access partial parse results for subparser optionals in parsed_args (#114).
+- The default completer can now be specified when manually instantiating CompletionFinder. Thanks to @avylove (#130).
+
 Version 1.1.1 (2016-03-22)
 --------------------------
 - Use FilesCompleter as default completer fallback (#120).
