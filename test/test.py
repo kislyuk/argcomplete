@@ -227,13 +227,14 @@ class TestArgcomplete(unittest.TestCase):
             subparser.add_argument('arg1')
             subparser.add_argument('arg2').completer = c_depends_on_positional_arg1
             subparser.add_argument('arg3').completer = c_depends_on_optional_arg5
-            subparser.add_argument('--arg4', required=True)
+            subparser.add_argument('--arg4').completer = c_depends_on_optional_arg5
             subparser.add_argument('--arg5')
             return parser
 
         expected_outputs = (
             ("prog subcommand val1 ", ["val1", "--arg4", "--arg5", "-h", "--help"]),
             ("prog subcommand val1 val2 --arg5 val5 ", ["val5", "--arg4", "--arg5", "-h", "--help"]),
+            ("prog subcommand val1 val2 --arg5 val6 --arg4 v", ["val6 "]),
         )
 
         for cmd, output in expected_outputs:

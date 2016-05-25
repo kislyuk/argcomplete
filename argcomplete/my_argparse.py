@@ -32,6 +32,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
     '''
 
     def _parse_known_args(self, arg_strings, namespace):
+        self._argcomplete_namespace = namespace
         self.active_actions = []  # Added by argcomplete
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
@@ -96,10 +97,21 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
             # take the action if we didn't receive a SUPPRESS value
             # (e.g. from a default)
-            # argcomplete: we should walk through sub-commands.
             if argument_values is not SUPPRESS \
                     or isinstance(action, _SubParsersAction):
-                action(self, namespace, argument_values, option_string)
+                try:
+                    action(self, namespace, argument_values, option_string)
+                except:
+                    # Begin added by argcomplete
+                    # When a subparser action is taken and fails due to incomplete arguments, it does not merge the
+                    # contents of its parsed namespace into the parent namespace. Do that here to allow completers to
+                    # access the partially parsed arguments for the subparser.
+                    if isinstance(action, _SubParsersAction):
+                        subnamespace = action._name_parser_map[argument_values[0]]._argcomplete_namespace
+                        for key, value in vars(subnamespace).items():
+                            setattr(namespace, key, value)
+                    # End added by argcomplete
+                    raise
 
         # function to convert arg_strings into an optional action
         def consume_optional(start_index):
