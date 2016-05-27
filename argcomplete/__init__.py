@@ -4,9 +4,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os, sys, argparse, contextlib
-from . import my_shlex as shlex
+from . import completers, my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 from .completers import FilesCompleter
+from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -26,9 +27,6 @@ safe_actions = (argparse._StoreAction,
                 argparse._AppendAction,
                 argparse._AppendConstAction,
                 argparse._CountAction)
-
-from . import completers
-from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open
 
 @contextlib.contextmanager
 def mute_stdout():

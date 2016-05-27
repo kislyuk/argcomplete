@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 install_requires = []
 
 try:
-    import argparse
+    import argparse  # noqa
 except ImportError:
     install_requires.append('argparse')
 

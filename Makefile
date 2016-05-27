@@ -1,16 +1,9 @@
-# TODO: pyflakes?
-test:
-	@echo "\n - Running pylint on all code"
-	-pylint -E argcomplete
-	@echo "\n - Running unittests"
-	./test/test.py -v
+test: lint
+	python setup.py test -v
 
-flake8:
-	@echo "\n - Running flake8 on all python code"
-	flake8 . --max-line-length 159 --exclude=conf.py,describe_github_user.py,my_shlex.py,.tox,dist,docs,build,.git --show-source --statistics
-
-test3:
-	python3 ./test/test.py -v
+lint:
+	python setup.py flake8 -v
+#	flake8 . --max-line-length 159 --exclude=conf.py,describe_github_user.py,my_shlex.py,.tox,dist,docs,build,.git --show-source --statistics
 
 release: docs
 	python setup.py sdist bdist_wheel upload -s -i D2069255
@@ -21,4 +14,4 @@ docs:
 install:
 	./setup.py install
 
-.PHONY: test release docs
+.PHONY: test lint release docs
