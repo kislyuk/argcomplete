@@ -8,7 +8,7 @@ sys_encoding = locale.getpreferredencoding()
 USING_PYTHON2 = True if sys.version_info < (3, 0) else False
 
 if USING_PYTHON2:
-    str = unicode
+    str = unicode  # noqa
 else:
     str = str
 

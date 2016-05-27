@@ -19,7 +19,7 @@ before_install:
   - pip --quiet install coverage
 
 install:
-  - pip install flake8==2.5.4
+  - pip install flake8
   - python setup.py build
   - python setup.py sdist
   - python setup.py bdist
@@ -27,10 +27,8 @@ install:
   - python setup.py install
 
 script:
-  - flake8 argcomplete --exclude=compat.py --ignore=E501,E302,E401,E402,W503
-  - make lint test
-#    - coverage run --omit='*/site-packages/*,*/distutils/*' ./test/test.py
-#    - coverage report --show-missing
+  - make lint
+  - coverage run --source=argcomplete ./test/test.py
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
