@@ -265,6 +265,8 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
 
 .. image:: https://travis-ci.org/kislyuk/argcomplete.png
         :target: https://travis-ci.org/kislyuk/argcomplete
+.. image:: https://codecov.io/github/kislyuk/argcomplete/coverage.svg?branch=master
+        :target: https://codecov.io/github/kislyuk/argcomplete?branch=master
 .. image:: https://img.shields.io/pypi/v/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://img.shields.io/pypi/dm/argcomplete.svg
