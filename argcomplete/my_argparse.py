@@ -11,18 +11,33 @@ def action_is_satisfied(action):
     '''
     num_consumed_args = getattr(action, 'num_consumed_args', 0)
 
-    if action.nargs == ONE_OR_MORE and num_consumed_args < 1:
+    if action.nargs in [OPTIONAL, ZERO_OR_MORE, REMAINDER]:
+        return True
+    if action.nargs == ONE_OR_MORE:
+        return num_consumed_args >= 1
+    if action.nargs == PARSER:
+        # Not sure what this should be, but this previously always returned False
+        # so at least this won't break anything that wasn't already broken.
         return False
-    elif action.nargs is None:
+    if action.nargs is None:
         return num_consumed_args == 1
-    else:
-        return num_consumed_args == action.nargs
+
+    assert isinstance(action.nargs, int), 'failed to handle a possible nargs value: %r' % action.nargs
+    return num_consumed_args == action.nargs
 
 
 def action_is_open(action):
     ''' Returns True if action could consume more arguments (i.e., its pattern is open).
     '''
-    return action.nargs in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]
+    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+
+    if action.nargs in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]:
+        return True
+    if action.nargs == OPTIONAL or action.nargs is None:
+        return num_consumed_args == 0
+
+    assert isinstance(action.nargs, int), 'failed to handle a possible nargs value: %r' % action.nargs
+    return num_consumed_args < action.nargs
 
 
 class IntrospectiveArgumentParser(ArgumentParser):
@@ -182,11 +197,9 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     # Begin added by argcomplete
                     # If the pattern is not open (e.g. no + at the end), remove the action from active actions (since
                     # it wouldn't be able to consume any more args)
+                    action.num_consumed_args = len(args)
                     if not action_is_open(action):
                         self.active_actions.remove(action)
-                    elif action.nargs == OPTIONAL and len(args) == 1:
-                        self.active_actions.remove(action)
-                    action.num_consumed_args = len(args)
                     # End added by argcomplete
 
                     action_tuples.append((action, args, option_string))
