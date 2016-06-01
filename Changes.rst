@@ -1,3 +1,7 @@
+Version 1.3.0 (2016-06-01)
+--------------------------
+- Correctly handle suggestions with custom nargs for optionals. Thanks to @evanunderscore (#131).
+
 Version 1.2.0 (2016-05-25)
 --------------------------
 - Fix propagation of partially parsed subparser namespace into parent parser namespace upon subparser failure due to
