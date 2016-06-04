@@ -7,7 +7,7 @@ import os, sys, argparse, contextlib
 from . import completers, my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 from .completers import FilesCompleter
-from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open
+from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -330,11 +330,21 @@ class CompletionFinder(object):
     def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
         debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
-        # Only run completers if current word does not start with - (is not an optional)
-        if len(cword_prefix) > 0 and cword_prefix[0] in parser.prefix_chars:
+        isoptional = cword_prefix and cword_prefix[0] in parser.prefix_chars
+        greedy_actions = [x for x in parser.active_actions if action_is_greedy(x, isoptional)]
+        if greedy_actions:
+            assert len(greedy_actions) == 1, "expect at most 1 greedy action"
+            # This means the action will fail to parse if the word under the cursor is not given
+            # to it, so give it exclusive control over completions (flush previous completions)
+            debug("Resetting completions because", greedy_actions[0], "must consume the next argument")
+            self._display_completions = {}
+            completions = []
+        elif isoptional:
+            # Only run completers if current word does not start with - (is not an optional)
             return completions
 
-        for active_action in parser.active_actions:
+        # Use the single greedy action (if there is one) or all active actions.
+        for active_action in greedy_actions or parser.active_actions:
             if not active_action.option_strings:  # action is a positional
                 if action_is_satisfied(active_action) and not action_is_open(active_action):
                     debug("Skipping", active_action)
@@ -351,13 +361,6 @@ class CompletionFinder(object):
                     completer = self.default_completer
 
             if completer:
-                if len(active_action.option_strings) > 0:  # only for optionals
-                    if not action_is_satisfied(active_action):
-                        # This means the current action will fail to parse if the word under the cursor is not given
-                        # to it, so give it exclusive control over completions (flush previous completions)
-                        debug("Resetting completions because", active_action, "is unsatisfied")
-                        self._display_completions = {}
-                        completions = []
                 if callable(completer):
                     completions_from_callable = [c for c in completer(
                         prefix=cword_prefix, action=active_action, parsed_args=parsed_args)

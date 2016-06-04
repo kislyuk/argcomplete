@@ -40,6 +40,20 @@ def action_is_open(action):
     return num_consumed_args < action.nargs
 
 
+def action_is_greedy(action, isoptional=False):
+    ''' Returns True if action will necessarily consume the next argument.
+    isoptional indicates whether the argument is an optional (starts with -).
+    '''
+    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+
+    if action.option_strings:
+        if not isoptional and not action_is_satisfied(action):
+            return True
+        return action.nargs == REMAINDER
+    else:
+        return action.nargs == REMAINDER and num_consumed_args >= 1
+
+
 class IntrospectiveArgumentParser(ArgumentParser):
     ''' The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
