@@ -474,9 +474,10 @@ class TestArgcomplete(unittest.TestCase):
             parser.add_argument("--bar", choices=["bar1", "bar2"], nargs="?")
             parser.add_argument("--baz", choices=["baz1", "baz2"], nargs="*")
             parser.add_argument("--qux", choices=["qux1", "qux2"], nargs="+")
+            parser.add_argument("--foobar", choices=["pos", "--opt"], nargs=argparse.REMAINDER)
             return parser
 
-        options = ["--foo", "--bar", "--baz", "--qux", "-h", "--help"]
+        options = ["--foo", "--bar", "--baz", "--qux", "--foobar", "-h", "--help"]
 
         expected_outputs = (
             ("prog ", options),
@@ -493,10 +494,40 @@ class TestArgcomplete(unittest.TestCase):
 
             ("prog --qux ", ["qux1", "qux2"]),
             ("prog --qux qux1 ", ["qux1", "qux2"] + options),
+
+            ("prog --foobar ", ["pos", "--opt"]),
+            ("prog --foobar pos ", ["pos", "--opt"]),
+            ("prog --foobar --", ["--opt "]),
+            ("prog --foobar --opt ", ["pos", "--opt"]),
         )
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_positional_remainder(self):
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("--foo", choices=["foo1", "foo2"])
+            parser.add_argument("remainder", choices=["pos", "--opt"], nargs=argparse.REMAINDER)
+            return parser
+
+        options = ["--foo", "-h", "--help"]
+
+        expected_outputs = (
+            ("prog ", ["pos", "--opt"] + options),
+            ("prog --foo foo1 ", ["pos", "--opt"] + options),
+            ("prog pos ", ["pos", "--opt"]),
+            ("prog -- ", ["pos", "--opt"]),
+            ("prog -- --opt ", ["pos", "--opt"])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_skipped_completer(self):
+        parser = ArgumentParser(add_help=False)
+        parser.add_argument("--foo", choices=["--bar"])
+        self.assertEqual(self.run_completer(parser, "prog --foo --"), ["--foo "])
 
 
 class TestArgcompleteREPL(unittest.TestCase):
