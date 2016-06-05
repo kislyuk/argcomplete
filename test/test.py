@@ -446,13 +446,13 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual("ttt", disp.get("--oh", ""))
         self.assertEqual("ccc", disp.get("--ch", ""))
 
-    @unittest.expectedFailure
     def test_nargs_one_or_more(self):
         def make_parser():
             parser = ArgumentParser()
             parser.add_argument("h1", choices=["c", "d"])
             parser.add_argument("var", choices=["bus", "car"], nargs="+")
             parser.add_argument("value", choices=["orange", "apple"])
+            parser.add_argument("end", choices=["end"])
             return parser
 
         expected_outputs = (
@@ -461,7 +461,45 @@ class TestArgcomplete(unittest.TestCase):
             ("prog c bus ", ["bus", "car", "apple", "orange", "-h", "--help"]),
             ("prog c bus car ", ["bus", "car", "apple", "orange", "-h", "--help"]),
             ("prog c bus appl", ["apple "]),
-            ("prog c bus apple ", ["-h", "--help"]),
+            # No way to know which completers to run past this point.
+            ("prog c bus apple ", ["bus", "car", "apple", "orange", "end", "-h", "--help"]),
+            ("prog c bus car apple ", ["bus", "car", "apple", "orange", "end", "-h", "--help"]),
+            ("prog c bus car apple end ", ["bus", "car", "apple", "orange", "end", "-h", "--help"]),
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_nargs_zero_or_more(self):
+        def make_parser():
+            parser = ArgumentParser()
+            # default="foo" is necessary to stop argparse trying to validate []
+            parser.add_argument("foo", choices=["foo"], nargs="*", default="foo")
+            parser.add_argument("bar", choices=["bar"])
+            return parser
+
+        expected_outputs = (
+            ("prog ", ["foo", "bar", "-h", "--help"]),
+            ("prog foo ", ["foo", "bar", "-h", "--help"]),
+            ("prog foo bar ", ["foo", "bar", "-h", "--help"]),
+            ("prog foo foo bar ", ["foo", "bar", "-h", "--help"]),
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_nargs_optional(self):
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("foo", choices=["foo"], nargs="?")
+            parser.add_argument("bar", choices=["bar"])
+            return parser
+
+        expected_outputs = (
+            ("prog ", ["foo", "bar", "-h", "--help"]),
+            ("prog foo ", ["foo", "bar", "-h", "--help"]),
+            ("prog foo bar ", ["-h", "--help"]),
+            ("prog bar ", ["foo", "bar", "-h", "--help"]),
         )
 
         for cmd, output in expected_outputs:
