@@ -343,12 +343,21 @@ class CompletionFinder(object):
             # Only run completers if current word does not start with - (is not an optional)
             return completions
 
+        complete_remaining_positionals = False
         # Use the single greedy action (if there is one) or all active actions.
         for active_action in greedy_actions or parser.active_actions:
             if not active_action.option_strings:  # action is a positional
-                if action_is_satisfied(active_action) and not action_is_open(active_action):
-                    debug("Skipping", active_action)
-                    continue
+                if action_is_open(active_action):
+                    # Any positional arguments after this may slide down into this action
+                    # if more arguments are added (since the user may not be done yet),
+                    # so it is extremely difficult to tell which completers to run.
+                    # Running all remaining completers will probably show more than the user wants
+                    # but it also guarantees we won't miss anything.
+                    complete_remaining_positionals = True
+                if not complete_remaining_positionals:
+                    if action_is_satisfied(active_action) and not action_is_open(active_action):
+                        debug("Skipping", active_action)
+                        continue
 
             debug("Activating completion for", active_action, active_action._orig_class)
             # completer = getattr(active_action, "completer", DefaultCompleter())

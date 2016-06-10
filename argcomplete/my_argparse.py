@@ -239,11 +239,9 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
             # slice off the appropriate arg strings for each Positional
             # and add the Positional and its args to the list
+            for action, arg_count in zip(positionals, arg_counts):  # Added by argcomplete
+                self.active_actions.append(action)  # Added by argcomplete
             for action, arg_count in zip(positionals, arg_counts):
-                if arg_count > 0:  # Added by argcomplete
-                    self.active_actions = [action]  # Added by argcomplete
-                else:  # Added by argcomplete
-                    self.active_actions.append(action)  # Added by argcomplete
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
                 action.num_consumed_args = len(args)   # Added by argcomplete
