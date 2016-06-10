@@ -457,6 +457,7 @@ class TestArgcomplete(unittest.TestCase):
 
         expected_outputs = (
             ("prog ", ["c", "d", "-h", "--help"]),
+            ("prog c ", ["bus", "car", "-h", "--help"]),
             ("prog c bu", ["bus "]),
             ("prog c bus ", ["bus", "car", "apple", "orange", "-h", "--help"]),
             ("prog c bus car ", ["bus", "car", "apple", "orange", "-h", "--help"]),
