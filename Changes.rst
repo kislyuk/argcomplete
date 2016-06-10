@@ -1,3 +1,7 @@
+Version 1.4.0 (2016-06-10)
+--------------------------
+- Correctly handle suggestions for positionals with variable-length nargs. Thanks to @evanunderscore (#132, #133).
+
 Version 1.3.0 (2016-06-01)
 --------------------------
 - Correctly handle suggestions with custom nargs for optionals. Thanks to @evanunderscore (#131).
