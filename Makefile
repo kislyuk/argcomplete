@@ -1,7 +1,10 @@
 test: lint
 	python setup.py test -v
 
-lint:
+lint_deps:
+	pip install flake8
+
+lint: lint_deps
 	python setup.py flake8 -v
 #	flake8 . --max-line-length 159 --exclude=conf.py,describe_github_user.py,my_shlex.py,.tox,dist,docs,build,.git --show-source --statistics
 
@@ -14,4 +17,4 @@ docs:
 install:
 	./setup.py install
 
-.PHONY: test lint release docs
+.PHONY: test lint lint_deps release docs

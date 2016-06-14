@@ -94,15 +94,15 @@ def split_line(line, point=None):
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:
-                raise ArgcompleteException("Unexpected internal state. Please report this bug at https://github.com/kislyuk/argcomplete/issues.")
+                raise ArgcompleteException("Unexpected internal state. Please report this bug at https://github.com/kislyuk/argcomplete/issues.")  # noqa
 
 def default_validator(completion, prefix):
     return completion.startswith(prefix)
 
 class CompletionFinder(object):
     """
-    Inherit from this class if you wish to override any of the stages below. Otherwise, use ``argcomplete.autocomplete()``
-    directly (it's a convenience instance of this class). It has the same signature as
+    Inherit from this class if you wish to override any of the stages below. Otherwise, use
+    ``argcomplete.autocomplete()`` directly (it's a convenience instance of this class). It has the same signature as
     :meth:`CompletionFinder.__call__()`.
     """
     def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
@@ -148,8 +148,8 @@ class CompletionFinder(object):
         Produces tab completions for ``argument_parser``. See module docs for more info.
 
         Argcomplete only executes actions if their class is known not to have side effects. Custom action classes can be
-        added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or their
-        execution is otherwise desirable.
+        added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or
+        their execution is otherwise desirable.
         """
         self.__init__(argument_parser, always_complete_options, exclude, validator, print_suppressed)
 
@@ -171,7 +171,7 @@ class CompletionFinder(object):
                 exit_method(1)
 
         # print("", stream=debug_stream)
-        # for v in "COMP_CWORD", "COMP_LINE", "COMP_POINT", "COMP_TYPE", "COMP_KEY", "_ARGCOMPLETE_COMP_WORDBREAKS", "COMP_WORDS":
+        # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():
         #     print(v, os.environ[v], stream=debug_stream)
 
         ifs = os.environ.get("_ARGCOMPLETE_IFS", "\013")
@@ -313,7 +313,7 @@ class CompletionFinder(object):
 
     def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
-            [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]
+            [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]  # noqa
              for action in parser._actions
              if action.option_strings])
 
@@ -456,8 +456,8 @@ class CompletionFinder(object):
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
         # On Python 2, we have to make sure all completions are unicode objects before we continue and output them.
-        # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will try
-        # to implicitly decode string objects using ascii, and fail.
+        # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will
+        # try to implicitly decode string objects using ascii, and fail.
         completions = [ensure_str(c) for c in completions]
 
         # De-duplicate completions and remove excluded ones
