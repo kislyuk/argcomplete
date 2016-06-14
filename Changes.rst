@@ -1,3 +1,7 @@
+Version 1.4.1 (2016-06-14)
+--------------------------
+- activate-global-python-argcomplete runs on Homebrew out of the box
+
 Version 1.4.0 (2016-06-10)
 --------------------------
 - Correctly handle suggestions for positionals with variable-length nargs. Thanks to @evanunderscore (#132, #133).
