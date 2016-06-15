@@ -59,6 +59,13 @@ default), and exits. Otherwise, it returns to the caller immediately.
  stderr will be suppressed). For this reason it's best to construct the argument parser and call
  ``argcomplete.autocomplete()`` as early as possible in your execution flow.
 
+.. admonition:: Performance
+
+ If the program takes a long time to get to the point where ``argcomplete.autocomplete()`` is called, the tab completion
+ process will feel sluggish, and the user may lose confidence in it. So it's also important to minimize the startup time
+ of the program up to that point (for example, by deferring initialization or importing of large modules until after
+ parsing options).
+
 Specifying completers
 ---------------------
 You can specify custom completion functions for your options and arguments. Two styles are supported: callable and

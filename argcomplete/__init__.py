@@ -118,17 +118,17 @@ class CompletionFinder(object):
         self._display_completions = {}
         self.default_completer = default_completer
 
-    def __call__(self, argument_parser, always_complete_options="long", exit_method=os._exit, output_stream=None,
+    def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None, print_suppressed=False):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
         :param always_complete_options:
             Controls the autocompletion of option strings if an option string opening character (normally ``-``) has not
-            been entered. If ``True``, both short (``-x``) and long (``--x``) option strings will be suggested. If
-            ``False``, no option strings will be suggested. If ``long`` (default), long options and short options with
-            no long variant will be suggested. If ``short``, short options and long options with no short variant will
-            be suggested.
+            been entered. If ``True`` (default), both short (``-x``) and long (``--x``) option strings will be
+            suggested. If ``False``, no option strings will be suggested. If ``long``, long options and short options
+            with no long variant will be suggested. If ``short``, short options and long options with no short variant
+            will be suggested.
         :type always_complete_options: boolean or string
         :param exit_method:
             Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to
@@ -154,7 +154,8 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or
         their execution is otherwise desirable.
         """
-        self.__init__(argument_parser, always_complete_options, exclude, validator, print_suppressed)
+        self.__init__(argument_parser, always_complete_options=always_complete_options, exclude=exclude,
+                      validator=validator, print_suppressed=print_suppressed)
 
         if "_ARGCOMPLETE" not in os.environ:
             # not an argument completion invocation
@@ -314,6 +315,17 @@ class CompletionFinder(object):
         completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
         return completions
 
+    def _include_options(self, action, cword_prefix):
+        if len(cword_prefix) > 0 or self.always_complete_options is True:
+            return [ensure_str(opt) for opt in action.option_strings if ensure_str(opt).startswith(cword_prefix)]
+        long_opts = [ensure_str(opt) for opt in action.option_strings if len(opt) > 2]
+        short_opts = [ensure_str(opt) for opt in action.option_strings if len(opt) <= 2]
+        if self.always_complete_options == "long":
+            return long_opts if long_opts else short_opts
+        elif self.always_complete_options == "short":
+            return short_opts if short_opts else long_opts
+        return []
+
     def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
             [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]  # noqa
@@ -325,9 +337,7 @@ class CompletionFinder(object):
             if action.help == argparse.SUPPRESS and not self.print_suppressed:
                 continue
             if not isinstance(action, argparse._SubParsersAction):
-                for option in action.option_strings:
-                    if ensure_str(option).startswith(cword_prefix):
-                        option_completions.append(ensure_str(option))
+                option_completions += self._include_options(action, cword_prefix)
         return option_completions
 
     def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
