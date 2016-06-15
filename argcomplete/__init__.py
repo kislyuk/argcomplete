@@ -118,15 +118,18 @@ class CompletionFinder(object):
         self._display_completions = {}
         self.default_completer = default_completer
 
-    def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
+    def __call__(self, argument_parser, always_complete_options="long", exit_method=os._exit, output_stream=None,
                  exclude=None, validator=None, print_suppressed=False):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
         :param always_complete_options:
-            Whether or not to autocomplete options even if an option string opening character (normally ``-``) has not
-            been entered
-        :type always_complete_options: boolean
+            Controls the autocompletion of option strings if an option string opening character (normally ``-``) has not
+            been entered. If ``True``, both short (``-x``) and long (``--x``) option strings will be suggested. If
+            ``False``, no option strings will be suggested. If ``long`` (default), long options and short options with
+            no long variant will be suggested. If ``short``, short options and long options with no short variant will
+            be suggested.
+        :type always_complete_options: boolean or string
         :param exit_method:
             Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to
             perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
