@@ -50,17 +50,21 @@ This method is the entry point to the module. It must be called **after** Argume
 completion hook shellcode sets, and if it's there, collects completions, prints them to the output stream (fd 8 by
 default), and exits. Otherwise, it returns to the caller immediately.
 
-.. admonition:: Side effects and performance
+.. admonition:: Side effects
 
  Argcomplete gets completions by running your program. It intercepts the execution flow at the moment
  ``argcomplete.autocomplete()`` is called. After sending completions, it exits using ``exit_method`` (``os._exit``
  by default). This means if your program has any side effects that happen before ``argcomplete`` is called, those
  side effects will happen every time the user presses ``<TAB>`` (although anything your program prints to stdout or
- stderr will be suppressed). Also, if the program takes a long time to get to this point, the tab completion process
- will feel sluggish, and the user may lose confidence in it. For these reasons it's best to construct the argument
- parser and call ``argcomplete.autocomplete()`` as early as possible in your execution flow, and to minimize the startup
- time of the program up to that point (for example, by deferring the loading of large modules until after parsing
- options).
+ stderr will be suppressed). For this reason it's best to construct the argument parser and call
+ ``argcomplete.autocomplete()`` as early as possible in your execution flow.
+
+.. admonition:: Performance
+
+ If the program takes a long time to get to the point where ``argcomplete.autocomplete()`` is called, the tab completion
+ process will feel sluggish, and the user may lose confidence in it. So it's also important to minimize the startup time
+ of the program up to that point (for example, by deferring initialization or importing of large modules until after
+ parsing options).
 
 Specifying completers
 ---------------------
