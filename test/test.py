@@ -185,7 +185,7 @@ class TestArgcomplete(unittest.TestCase):
             ("prog c b build car ", ["--profile", "-h", "--help"]),
             ("prog build car ", ["-h", "--help"]),
             ("prog a build car ", ["-h", "--help"]),
-            )
+        )
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
@@ -275,7 +275,8 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_directory_completion(self):
         completer = DirectoriesCompleter()
-        c = lambda prefix: set(completer(prefix))
+        def c(prefix):
+            return set(completer(prefix))
         with TempDir(prefix="test_dir", dir="."):
             # Create some temporary dirs and files (files must be ignored)
             os.makedirs(os.path.join("abc", "baz"))
