@@ -21,7 +21,7 @@ class ChoicesCompleter(object):
             self._load_choices = (lambda self:
                                   setattr(self, 'choices', choices()))
         else:
-            self.choices = choices
+            self._load_choices = lambda self: (self, 'choices', choices)
 
     def __call__(self, prefix, **kwargs):
         return (c for c in self.choices if c.startswith(prefix))
