@@ -15,16 +15,38 @@ def _call(*args, **kwargs):
 
 class ChoicesCompleter(object):
     def __init__(self, choices):
-        self.choices = []
-        for choice in choices:
+        self._choices = None
+
+        if callable(choices):
+            self._load_choices = (lambda self:
+                                  setattr(self, 'choices', choices()))
+        else:
+            self.choices = choices
+
+    def __call__(self, prefix, **kwargs):
+        return (c for c in self.choices if c.startswith(prefix))
+
+    @property
+    def choices(self):
+        if self._choices is None:
+            self._load_choices(self)
+
+        return self._choices
+
+    @choices.setter
+    def choices(self, iterable):
+        """
+        Initialize the choices with items from the given iterable.
+
+        This also normalizes them to neat strings.
+        """
+        self._choices = []
+        for choice in iterable:
             if isinstance(choice, bytes):
                 choice = choice.decode(sys_encoding)
             if not isinstance(choice, str):
                 choice = str(choice)
-            self.choices.append(choice)
-
-    def __call__(self, prefix, **kwargs):
-        return (c for c in self.choices if c.startswith(prefix))
+            self._choices.append(choice)
 
 def EnvironCompleter(prefix, **kwargs):
     return (v for v in os.environ if v.startswith(prefix))
