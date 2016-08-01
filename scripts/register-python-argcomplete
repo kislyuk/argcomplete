@@ -18,19 +18,101 @@ import sys
 import argparse
 
 shellcode = '''
-_python_argcomplete() {
-    local IFS='\013'
+_python_argcomplete_lst() {
+
     COMPREPLY=( $(IFS="$IFS" \
                   COMP_LINE="$COMP_LINE" \
                   COMP_POINT="$COMP_POINT" \
                   _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
                   _ARGCOMPLETE=1 \
                   "$1" 8>&1 9>&2 1>/dev/null 2>/dev/null) )
+
+    # bash use echo to return results
+    echo $COMPREPLY
+}
+
+_python_argcomplete_zsh() {
+  # need different IFS for bash and zsh. why?
+  local IFS='\n'
+
+  # use tab to cycle throught all possible matches
+  compstate[insert]=menu # no expand
+
+  local ret=1
+  local -a suf matches
+  local -x COMP_POINT COMP_CWORD
+  local -a COMP_WORDS COMPREPLY BASH_VERSINFO
+  local -x COMP_LINE="$words"
+  local -A savejobstates savejobtexts
+
+  (( COMP_POINT = 1 + ${#${(j. .)words[1,CURRENT]}} + $#QIPREFIX + $#IPREFIX + $#PREFIX ))
+  (( COMP_CWORD = CURRENT - 1))
+  COMP_WORDS=( $words )
+  BASH_VERSINFO=( 2 05b 0 1 release )
+
+  savejobstates=( ${(kv)jobstates} )
+  savejobtexts=( ${(kv)jobtexts} )
+
+  [[ ${argv[${argv[(I)nospace]:-0}-1]} = -o ]] && suf=( -S '' )
+
+  # get result from python script
+  val=`_python_argcomplete_lst %(executable)s`
+
+  # here we have to use bash's IFS (\013) to separate the val string into an array, why?
+  matches=("${(@s/\013/)val}")
+
+  if [ ${#matches[@]} -le "1" ]; then
+      # if there is only one match, a strange space will be put at the end of the line
+      # remove it by http://stackoverflow.com/questions/369758/how-to-trim-whitespace-from-a-bash-variable
+      matches=("${val//[[:space:]]/}")
+  fi
+
+  if [[ -n $matches ]]; then
+    if [[ ${argv[${argv[(I)filenames]:-0}-1]} = -o ]]; then
+      compset -P '*/' && matches=( ${matches##*/} )
+      compset -S '/*' && matches=( ${matches%%/*} )
+      compadd -U -Q -f "${suf[@]}" -a matches && ret=0
+    else
+      # comapp reference http://zsh.sourceforge.net/Doc/Release/Completion-Widgets.html#Completion-Widgets
+      count=0
+      for item in "${matches[@]}"
+      do
+        # -V to preserve the completion orders http://stackoverflow.com/questions/15140396/zsh-completion-order
+        compadd -U -V $count $item
+        (( count++ ))
+      done
+      ret=0
+
+    fi
+  fi
+
+  if (( ret )); then
+    if [[ ${argv[${argv[(I)default]:-0}-1]} = -o ]]; then
+      _default "${suf[@]}" && ret=0
+    elif [[ ${argv[${argv[(I)dirnames]:-0}-1]} = -o ]]; then
+      _directories "${suf[@]}" && ret=0
+    fi
+  fi
+
+  return ret
+}
+
+_python_argcomplete() {
+    local IFS='\013'
+
+    COMPREPLY=`_python_argcomplete_lst %(executable)s`
     if [[ $? != 0 ]]; then
         unset COMPREPLY
     fi
 }
-complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
+
+if type compdef >/dev/null 2>/dev/null; then
+    # zsh
+    compdef _python_argcomplete_zsh "%(executable)s"
+else if type complete >/dev/null 2>/dev/null; then
+    # bash
+    complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
+fi; fi
 '''
 
 parser = argparse.ArgumentParser(
