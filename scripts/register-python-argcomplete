@@ -73,7 +73,7 @@ _python_argcomplete_zsh() {
       compset -S '/*' && matches=( ${matches%%/*} )
       compadd -U -Q -f "${suf[@]}" -a matches && ret=0
     else
-      # comapp reference http://zsh.sourceforge.net/Doc/Release/Completion-Widgets.html#Completion-Widgets
+      # comadd reference http://zsh.sourceforge.net/Doc/Release/Completion-Widgets.html#Completion-Widgets
       count=0
       for item in "${matches[@]}"
       do
