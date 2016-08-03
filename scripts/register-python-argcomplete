@@ -78,7 +78,9 @@ _python_argcomplete_zsh() {
       for item in "${matches[@]}"
       do
         # -V to preserve the completion orders http://stackoverflow.com/questions/15140396/zsh-completion-order
-        compadd -U -V $count $item
+        # -S to remove the trailing space after the completion. equal to 'complete -o nospace' in bash
+        # TODO: allow user to specify the complete_opts ?
+        compadd -U -S '' -V $count $item
         (( count++ ))
       done
       ret=0
