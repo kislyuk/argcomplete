@@ -276,8 +276,6 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
         :target: https://codecov.io/github/kislyuk/argcomplete?branch=master
 .. image:: https://img.shields.io/pypi/v/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://img.shields.io/pypi/dm/argcomplete.svg
-        :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://img.shields.io/pypi/l/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://readthedocs.org/projects/argcomplete/badge/?version=latest
