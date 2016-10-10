@@ -606,7 +606,7 @@ class CompletionFinder(object):
 class ExclusiveCompletionFinder(CompletionFinder):
     def _get_option_completions(self, parser, cword_prefix, parsed_args):
         super_function = super(ExclusiveCompletionFinder, self)._get_option_completions
-        option_completions = super_function(parser, cword_prefix)
+        option_completions = super_function(parser, cword_prefix, parsed_args)
 
         for action in parser._actions:
             if getattr(parsed_args, action.dest, False):
