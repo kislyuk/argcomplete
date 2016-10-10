@@ -440,7 +440,7 @@ class CompletionFinder(object):
         active_parser = active_parsers[-1]
         debug("active_parser:", active_parser)
         if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
-            completions += self._get_option_completions(active_parser, cword_prefix)
+            completions += self._get_option_completions(active_parser, cword_prefix, parsed_args=parsed_args)
         debug("optional options:", completions)
 
         next_positional = self._get_next_positional()
@@ -602,6 +602,23 @@ class CompletionFinder(object):
 
         """
         return self._display_completions
+
+class ExclusiveCompletionFinder(CompletionFinder):
+    def _get_option_completions(self, parser, cword_prefix, parsed_args=None):
+        super_function = super(ExclusiveCompletionFinder, self)._get_option_completions
+        option_completions = super_function(parser, cword_prefix)
+
+        for action in parser._actions:
+            if getattr(parsed_args, action.dest, False):
+                [self.remove_option(option_completions, name) for name in action.option_strings]
+
+        return option_completions
+
+    def remove_option(self, options, name):
+        try:
+            options.remove(name)
+        except ValueError:
+            pass
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
