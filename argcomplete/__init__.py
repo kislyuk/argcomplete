@@ -334,7 +334,7 @@ class CompletionFinder(object):
             return short_opts if short_opts else long_opts
         return []
 
-    def _get_option_completions(self, parser, cword_prefix):
+    def _get_option_completions(self, parser, cword_prefix, parsed_args):
         self._display_completions.update(
             [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]  # noqa
              for action in parser._actions
@@ -440,7 +440,7 @@ class CompletionFinder(object):
         active_parser = active_parsers[-1]
         debug("active_parser:", active_parser)
         if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
-            completions += self._get_option_completions(active_parser, cword_prefix, parsed_args=parsed_args)
+            completions += self._get_option_completions(active_parser, cword_prefix, parsed_args)
         debug("optional options:", completions)
 
         next_positional = self._get_next_positional()
@@ -604,7 +604,7 @@ class CompletionFinder(object):
         return self._display_completions
 
 class ExclusiveCompletionFinder(CompletionFinder):
-    def _get_option_completions(self, parser, cword_prefix, parsed_args=None):
+    def _get_option_completions(self, parser, cword_prefix, parsed_args):
         super_function = super(ExclusiveCompletionFinder, self)._get_option_completions
         option_completions = super_function(parser, cword_prefix)
 
