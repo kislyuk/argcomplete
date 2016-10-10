@@ -336,9 +336,20 @@ class CompletionFinder(object):
         for action in parser._actions:
             if action.help == argparse.SUPPRESS and not self.print_suppressed:
                 continue
+            if not self._action_allowed(action, parser):
+                continue
             if not isinstance(action, argparse._SubParsersAction):
                 option_completions += self._include_options(action, cword_prefix)
         return option_completions
+
+    @staticmethod
+    def _action_allowed(action, parser):
+        # Logic adapted from take_action in ArgumentParser._parse_known_args
+        # (members are saved by my_argparse.IntrospectiveArgumentParser)
+        for conflict_action in parser._action_conflicts.get(action, []):
+            if conflict_action in parser._seen_non_default_actions:
+                return False
+        return True
 
     def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
         debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))

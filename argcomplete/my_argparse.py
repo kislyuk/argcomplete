@@ -70,6 +70,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         # map all mutually exclusive arguments to the other arguments
         # they can't occur with
         action_conflicts = {}
+        self._action_conflicts = action_conflicts  # Added by argcomplete
         for mutex_group in self._mutually_exclusive_groups:
             group_actions = mutex_group._group_actions
             for i, mutex_action in enumerate(mutex_group._group_actions):
@@ -108,6 +109,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         # converts arg strings to the appropriate and then takes the action
         seen_actions = set()
         seen_non_default_actions = set()
+        self._seen_non_default_actions = seen_non_default_actions  # Added by argcomplete
 
         def take_action(action, argument_strings, option_string=None):
             seen_actions.add(action)

@@ -593,6 +593,25 @@ class TestArgcomplete(unittest.TestCase):
                 result = self.run_completer(make_parser(), cmd, always_complete_options=always_complete_options)
                 self.assertEqual(set(result), set(output))
 
+    def test_exclusive(self):
+        def make_parser():
+            parser = ArgumentParser(add_help=False)
+            parser.add_argument("--foo", action="store_true")
+            group = parser.add_mutually_exclusive_group()
+            group.add_argument("--bar", action="store_true")
+            group.add_argument("--no-bar", action="store_true")
+            return parser
+
+        expected_outputs = (
+            ("prog ", ["--foo", "--bar", "--no-bar"]),
+            ("prog --foo ", ["--foo", "--bar", "--no-bar"]),
+            ("prog --bar ", ["--foo", "--bar"]),
+            ("prog --foo --no-bar ", ["--foo", "--no-bar"]),
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
