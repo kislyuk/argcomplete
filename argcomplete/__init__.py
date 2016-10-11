@@ -334,7 +334,7 @@ class CompletionFinder(object):
             return short_opts if short_opts else long_opts
         return []
 
-    def _get_option_completions(self, parser, cword_prefix, parsed_args):
+    def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
             [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]  # noqa
              for action in parser._actions
@@ -440,7 +440,7 @@ class CompletionFinder(object):
         active_parser = active_parsers[-1]
         debug("active_parser:", active_parser)
         if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
-            completions += self._get_option_completions(active_parser, cword_prefix, parsed_args)
+            completions += self._get_option_completions(active_parser, cword_prefix)
         debug("optional options:", completions)
 
         next_positional = self._get_next_positional()
@@ -604,21 +604,12 @@ class CompletionFinder(object):
         return self._display_completions
 
 class ExclusiveCompletionFinder(CompletionFinder):
-    def _get_option_completions(self, parser, cword_prefix, parsed_args):
-        super_function = super(ExclusiveCompletionFinder, self)._get_option_completions
-        option_completions = super_function(parser, cword_prefix, parsed_args)
+    @staticmethod
+    def _action_allowed(action, parser):
+        class_name = ExclusiveCompletionFinder
+        allowed = super(class_name, class_name)._action_allowed(action, parser)
 
-        for action in parser._actions:
-            if getattr(parsed_args, action.dest, False):
-                [self.remove_option(option_completions, name) for name in action.option_strings]
-
-        return option_completions
-
-    def remove_option(self, options, name):
-        try:
-            options.remove(name)
-        except ValueError:
-            pass
+        return allowed and action not in parser._seen_non_default_actions
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
