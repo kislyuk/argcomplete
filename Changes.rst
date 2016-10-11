@@ -1,3 +1,8 @@
+Changes for v1.5.0 (2016-10-11)
+===============================
+
+-  Do not suggest options from mutually exclusive groups (#145).
+
 Version 1.4.1 (2016-06-14)
 --------------------------
 - activate-global-python-argcomplete runs on Homebrew out of the box
