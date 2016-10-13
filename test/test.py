@@ -16,6 +16,7 @@ from argcomplete import (
     autocomplete,
     CompletionFinder,
     split_line,
+    ExclusiveCompletionFinder,
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
@@ -660,6 +661,26 @@ class TestArgcompleteREPL(unittest.TestCase):
             comp_words, cword_prefix, cword_prequote, first_colon_pos)
 
         return completions
+
+    def test_exclusive_class(self):
+        parser = ArgumentParser(add_help=False)
+        parser.add_argument("--foo", dest="types", action="append_const", const=str)
+        parser.add_argument("--bar", dest="types", action="append_const", const=int)
+        parser.add_argument("--baz", choices=["baz1", "baz2"])
+        parser.add_argument("--no-bar", action="store_true")
+
+        completer = ExclusiveCompletionFinder(parser, always_complete_options=True)
+
+        expected_outputs = (
+            ("prog ", ["--foo", "--bar", "--baz", "--no-bar"]),
+            ("prog --baz ", ["baz1", "baz2"]),
+            ("prog --baz baz1 ", ["--foo", "--bar", "--no-bar"]),
+            ("prog --bar  ", ["--foo", "--bar", "--baz", "--no-bar"]),
+            ("prog --foo  --no-bar ", ["--foo", "--bar", "--baz"]),
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(parser, completer, cmd)), set(output))
 
     def test_repl_multiple_complete(self):
         p = ArgumentParser()

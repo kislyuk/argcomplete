@@ -608,9 +608,11 @@ class ExclusiveCompletionFinder(CompletionFinder):
     def _action_allowed(action, parser):
         class_name = ExclusiveCompletionFinder
         allowed = super(class_name, class_name)._action_allowed(action, parser)
-        exist = action not in parser._seen_non_default_actions or action._orig_class == argparse._AppendAction
 
-        return allowed and exist
+        append_classes = (argparse._AppendAction, argparse._AppendConstAction)
+        not_exist = action not in parser._seen_non_default_actions or action._orig_class in append_classes
+
+        return allowed and not_exist
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
