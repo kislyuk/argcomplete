@@ -675,8 +675,8 @@ class TestArgcompleteREPL(unittest.TestCase):
             ("prog ", ["--foo", "--bar", "--baz", "--no-bar"]),
             ("prog --baz ", ["baz1", "baz2"]),
             ("prog --baz baz1 ", ["--foo", "--bar", "--no-bar"]),
-            ("prog --bar  ", ["--foo", "--bar", "--baz", "--no-bar"]),
-            ("prog --foo  --no-bar ", ["--foo", "--bar", "--baz"]),
+            ("prog --bar ", ["--foo", "--bar", "--baz", "--no-bar"]),
+            ("prog --foo --no-bar ", ["--foo", "--bar", "--baz"]),
         )
 
         for cmd, output in expected_outputs:
