@@ -707,7 +707,6 @@ class TestArgcompleteREPL(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(p, c, cmd)), set(output))
 
-    @unittest.expectedFailure
     def test_repl_reuse_parser_with_positional(self):
         p = ArgumentParser()
         p.add_argument("foo", choices=["aa", "bb", "cc"])
