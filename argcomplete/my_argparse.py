@@ -5,11 +5,13 @@ from argparse import ArgumentParser, ArgumentError, SUPPRESS, _SubParsersAction
 from argparse import OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
 from argparse import _get_action_name, _
 
+_num_consumed_args = {}
+
 
 def action_is_satisfied(action):
     ''' Returns False if the parse would raise an error if no more arguments are given to this action, True otherwise.
     '''
-    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+    num_consumed_args = _num_consumed_args.get(action, 0)
 
     if action.nargs in [OPTIONAL, ZERO_OR_MORE, REMAINDER]:
         return True
@@ -29,7 +31,7 @@ def action_is_satisfied(action):
 def action_is_open(action):
     ''' Returns True if action could consume more arguments (i.e., its pattern is open).
     '''
-    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+    num_consumed_args = _num_consumed_args.get(action, 0)
 
     if action.nargs in [ZERO_OR_MORE, ONE_OR_MORE, PARSER, REMAINDER]:
         return True
@@ -44,7 +46,7 @@ def action_is_greedy(action, isoptional=False):
     ''' Returns True if action will necessarily consume the next argument.
     isoptional indicates whether the argument is an optional (starts with -).
     '''
-    num_consumed_args = getattr(action, 'num_consumed_args', 0)
+    num_consumed_args = _num_consumed_args.get(action, 0)
 
     if action.option_strings:
         if not isoptional and not action_is_satisfied(action):
@@ -61,6 +63,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
     '''
 
     def _parse_known_args(self, arg_strings, namespace):
+        _num_consumed_args.clear()  # Added by argcomplete
         self._argcomplete_namespace = namespace
         self.active_actions = []  # Added by argcomplete
         # replace arg strings that are file references
@@ -205,7 +208,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     start = start_index + 1
                     selected_patterns = arg_strings_pattern[start:]
                     self.active_actions = [action]  # Added by argcomplete
-                    action.num_consumed_args = 0  # Added by argcomplete
+                    _num_consumed_args[action] = 0  # Added by argcomplete
                     arg_count = match_argument(action, selected_patterns)
                     stop = start + arg_count
                     args = arg_strings[start:stop]
@@ -213,7 +216,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     # Begin added by argcomplete
                     # If the pattern is not open (e.g. no + at the end), remove the action from active actions (since
                     # it wouldn't be able to consume any more args)
-                    action.num_consumed_args = len(args)
+                    _num_consumed_args[action] = len(args)
                     if not action_is_open(action):
                         self.active_actions.remove(action)
                     # End added by argcomplete
@@ -246,7 +249,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
             for action, arg_count in zip(positionals, arg_counts):
                 args = arg_strings[start_index: start_index + arg_count]
                 start_index += arg_count
-                action.num_consumed_args = len(args)   # Added by argcomplete
+                _num_consumed_args[action] = len(args)   # Added by argcomplete
                 take_action(action, args)
 
             # slice off the Positionals that we just parsed and return the
