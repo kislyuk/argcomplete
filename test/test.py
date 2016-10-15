@@ -647,8 +647,6 @@ class TestArgcompleteREPL(unittest.TestCase):
     def run_completer(self, parser, completer, command, point=None, **kwargs):
         cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(command)
 
-        comp_words.insert(0, sys.argv[0])
-
         completions = completer._get_completions(
             comp_words, cword_prefix, cword_prequote, first_colon_pos)
 
@@ -701,12 +699,12 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         expected_outputs = (
-            ("", ["-h", "--help", "--foo", "--bar", "list", "show", "set"]),
-            ("li", ["list "]),
-            ("s", ["show", "set"]),
-            ("show ", ["--test", "depth", "-h", "--help"]),
-            ("show d", ["depth "]),
-            ("show depth ", ["-h", "--help"]),
+            ("prog ", ["-h", "--help", "--foo", "--bar", "list", "show", "set"]),
+            ("prog li", ["list "]),
+            ("prog s", ["show", "set"]),
+            ("prog show ", ["--test", "depth", "-h", "--help"]),
+            ("prog show d", ["depth "]),
+            ("prog show depth ", ["-h", "--help"]),
         )
 
         for cmd, output in expected_outputs:
@@ -719,13 +717,13 @@ class TestArgcompleteREPL(unittest.TestCase):
 
         c = CompletionFinder(p, always_complete_options=True)
 
-        self.assertEqual(set(self.run_completer(p, c, "")),
+        self.assertEqual(set(self.run_completer(p, c, "prog ")),
                          set(["-h", "--help", "aa", "bb", "cc"]))
 
-        self.assertEqual(set(self.run_completer(p, c, "aa ")),
+        self.assertEqual(set(self.run_completer(p, c, "prog aa ")),
                          set(["-h", "--help", "d", "e"]))
 
-        self.assertEqual(set(self.run_completer(p, c, "")),
+        self.assertEqual(set(self.run_completer(p, c, "prog ")),
                          set(["-h", "--help", "aa", "bb", "cc"]))
 
 
