@@ -665,10 +665,9 @@ class TestArgcompleteREPL(unittest.TestCase):
         completions = self.run_completer(p, c, "prog --")
         assert(set(completions) == set(["--help", "--foo", "--bar"]))
 
-    @unittest.expectedFailure
     def test_repl_parse_after_complete(self):
         p = ArgumentParser()
-        p.add_argument("--foo")
+        p.add_argument("--foo", required=True)
         p.add_argument("bar", choices=["bar"])
 
         c = CompletionFinder(p, always_complete_options=True)
@@ -680,11 +679,12 @@ class TestArgcompleteREPL(unittest.TestCase):
         assert(args.foo == "spam")
         assert(args.bar == "bar")
 
-        # "bar" is required - check the parser still enforces this.
+        # Both options are required - check the parser still enforces this.
         with self.assertRaises(SystemExit):
             p.parse_args(["--foo", "spam"])
+        with self.assertRaises(SystemExit):
+            p.parse_args(["bar"])
 
-    @unittest.expectedFailure
     def test_repl_subparser_parse_after_complete(self):
         p = ArgumentParser()
         sp = p.add_subparsers().add_parser("foo")
