@@ -772,6 +772,18 @@ class TestBash(unittest.TestCase):
     def test_quoted_exact(self):
         self.assertEqual(self.bash.run_command('prog basic "f\t--'), 'foo\r\n')
 
+    def test_special_characters(self):
+        self.assertEqual(self.bash.run_command('prog spec a\t'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command('prog spec d\t'), 'd$e$f\r\n')
+
+    def test_special_characters_single_quoted(self):
+        self.assertEqual(self.bash.run_command("prog spec 'a\t"), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command("prog spec 'd\t"), 'd$e$f\r\n')
+
+    def test_special_characters_double_quoted(self):
+        self.assertEqual(self.bash.run_command('prog spec "a\t'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command('prog spec "d\t'), 'd$e$f\r\n')
+
 
 if __name__ == "__main__":
     unittest.main()

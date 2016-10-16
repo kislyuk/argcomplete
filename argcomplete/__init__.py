@@ -506,7 +506,7 @@ class CompletionFinder(object):
                                                     os.environ.get("COMP_WORDBREAKS",
                                                                    " \t\"'@><=;|&(:.")))
 
-        punctuation_chars = "();<>|&!`"
+        punctuation_chars = "();<>|&!`$"
         for char in punctuation_chars:
             if char not in comp_wordbreaks:
                 comp_wordbreaks += char
