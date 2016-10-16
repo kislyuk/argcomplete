@@ -773,17 +773,31 @@ class TestBash(unittest.TestCase):
         self.assertEqual(self.bash.run_command('prog basic "f\t--'), 'foo\r\n')
 
     def test_special_characters(self):
-        self.assertEqual(self.bash.run_command('prog spec a\t'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command('prog spec d\t'), 'd$e$f\r\n')
+        self.assertEqual(self.bash.run_command('prog spec a\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command('prog spec d\tf'), 'd$e$f\r\n')
 
     def test_special_characters_single_quoted(self):
-        self.assertEqual(self.bash.run_command("prog spec 'a\t"), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command("prog spec 'd\t"), 'd$e$f\r\n')
+        self.assertEqual(self.bash.run_command("prog spec 'a\tc'"), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command("prog spec 'd\tf'"), 'd$e$f\r\n')
 
     def test_special_characters_double_quoted(self):
-        self.assertEqual(self.bash.run_command('prog spec "a\t'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command('prog spec "d\t'), 'd$e$f\r\n')
+        self.assertEqual(self.bash.run_command('prog spec "a\tc"'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command('prog spec "d\tf"'), 'd$e$f\r\n')
 
+    def test_parse_special_characters(self):
+        self.assertEqual(self.bash.run_command('prog spec a:b:\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command('prog spec a:b\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command("prog spec 'a:b\tc\t"), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command('prog spec "a:b\tc\t'), 'a:b:c\r\n')
+        self.assertEqual(self.bash.run_command("prog spec 'd$e\tf\t"), 'd$e$f\r\n')
+
+    @unittest.expectedFailure
+    def test_parse_special_characters_dollar(self):
+        # my_shlex.shlex splits on '$'.
+        self.assertEqual(self.bash.run_command('prog spec d$e$\tf'), 'd$e$f\r\n')
+        self.assertEqual(self.bash.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
+        # First tab expands to 'd\$e\$'; completion works with 'd$' but not 'd\$'.
+        self.assertEqual(self.bash.run_command('prog spec "d$e\tf\t'), 'd$e$f\r\n')
 
 if __name__ == "__main__":
     unittest.main()
