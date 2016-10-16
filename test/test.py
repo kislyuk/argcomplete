@@ -4,9 +4,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os, sys, shutil, argparse
+import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, mkdtemp
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+TEST_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(TEST_DIR)
+sys.path.insert(0, BASE_DIR)
 
 from argparse import ArgumentParser, SUPPRESS
 from argcomplete import (
@@ -51,12 +54,14 @@ class TempDir(object):
 
 class TestArgcomplete(unittest.TestCase):
     def setUp(self):
+        self._os_environ = os.environ
+        os.environ = os.environ.copy()
         os.environ["_ARGCOMPLETE"] = "yes"
         os.environ["_ARC_DEBUG"] = "yes"
         os.environ["IFS"] = IFS
 
     def tearDown(self):
-        pass
+        os.environ = self._os_environ
 
     def run_completer(self, parser, command, point=None, **kwargs):
         command = ensure_str(command)
@@ -722,6 +727,51 @@ class TestArgcompleteREPL(unittest.TestCase):
 
         self.assertEqual(set(self.run_completer(p, c, "")),
                          set(["-h", "--help", "aa", "bb", "cc"]))
+
+
+class TestBash(unittest.TestCase):
+    def setUp(self):
+        bash = pexpect.replwrap.bash()
+        path = ':'.join(['$PATH', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
+        bash.run_command('export PATH=' + path)
+        bash.run_command('export PYTHONPATH=' + BASE_DIR)
+        bash.run_command('eval "$(register-python-argcomplete prog)"')
+        self.bash = bash
+
+    def tearDown(self):
+        with self.assertRaises(pexpect.EOF):
+            self.bash.run_command('exit')
+
+    def test_simple_completion(self):
+        self.assertEqual(self.bash.run_command('prog basic f\t'), 'foo\r\n')
+
+    def test_partial_completion(self):
+        self.assertEqual(self.bash.run_command('prog basic b\tr'), 'bar\r\n')
+
+    def test_single_quoted_completion(self):
+        self.assertEqual(self.bash.run_command("prog basic 'f\t"), 'foo\r\n')
+
+    def test_double_quoted_completion(self):
+        self.assertEqual(self.bash.run_command('prog basic "f\t'), 'foo\r\n')
+
+    def test_unquoted_space(self):
+        self.assertEqual(self.bash.run_command('prog space f\t'), 'foo bar\r\n')
+
+    def test_quoted_space(self):
+        self.assertEqual(self.bash.run_command('prog space "f\t'), 'foo bar\r\n')
+
+    def test_continuation(self):
+        # This produces 'prog basic foo --', and '--' is ignored.
+        self.assertEqual(self.bash.run_command('prog basic f\t--'), 'foo\r\n')
+        # These do not insert a space, so the '--' is part of the token.
+        self.assertEqual(self.bash.run_command('prog cont f\t--'), 'foo=--\r\n')
+        self.assertEqual(self.bash.run_command('prog cont bar\t--'), 'bar/--\r\n')
+        self.assertEqual(self.bash.run_command('prog cont baz\t--'), 'baz:--\r\n')
+
+    @unittest.expectedFailure
+    def test_quoted_exact(self):
+        self.assertEqual(self.bash.run_command('prog basic "f\t--'), 'foo\r\n')
+
 
 if __name__ == "__main__":
     unittest.main()
