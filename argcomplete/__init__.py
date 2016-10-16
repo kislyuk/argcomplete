@@ -511,7 +511,7 @@ class CompletionFinder(object):
             if char not in comp_wordbreaks:
                 comp_wordbreaks += char
 
-        # If the word under the cursor was quoted, escape the quote char and add the leading quote back in.
+        # If the word under the cursor was quoted, escape the quote char.
         # Otherwise, escape all COMP_WORDBREAKS chars.
         if cword_prequote == "":
             # Bash mangles completions which contain colons if COMP_WORDBREAKS contains a colon.
@@ -525,7 +525,7 @@ class CompletionFinder(object):
             if cword_prequote == '"':
                 for char in "`$!":
                     completions = [c.replace(char, "\\" + char) for c in completions]
-            completions = [cword_prequote + c.replace(cword_prequote, "\\" + cword_prequote) for c in completions]
+            completions = [c.replace(cword_prequote, "\\" + cword_prequote) for c in completions]
 
         # Note: similar functionality in bash is turned off by supplying the "-o nospace" option to complete.
         # We can't use that functionality because bash is not smart enough to recognize continuation characters (/) for

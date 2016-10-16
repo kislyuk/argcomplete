@@ -202,11 +202,11 @@ class TestArgcomplete(unittest.TestCase):
 
         expected_outputs = (
             ("prog --url ", ["http\\://url1", "http\\://url2"]),
-            ("prog --url \"", ['"http://url1', '"http://url2']),
+            ("prog --url \"", ['http://url1', 'http://url2']),
             ("prog --url \"http://url1\" --email ", ["a\\@b.c", "a\\@b.d", "ab\\@c.d", "bcd\\@e.f", "bce\\@f.g"]),
             ("prog --url \"http://url1\" --email a", ["a\\@b.c", "a\\@b.d", "ab\\@c.d"]),
-            ("prog --url \"http://url1\" --email \"a@", ['"a@b.c', '"a@b.d']),
-            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"a@", ['"a@b.c', '"a@b.d']),
+            ("prog --url \"http://url1\" --email \"a@", ['a@b.c', 'a@b.d']),
+            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"a@", ['a@b.c', 'a@b.d']),
             ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ", ["--url", "--email", "-h", "--help"]),
         )
 
@@ -314,7 +314,7 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --age 1 eggs", ["eggs "]),
             ("prog --age 2 eggs ", ["on a train", "with a goat", "on a boat", "in the rain", "--help", "-h"]),
             ("prog eggs ", ["on a train", "with a goat", "on a boat", "in the rain", "--help", "-h"]),
-            ("prog eggs \"on a", ['\"on a train', '\"on a boat']),
+            ("prog eggs \"on a", ['on a train', 'on a boat']),
             ("prog eggs on\\ a", ["on a train", "on a boat"]),
             ("prog spam ", ["iberico", "ham", "--help", "-h"]),
         )
