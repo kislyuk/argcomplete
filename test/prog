@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+"""Test script used by test.TestBash."""
+import argparse
+import argcomplete
+
+
+def complete_cont(*args, **kwargs):
+    return ['foo=', 'bar/', 'baz:']
+
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers()
+subparsers.add_parser('basic').add_argument('arg', choices=['foo', 'bar', 'baz'])
+subparsers.add_parser('space').add_argument('arg', choices=['foo bar', 'baz'])
+subparsers.add_parser('cont').add_argument('arg').completer = complete_cont
+
+
+argcomplete.autocomplete(parser)
+args = parser.parse_args()
+print(args.arg)

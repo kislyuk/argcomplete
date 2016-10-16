@@ -16,7 +16,7 @@ matrix:
 
 before_install:
   - if [ "$TRAVIS_PYTHON_VERSION" == 2.6 ]; then pip --quiet install unittest2; fi
-  - pip --quiet install coverage
+  - pip --quiet install coverage pexpect
 
 install:
   - pip install flake8
