@@ -15,7 +15,8 @@ subparsers = parser.add_subparsers()
 subparsers.add_parser('basic').add_argument('arg', choices=['foo', 'bar', 'baz'])
 subparsers.add_parser('space').add_argument('arg', choices=['foo bar', 'baz'])
 subparsers.add_parser('cont').add_argument('arg').completer = complete_cont
-subparsers.add_parser('spec').add_argument('arg', choices=['a:b:c', 'a:b:d', 'd$e$f', 'd$e$g'])
+subparsers.add_parser('spec').add_argument('arg', choices=['a:b:c', 'a:b:d', 'd$e$f', 'd$e$g', 'x!x'])
+subparsers.add_parser('quote').add_argument('arg', choices=["1'1", '2"2'])
 
 
 argcomplete.autocomplete(parser)

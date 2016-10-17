@@ -729,6 +729,28 @@ class TestArgcompleteREPL(unittest.TestCase):
                          set(["-h", "--help", "aa", "bb", "cc"]))
 
 
+class TestSplitLine(unittest.TestCase):
+    def prefix(self, line):
+        return split_line(line)[1]
+
+    def test_simple(self):
+        self.assertEqual(self.prefix('a b c'), 'c')
+
+    def test_escaped_special(self):
+        self.assertEqual(self.prefix('a\$b'), 'a$b')
+        self.assertEqual(self.prefix('a\`b'), 'a`b')
+
+    @unittest.expectedFailure
+    def test_unescaped_special(self):
+        self.assertEqual(self.prefix('a$b'), 'a$b')
+        self.assertEqual(self.prefix('a`b'), 'a`b')
+
+    @unittest.expectedFailure
+    def test_escaped_special_in_double_quotes(self):
+        self.assertEqual(self.prefix('"a\$b'), 'a$b')
+        self.assertEqual(self.prefix('"a\`b'), 'a`b')
+
+
 class TestBash(unittest.TestCase):
     def setUp(self):
         bash = pexpect.replwrap.bash()
@@ -798,6 +820,22 @@ class TestBash(unittest.TestCase):
         self.assertEqual(self.bash.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
         # First tab expands to 'd\$e\$'; completion works with 'd$' but not 'd\$'.
         self.assertEqual(self.bash.run_command('prog spec "d$e\tf\t'), 'd$e$f\r\n')
+
+    @unittest.expectedFailure
+    def test_exclamation_in_double_quotes(self):
+        # Exclamation marks cannot be properly escaped within double quotes.
+        # 'a!b' == "a"\!"b"
+        self.assertEqual(self.bash.run_command('prog spec "x\t'), 'x!x\r\n')
+
+    def test_single_quotes_in_double_quotes(self):
+        self.assertEqual(self.bash.run_command('prog quote "1\t'), "1'1\r\n")
+
+    @unittest.expectedFailure
+    def test_single_quotes_in_single_quotes(self):
+        # Single quotes cannot be escaped within single quotes.
+        # "a'b" == 'a'\''b'
+        self.assertEqual(self.bash.run_command("prog quote '1\t"), "1'1\r\n")
+
 
 if __name__ == "__main__":
     unittest.main()
