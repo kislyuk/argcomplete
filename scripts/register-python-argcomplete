@@ -12,6 +12,10 @@ To perform the registration, source the output of this script in your bash shell
 Example:
 
     $ eval "$(register-python-argcomplete my-favorite-script.py)"
+
+For Tcsh
+
+    $ eval `register-python-argcomplete --shell tcsh my-favorite-script.py`
 '''
 
 import sys
@@ -33,6 +37,10 @@ _python_argcomplete() {
 complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
 '''
 
+tcshcode = '''\
+complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(executable)s"`@'
+'''
+
 parser = argparse.ArgumentParser(
     description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -44,6 +52,10 @@ parser.add_argument(
     '--complete-arguments',
     nargs=argparse.REMAINDER,
     help='arguments to call complete with; use of this option discards default options')
+parser.add_argument(
+    '-s', '--shell',
+    choices=('bash', 'tcsh'), default='bash',
+    help='output code for the specified shell')
 
 parser.add_argument("executable")
 
@@ -58,7 +70,12 @@ if args.complete_arguments is None:
 else:
     complete_options = " ".join(args.complete_arguments)
 
-sys.stdout.write(shellcode % dict(
+if args.shell == 'bash':
+    code = shellcode
+else:
+    code = tcshcode
+
+sys.stdout.write(code % dict(
     complete_opts=complete_options,
     executable=args.executable
 ))

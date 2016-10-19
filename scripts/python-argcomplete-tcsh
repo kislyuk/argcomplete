@@ -1,0 +1,17 @@
+#!/bin/sh
+IFS=
+export IFS
+
+COMP_WORDBREAKS=
+export COMP_WORDBREAKS
+
+COMP_LINE=${COMMAND_LINE}
+export COMP_LINE
+
+COMP_POINT=${#COMMAND_LINE}
+export COMP_POINT
+
+_ARGCOMPLETE=1
+export _ARGCOMPLETE
+
+"$1" 8>&1 9>&2 1>/dev/null 2>/dev/null
