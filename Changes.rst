@@ -1,3 +1,19 @@
+Changes for v1.6.0 (2016-10-20)
+===============================
+
+-  Add support for tcsh (#155)
+
+-  Fix handling of unquoted completions containing $ (#154)
+
+-  Don't insert unnecessary leading quote char in completions (#152)
+
+-  Fix parser reuse with positional arguments (#149)
+
+-  Tests: Add simple pexpect tests for bash (#153); Add test case to
+   verify #20 is fixed (#148)
+
+-  Thanks to @davvid and @evanunderscore for their work on this release.
+
 Changes for v1.5.1 (2016-10-11)
 ===============================
 
