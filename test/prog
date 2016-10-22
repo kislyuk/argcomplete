@@ -2,9 +2,11 @@
 """Test script used by test.TestBash."""
 import argparse
 import argcomplete
+import os
 
 
 def complete_cont(*args, **kwargs):
+    assert 'COMP_TYPE' in os.environ
     return ['foo=', 'bar/', 'baz:']
 
 
