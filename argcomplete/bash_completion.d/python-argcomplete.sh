@@ -40,6 +40,7 @@ _python_argcomplete_global() {
         COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
+            COMP_TYPE="$COMP_TYPE" \
             _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
             "$executable" 8>&1 9>&2 1>/dev/null 2>&1) )
