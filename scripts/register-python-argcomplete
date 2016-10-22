@@ -30,9 +30,12 @@ _python_argcomplete() {
                   COMP_TYPE="$COMP_TYPE" \
                   _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
                   _ARGCOMPLETE=1 \
+                  _ARGCOMPLETE_SUPPRESS_SPACE=1 \
                   "$1" 8>&1 9>&2 1>/dev/null 2>/dev/null) )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
+    elif [[ "$COMPREPLY" =~ [=/:]$ ]]; then
+        compopt -o nospace
     fi
 }
 complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
@@ -67,7 +70,7 @@ if len(sys.argv) == 1:
 args = parser.parse_args()
 
 if args.complete_arguments is None:
-    complete_options = '-o nospace -o default' if args.use_defaults else '-o nospace'
+    complete_options = '-o default' if args.use_defaults else '-o nospace'
 else:
     complete_options = " ".join(args.complete_arguments)
 
