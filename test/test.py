@@ -751,90 +751,150 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.prefix('"a\`b'), 'a`b')
 
 
-class TestBash(unittest.TestCase):
+class _TestSh(object):
+    sh = None
+    expected_failures = []
+
+    @classmethod
+    def setUpClass(cls, *args, **kwargs):
+        for name in cls.expected_failures:
+            test = getattr(cls, name)
+            @unittest.expectedFailure
+            def wrapped(self):
+                test(self)
+            setattr(cls, name, wrapped)
+        super(_TestSh, cls).setUpClass(*args, **kwargs)
+
     def setUp(self):
-        bash = pexpect.replwrap.bash()
-        path = ':'.join(['$PATH', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
-        bash.run_command('export PATH=' + path)
-        bash.run_command('export PYTHONPATH=' + BASE_DIR)
-        bash.run_command('eval "$(register-python-argcomplete prog)"')
-        self.bash = bash
+        raise NotImplementedError
 
     def tearDown(self):
         with self.assertRaises(pexpect.EOF):
-            self.bash.run_command('exit')
+            self.sh.run_command('exit')
+            # tcsh doesn't seem to die immediately.
+            self.sh.run_command('')
 
     def test_simple_completion(self):
-        self.assertEqual(self.bash.run_command('prog basic f\t'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('prog basic f\t'), 'foo\r\n')
 
     def test_partial_completion(self):
-        self.assertEqual(self.bash.run_command('prog basic b\tr'), 'bar\r\n')
+        self.assertEqual(self.sh.run_command('prog basic b\tr'), 'bar\r\n')
 
     def test_single_quoted_completion(self):
-        self.assertEqual(self.bash.run_command("prog basic 'f\t"), 'foo\r\n')
+        self.assertEqual(self.sh.run_command("prog basic 'f\t"), 'foo\r\n')
 
     def test_double_quoted_completion(self):
-        self.assertEqual(self.bash.run_command('prog basic "f\t'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('prog basic "f\t'), 'foo\r\n')
 
     def test_unquoted_space(self):
-        self.assertEqual(self.bash.run_command('prog space f\t'), 'foo bar\r\n')
+        self.assertEqual(self.sh.run_command('prog space f\t'), 'foo bar\r\n')
 
     def test_quoted_space(self):
-        self.assertEqual(self.bash.run_command('prog space "f\t'), 'foo bar\r\n')
+        self.assertEqual(self.sh.run_command('prog space "f\t'), 'foo bar\r\n')
 
     def test_continuation(self):
         # This produces 'prog basic foo --', and '--' is ignored.
-        self.assertEqual(self.bash.run_command('prog basic f\t--'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('prog basic f\t--'), 'foo\r\n')
         # These do not insert a space, so the '--' is part of the token.
-        self.assertEqual(self.bash.run_command('prog cont f\t--'), 'foo=--\r\n')
-        self.assertEqual(self.bash.run_command('prog cont bar\t--'), 'bar/--\r\n')
-        self.assertEqual(self.bash.run_command('prog cont baz\t--'), 'baz:--\r\n')
+        self.assertEqual(self.sh.run_command('prog cont f\t--'), 'foo=--\r\n')
+        self.assertEqual(self.sh.run_command('prog cont bar\t--'), 'bar/--\r\n')
+        self.assertEqual(self.sh.run_command('prog cont baz\t--'), 'baz:--\r\n')
 
-    @unittest.expectedFailure
     def test_quoted_exact(self):
-        self.assertEqual(self.bash.run_command('prog basic "f\t--'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('prog basic "f\t--'), 'foo\r\n')
 
     def test_special_characters(self):
-        self.assertEqual(self.bash.run_command('prog spec a\tc'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command('prog spec d\tf'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec a\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog spec d\tf'), 'd$e$f\r\n')
 
     def test_special_characters_single_quoted(self):
-        self.assertEqual(self.bash.run_command("prog spec 'a\tc'"), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command("prog spec 'd\tf'"), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command("prog spec 'a\tc'"), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command("prog spec 'd\tf'"), 'd$e$f\r\n')
 
     def test_special_characters_double_quoted(self):
-        self.assertEqual(self.bash.run_command('prog spec "a\tc"'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command('prog spec "d\tf"'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec "a\tc"'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog spec "d\tf"'), 'd$e$f\r\n')
 
     def test_parse_special_characters(self):
-        self.assertEqual(self.bash.run_command('prog spec a:b:\tc'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command('prog spec a:b\tc'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command("prog spec 'a:b\tc\t"), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command('prog spec "a:b\tc\t'), 'a:b:c\r\n')
-        self.assertEqual(self.bash.run_command("prog spec 'd$e\tf\t"), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec a:b:\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog spec a:b\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command("prog spec 'a:b\tc\t"), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog spec "a:b\tc\t'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command("prog spec 'd$e\tf\t"), 'd$e$f\r\n')
 
-    @unittest.expectedFailure
     def test_parse_special_characters_dollar(self):
         # my_shlex.shlex splits on '$'.
-        self.assertEqual(self.bash.run_command('prog spec d$e$\tf'), 'd$e$f\r\n')
-        self.assertEqual(self.bash.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec d$e$\tf'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
         # First tab expands to 'd\$e\$'; completion works with 'd$' but not 'd\$'.
-        self.assertEqual(self.bash.run_command('prog spec "d$e\tf\t'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec "d$e\tf\t'), 'd$e$f\r\n')
 
-    @unittest.expectedFailure
     def test_exclamation_in_double_quotes(self):
         # Exclamation marks cannot be properly escaped within double quotes.
         # 'a!b' == "a"\!"b"
-        self.assertEqual(self.bash.run_command('prog spec "x\t'), 'x!x\r\n')
+        self.assertEqual(self.sh.run_command('prog spec "x\t'), 'x!x\r\n')
 
     def test_single_quotes_in_double_quotes(self):
-        self.assertEqual(self.bash.run_command('prog quote "1\t'), "1'1\r\n")
+        self.assertEqual(self.sh.run_command('prog quote "1\t'), "1'1\r\n")
 
-    @unittest.expectedFailure
     def test_single_quotes_in_single_quotes(self):
         # Single quotes cannot be escaped within single quotes.
         # "a'b" == 'a'\''b'
-        self.assertEqual(self.bash.run_command("prog quote '1\t"), "1'1\r\n")
+        self.assertEqual(self.sh.run_command("prog quote '1\t"), "1'1\r\n")
+
+
+class TestBash(_TestSh, unittest.TestCase):
+    expected_failures = [
+        'test_quoted_exact',
+        'test_parse_special_characters_dollar',
+        'test_exclamation_in_double_quotes',
+        'test_single_quotes_in_single_quotes',
+    ]
+
+    def setUp(self):
+        sh = pexpect.replwrap.bash()
+        path = ':'.join(['$PATH', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
+        sh.run_command('export PATH={0}'.format(path))
+        sh.run_command('export PYTHONPATH={0}'.format(BASE_DIR))
+        sh.run_command('eval "$(register-python-argcomplete prog)"')
+        self.sh = sh
+
+
+class TestTcsh(_TestSh, unittest.TestCase):
+    expected_failures = [
+        'test_unquoted_space',
+        'test_quoted_space',
+        'test_continuation',
+        'test_special_characters',
+        'test_special_characters_single_quoted',
+        'test_special_characters_double_quoted',
+        'test_parse_special_characters',
+        'test_parse_special_characters_dollar',
+        'test_exclamation_in_double_quotes',
+    ]
+
+    def setUp(self):
+        sh = Shell('tcsh')
+        path = ' '.join(['$path', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
+        sh.run_command('set path = ({0})'.format(path))
+        sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
+        sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
+        self.sh = sh
+
+
+class Shell(object):
+    def __init__(self, shell):
+        self.child = pexpect.spawn(shell, encoding='utf-8')
+
+    def run_command(self, command):
+        try:
+            self.child.sendline(r"echo -n \#\#\#; {0}; echo -n \#\#\#".format(command))
+            self.child.expect_exact('###', timeout=1)
+            self.child.expect_exact('###', timeout=1)
+            return self.child.before
+        finally:
+            # Send Ctrl+C in case we get stuck.
+            self.child.sendline('\x03')
 
 
 if __name__ == "__main__":
