@@ -647,8 +647,6 @@ class TestArgcompleteREPL(unittest.TestCase):
     def run_completer(self, parser, completer, command, point=None, **kwargs):
         cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(command)
 
-        comp_words.insert(0, sys.argv[0])
-
         completions = completer._get_completions(
             comp_words, cword_prefix, cword_prequote, first_colon_pos)
 
@@ -669,16 +667,40 @@ class TestArgcompleteREPL(unittest.TestCase):
 
     def test_repl_parse_after_complete(self):
         p = ArgumentParser()
-        p.add_argument("--foo")
-        p.add_argument("--bar")
+        p.add_argument("--foo", required=True)
+        p.add_argument("bar", choices=["bar"])
 
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog ")
-        assert(set(completions) == set(["-h", "--help", "--foo", "--bar"]))
+        assert(set(completions) == set(["-h", "--help", "--foo", "bar"]))
 
-        args = p.parse_args(["--foo", "spam"])
+        args = p.parse_args(["--foo", "spam", "bar"])
         assert(args.foo == "spam")
+        assert(args.bar == "bar")
+
+        # Both options are required - check the parser still enforces this.
+        with self.assertRaises(SystemExit):
+            p.parse_args(["--foo", "spam"])
+        with self.assertRaises(SystemExit):
+            p.parse_args(["bar"])
+
+    def test_repl_subparser_parse_after_complete(self):
+        p = ArgumentParser()
+        sp = p.add_subparsers().add_parser("foo")
+        sp.add_argument("bar", choices=["bar"])
+
+        c = CompletionFinder(p, always_complete_options=True)
+
+        completions = self.run_completer(p, c, "prog foo ")
+        assert(set(completions) == set(["-h", "--help", "bar"]))
+
+        args = p.parse_args(["foo", "bar"])
+        assert(args.bar == "bar")
+
+        # "bar" is required - check the parser still enforces this.
+        with self.assertRaises(SystemExit):
+            p.parse_args(["foo"])
 
     def test_repl_subcommand(self):
         p = ArgumentParser()
@@ -701,12 +723,12 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         expected_outputs = (
-            ("", ["-h", "--help", "--foo", "--bar", "list", "show", "set"]),
-            ("li", ["list "]),
-            ("s", ["show", "set"]),
-            ("show ", ["--test", "depth", "-h", "--help"]),
-            ("show d", ["depth "]),
-            ("show depth ", ["-h", "--help"]),
+            ("prog ", ["-h", "--help", "--foo", "--bar", "list", "show", "set"]),
+            ("prog li", ["list "]),
+            ("prog s", ["show", "set"]),
+            ("prog show ", ["--test", "depth", "-h", "--help"]),
+            ("prog show d", ["depth "]),
+            ("prog show depth ", ["-h", "--help"]),
         )
 
         for cmd, output in expected_outputs:
@@ -719,13 +741,13 @@ class TestArgcompleteREPL(unittest.TestCase):
 
         c = CompletionFinder(p, always_complete_options=True)
 
-        self.assertEqual(set(self.run_completer(p, c, "")),
+        self.assertEqual(set(self.run_completer(p, c, "prog ")),
                          set(["-h", "--help", "aa", "bb", "cc"]))
 
-        self.assertEqual(set(self.run_completer(p, c, "aa ")),
+        self.assertEqual(set(self.run_completer(p, c, "prog aa ")),
                          set(["-h", "--help", "d", "e"]))
 
-        self.assertEqual(set(self.run_completer(p, c, "")),
+        self.assertEqual(set(self.run_completer(p, c, "prog ")),
                          set(["-h", "--help", "aa", "bb", "cc"]))
 
 

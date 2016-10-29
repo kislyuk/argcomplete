@@ -59,7 +59,6 @@ def action_is_greedy(action, isoptional=False):
 class IntrospectiveArgumentParser(ArgumentParser):
     ''' The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
-    Lines that contain the string "Disabled by argcomplete" have been commented out.
     '''
 
     def _parse_known_args(self, arg_strings, namespace):
@@ -304,16 +303,14 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
         if positionals:
             self.active_actions.append(positionals[0])  # Added by argcomplete
-            # self.error(_('too few arguments'))  # Disabled by argcomplete
+            self.error(_('too few arguments'))
 
-        # Begin disabled by arg complete
-        # # make sure all required actions were present
-        # for action in self._actions:
-        #     if action.required:
-        #         if action not in seen_actions:
-        #             name = _get_action_name(action)
-        #             self.error(_('argument %s is required') % name)
-        # End disabled by argcomplete
+        # make sure all required actions were present
+        for action in self._actions:
+            if action.required:
+                if action not in seen_actions:
+                    name = _get_action_name(action)
+                    self.error(_('argument %s is required') % name)
 
         # make sure all required groups had one option present
         for group in self._mutually_exclusive_groups:
