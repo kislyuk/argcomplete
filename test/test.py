@@ -83,16 +83,16 @@ class TestArgcomplete(unittest.TestCase):
         p.add_argument("--bar")
 
         completions = self.run_completer(p, "prog ")
-        self.assertEquals(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
 
         completions = self.run_completer(p, "prog -")
-        self.assertEquals(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
 
         completions = self.run_completer(p, "prog ", always_complete_options=False)
-        self.assertEquals(set(completions), set([""]))
+        self.assertEqual(set(completions), set([""]))
 
         completions = self.run_completer(p, "prog -", always_complete_options=False)
-        self.assertEquals(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
 
     def test_choices(self):
         def make_parser():
