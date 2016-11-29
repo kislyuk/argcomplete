@@ -1,5 +1,5 @@
 lint:
-	./setup.py flake8 -v
+	./setup.py flake8
 
 test: lint
 	python test/test.py -v
