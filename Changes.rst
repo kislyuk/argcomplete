@@ -1,3 +1,14 @@
+Changes for v1.7.0 (2016-11-30)
+===============================
+
+-  Restore parser to its original state to allow reuse after completion
+   (#150).
+
+-  Expose COMP\_TYPE environment variable (#157). Thanks to Matt Clay
+   (@mattclay).
+
+-  Test infrastructure and documentation improvements.
+
 Changes for v1.6.0 (2016-10-20)
 ===============================
 
