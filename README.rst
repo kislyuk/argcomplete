@@ -43,18 +43,6 @@ Shellcode (only necessary if global completion is not activated - see `Global co
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
-Tcsh Support
-------------
-To activate completions for tcsh use::
-
-    eval `register-python-argcomplete --shell tcsh my-awesome-script.py`
-
-The ``python-argcomplete-tcsh`` script provides completions for tcsh.
-The following is an example of the tcsh completion syntax for
-``my-awesome-script.py`` emitted by ``register-python-argcomplete``::
-
-    complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
-
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
@@ -248,6 +236,18 @@ Otherwise, you can redirect its shellcode output into a file::
 The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
+
+Tcsh Support
+------------
+To activate completions for tcsh use::
+
+    eval `register-python-argcomplete --shell tcsh my-awesome-script.py`
+
+The ``python-argcomplete-tcsh`` script provides completions for tcsh.
+The following is an example of the tcsh completion syntax for
+``my-awesome-script.py`` emitted by ``register-python-argcomplete``::
+
+    complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
 
 Debugging
 ---------
