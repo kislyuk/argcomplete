@@ -636,6 +636,15 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_append_space(self):
+        def make_parser():
+            parser = ArgumentParser(add_help=False)
+            parser.add_argument("foo", choices=["bar"])
+            return parser
+
+        self.assertEqual(self.run_completer(make_parser(), "prog "), ["bar "])
+        self.assertEqual(self.run_completer(make_parser(), "prog ", append_space=False), ["bar"])
+
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
@@ -867,19 +876,24 @@ class _TestSh(object):
 
 class TestBash(_TestSh, unittest.TestCase):
     expected_failures = [
-        'test_quoted_exact',
         'test_parse_special_characters_dollar',
         'test_exclamation_in_double_quotes',
         'test_single_quotes_in_single_quotes',
     ]
+
+    install_cmd = 'eval "$(register-python-argcomplete prog)"'
 
     def setUp(self):
         sh = pexpect.replwrap.bash()
         path = ':'.join(['$PATH', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
         sh.run_command('export PATH={0}'.format(path))
         sh.run_command('export PYTHONPATH={0}'.format(BASE_DIR))
-        sh.run_command('eval "$(register-python-argcomplete prog)"')
+        sh.run_command(self.install_cmd)
         self.sh = sh
+
+
+class TestBashGlobal(TestBash):
+    install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
 
 class TestTcsh(_TestSh, unittest.TestCase):
