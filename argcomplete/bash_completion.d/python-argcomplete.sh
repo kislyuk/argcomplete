@@ -43,9 +43,12 @@ _python_argcomplete_global() {
             COMP_TYPE="$COMP_TYPE" \
             _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
+            _ARGCOMPLETE_SUPPRESS_SPACE=1 \
             "$executable" 8>&1 9>&2 1>/dev/null 2>&1) )
         if [[ $? != 0 ]]; then
             unset COMPREPLY
+        elif [[ "$COMPREPLY" =~ [=/:]$ ]]; then
+            compopt -o nospace
         fi
     else
         type -t _completion_loader | grep -q 'function' && _completion_loader "$@"

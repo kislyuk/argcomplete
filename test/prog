@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 """Test script used by test.TestBash."""
 import argparse
 import argcomplete

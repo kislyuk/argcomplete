@@ -106,7 +106,7 @@ class CompletionFinder(object):
     :meth:`CompletionFinder.__call__()`.
     """
     def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
-                 print_suppressed=False, default_completer=FilesCompleter()):
+                 print_suppressed=False, default_completer=FilesCompleter(), append_space=None):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
         self.exclude = exclude
@@ -117,9 +117,13 @@ class CompletionFinder(object):
         self.completing = False
         self._display_completions = {}
         self.default_completer = default_completer
+        if append_space is None:
+            append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
+        self.append_space = append_space
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None, validator=None, print_suppressed=False, default_completer=FilesCompleter()):
+                 exclude=None, validator=None, print_suppressed=False, append_space=None,
+                 default_completer=FilesCompleter()):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
@@ -143,6 +147,9 @@ class CompletionFinder(object):
         :param print_suppressed:
             Whether or not to autocomplete options that have the ``help=argparse.SUPPRESS`` keyword argument set.
         :type print_suppressed: boolean
+        :param append_space:
+            Whether to append a space to unique matches. The default is ``True``.
+        :type append_space: boolean
 
         .. note::
             If you are not subclassing CompletionFinder to override its behaviors,
@@ -155,7 +162,8 @@ class CompletionFinder(object):
         their execution is otherwise desirable.
         """
         self.__init__(argument_parser, always_complete_options=always_complete_options, exclude=exclude,
-                      validator=validator, print_suppressed=print_suppressed, default_completer=default_completer)
+                      validator=validator, print_suppressed=print_suppressed, append_space=append_space,
+                      default_completer=default_completer)
 
         if "_ARGCOMPLETE" not in os.environ:
             # not an argument completion invocation
@@ -521,13 +529,14 @@ class CompletionFinder(object):
         for char in special_chars:
             completions = [c.replace(char, "\\" + char) for c in completions]
 
-        # Note: similar functionality in bash is turned off by supplying the "-o nospace" option to complete.
-        # We can't use that functionality because bash is not smart enough to recognize continuation characters (/) for
-        # which no space should be added.
-        continuation_chars = "=/:"
-        if len(completions) == 1 and completions[0][-1] not in continuation_chars:
-            if cword_prequote == "" and not completions[0].endswith(" "):
-                completions[0] += " "
+        if self.append_space:
+            # Similar functionality in bash was previously turned off by supplying the "-o nospace" option to complete.
+            # Now it is conditionally disabled using "compopt -o nospace" if the match ends in a continuation character.
+            # This code is retained for environments where this isn't done natively.
+            continuation_chars = "=/:"
+            if len(completions) == 1 and completions[0][-1] not in continuation_chars:
+                if cword_prequote == "" and not completions[0].endswith(" "):
+                    completions[0] += " "
 
         return completions
 
