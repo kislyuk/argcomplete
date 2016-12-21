@@ -15,7 +15,6 @@ matrix:
       os: osx
 
 before_install:
-  - if [ "$TRAVIS_PYTHON_VERSION" == 2.6 ]; then pip --quiet install unittest2; fi
   - pip --quiet install coverage pexpect
 
 install:
@@ -35,7 +34,6 @@ after_success:
 
 matrix:
   allow_failures:
-    - python: 2.6
     - python: 3.2
     - python: pypy
 
