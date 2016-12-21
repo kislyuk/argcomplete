@@ -122,7 +122,8 @@ class CompletionFinder(object):
         self.append_space = append_space
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None, validator=None, print_suppressed=False, append_space=None):
+                 exclude=None, validator=None, print_suppressed=False, append_space=None,
+                 default_completer=FilesCompleter()):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
@@ -161,7 +162,8 @@ class CompletionFinder(object):
         their execution is otherwise desirable.
         """
         self.__init__(argument_parser, always_complete_options=always_complete_options, exclude=exclude,
-                      validator=validator, print_suppressed=print_suppressed, append_space=append_space)
+                      validator=validator, print_suppressed=print_suppressed, append_space=append_space,
+                      default_completer=default_completer)
 
         if "_ARGCOMPLETE" not in os.environ:
             # not an argument completion invocation
