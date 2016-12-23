@@ -660,7 +660,6 @@ class TestArgcomplete(unittest.TestCase):
             ("prog ", ["--foo", "--bar", "--baz", "--no-bar"]),
             ("prog --baz ", ["baz1", "baz2"]),
             ("prog --baz baz1 ", ["--foo", "--bar", "--no-bar"]),
-            ("prog --bar ", ["bar1", "bar2"]),
             ("prog --foo --no-bar ", ["--foo", "--bar", "--baz"]),
             ("prog --foo --bar bar1 ", ["--foo", "--bar", "--baz", "--no-bar"]),
         )
