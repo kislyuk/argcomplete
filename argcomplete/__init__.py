@@ -612,7 +612,7 @@ class ExclusiveCompletionFinder(CompletionFinder):
         append_classes = (argparse._AppendAction, argparse._AppendConstAction)
         if action._orig_class in append_classes:
             return True
-        
+
         if action not in parser._seen_non_default_actions:
             return True
 
