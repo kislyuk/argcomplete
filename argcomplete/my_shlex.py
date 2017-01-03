@@ -82,8 +82,9 @@ class shlex:
             t = self.wordchars.maketrans(dict.fromkeys(punctuation_chars))
             self.wordchars = self.wordchars.translate(t)
 
-        # Modified by argcomplete: Record last colon position
-        self.first_colon_pos = None
+        # Modified by argcomplete: Record last wordbreak position
+        self.last_wordbreak_pos = None
+        self.wordbreaks = ''
 
     def push_token(self, tok):
         "Push a token onto the stack popped by the get_token method"
@@ -148,6 +149,8 @@ class shlex:
         return raw
 
     def read_token(self):
+        # Modified by argcomplete: Record last wordbreak position
+        self.last_wordbreak_pos = None
         quoted = False
         escapedstate = ' '
         while True:
@@ -269,9 +272,9 @@ class shlex:
                 elif (nextchar in self.wordchars or nextchar in self.quotes
                       or self.whitespace_split):
                     self.token += nextchar
-                    # Modified by argcomplete: Record last colon position
-                    if nextchar == ':':
-                        self.first_colon_pos = len(self.token) - 1
+                    # Modified by argcomplete: Record last wordbreak position
+                    if nextchar in self.wordbreaks:
+                        self.last_wordbreak_pos = len(self.token) - 1
                 else:
                     if self.punctuation_chars:
                         self._pushback_chars.append(nextchar)
