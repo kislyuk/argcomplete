@@ -1,10 +1,10 @@
 language: python
 python:
   - 2.7
-  - 3.2
   - 3.3
   - 3.4
   - 3.5
+  - 3.6
   - pypy
   - pypy3
 
@@ -14,28 +14,16 @@ matrix:
       python: 2.7
       os: osx
 
-before_install:
-  - pip --quiet install coverage pexpect
-
 install:
-  - pip install flake8
-  - python setup.py build
-  - python setup.py sdist
-  - python setup.py bdist
-  - python setup.py bdist_rpm
-  - python setup.py install
+  - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then python setup.py bdist_rpm; fi
+  - make install
 
 script:
   - make lint
-  - coverage run --source=argcomplete ./test/test.py
+  - make test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-
-matrix:
-  allow_failures:
-    - python: 3.2
-    - python: pypy
 
 sudo: false
 
