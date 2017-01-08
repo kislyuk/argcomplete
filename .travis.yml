@@ -17,6 +17,7 @@ matrix:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install bash; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install tcsh; fi
 
 install:
   - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then python setup.py bdist_rpm; fi

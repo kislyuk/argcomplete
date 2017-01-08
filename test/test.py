@@ -917,7 +917,6 @@ class TestBashGlobal(TestBash):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
 
-@unittest.skip
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_unquoted_space',
