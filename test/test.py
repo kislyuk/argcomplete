@@ -907,7 +907,8 @@ class TestBash(_TestSh, unittest.TestCase):
         path = ':'.join(['$PATH', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
         sh.run_command('export PATH={0}'.format(path))
         sh.run_command('export PYTHONPATH={0}'.format(BASE_DIR))
-        sh.run_command(self.install_cmd)
+        output = sh.run_command(self.install_cmd)
+        self.assertEqual(output, '')
         self.sh = sh
 
 
@@ -933,7 +934,8 @@ class TestTcsh(_TestSh, unittest.TestCase):
         path = ' '.join(['$path', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
         sh.run_command('set path = ({0})'.format(path))
         sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
-        sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
+        output = sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
+        self.assertEqual(output, '')
         self.sh = sh
 
     def tearDown(self):
