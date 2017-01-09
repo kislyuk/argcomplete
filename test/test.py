@@ -823,8 +823,6 @@ class _TestSh(object):
     def tearDown(self):
         with self.assertRaises(pexpect.EOF):
             self.sh.run_command('exit')
-            # tcsh doesn't seem to die immediately.
-            self.sh.run_command('')
 
     def test_simple_completion(self):
         self.assertEqual(self.sh.run_command('prog basic f\t'), 'foo\r\n')
@@ -917,7 +915,6 @@ class TestBashGlobal(TestBash):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
 
-@unittest.skip
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_unquoted_space',
@@ -938,6 +935,13 @@ class TestTcsh(_TestSh, unittest.TestCase):
         sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
         sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
         self.sh = sh
+
+    def tearDown(self):
+        # The shell wrapper is fragile; exactly which exception is raised
+        # differs depending on environment.
+        with self.assertRaises((pexpect.EOF, OSError)):
+            self.sh.run_command('exit')
+            self.sh.run_command('')
 
 
 class Shell(object):
