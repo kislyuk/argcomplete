@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse
+import os, sys, shutil, argparse, subprocess
 import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, mkdtemp
 
@@ -27,6 +27,9 @@ else:
     import unittest2 as unittest
 
 IFS = "\013"
+
+BASH_VERSION = subprocess.check_output(['bash', '-c', 'echo $BASH_VERSION']).decode()
+BASH_MAJOR_VERSION = int(BASH_VERSION.split('.')[0])
 
 
 class TempDir(object):
@@ -842,6 +845,7 @@ class _TestSh(object):
     def test_quoted_space(self):
         self.assertEqual(self.sh.run_command('prog space "f\t'), 'foo bar\r\n')
 
+    @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'compopt not supported')
     def test_continuation(self):
         # This produces 'prog basic foo --', and '--' is ignored.
         self.assertEqual(self.sh.run_command('prog basic f\t--'), 'foo\r\n')
@@ -904,7 +908,7 @@ class TestBash(_TestSh, unittest.TestCase):
 
     def setUp(self):
         sh = pexpect.replwrap.bash()
-        path = ':'.join(['$PATH', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
+        path = ':'.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$PATH'])
         sh.run_command('export PATH={0}'.format(path))
         sh.run_command('export PYTHONPATH={0}'.format(BASE_DIR))
         output = sh.run_command(self.install_cmd)
@@ -912,6 +916,7 @@ class TestBash(_TestSh, unittest.TestCase):
         self.sh = sh
 
 
+@unittest.skipIf(BASH_MAJOR_VERSION < 4, 'complete -D not supported')
 class TestBashGlobal(TestBash):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
@@ -931,7 +936,7 @@ class TestTcsh(_TestSh, unittest.TestCase):
 
     def setUp(self):
         sh = Shell('tcsh')
-        path = ' '.join(['$path', os.path.join(BASE_DIR, 'scripts'), TEST_DIR])
+        path = ' '.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$path'])
         sh.run_command('set path = ({0})'.format(path))
         sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
         output = sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
