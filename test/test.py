@@ -845,7 +845,6 @@ class _TestSh(object):
     def test_quoted_space(self):
         self.assertEqual(self.sh.run_command('prog space "f\t'), 'foo bar\r\n')
 
-    @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'compopt not supported')
     def test_continuation(self):
         # This produces 'prog basic foo --', and '--' is ignored.
         self.assertEqual(self.sh.run_command('prog basic f\t--'), 'foo\r\n')
@@ -903,6 +902,9 @@ class TestBash(_TestSh, unittest.TestCase):
         'test_exclamation_in_double_quotes',
         'test_single_quotes_in_single_quotes',
     ]
+    if BASH_MAJOR_VERSION < 4:
+        # This requires compopt which is not available in 3.x.
+        expected_failures.append('test_quoted_exact')
 
     install_cmd = 'eval "$(register-python-argcomplete prog)"'
 

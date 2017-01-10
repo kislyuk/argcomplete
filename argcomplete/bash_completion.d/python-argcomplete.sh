@@ -37,17 +37,19 @@ _python_argcomplete_global() {
 
     if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
         local IFS=$(echo -e '\v')
+        compopt +o nospace 2> /dev/null
+        local SUPPRESS_SPACE=$?
         COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
             COMP_TYPE="$COMP_TYPE" \
             _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
-            _ARGCOMPLETE_SUPPRESS_SPACE=1 \
+            _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
             "$executable" 8>&1 9>&2 1>/dev/null 2>&1) )
         if [[ $? != 0 ]]; then
             unset COMPREPLY
-        elif [[ "$COMPREPLY" =~ [=/:]$ ]]; then
+        elif [[ $SUPPRESS_SPACE == 0 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
             compopt -o nospace
         fi
     else
