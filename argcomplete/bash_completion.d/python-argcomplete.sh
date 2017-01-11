@@ -37,8 +37,10 @@ _python_argcomplete_global() {
 
     if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
         local IFS=$(echo -e '\v')
-        compopt +o nospace 2> /dev/null
-        local SUPPRESS_SPACE=$?
+        local SUPPRESS_SPACE=0
+        if compopt +o nospace 2> /dev/null; then
+            SUPPRESS_SPACE=1
+        fi
         COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
@@ -49,7 +51,7 @@ _python_argcomplete_global() {
             "$executable" 8>&1 9>&2 1>/dev/null 2>&1) )
         if [[ $? != 0 ]]; then
             unset COMPREPLY
-        elif [[ $SUPPRESS_SPACE == 0 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
+        elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
             compopt -o nospace
         fi
     else

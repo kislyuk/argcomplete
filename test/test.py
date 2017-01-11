@@ -918,6 +918,12 @@ class TestBash(_TestSh, unittest.TestCase):
         self.assertEqual(output, '')
         self.sh = sh
 
+    def test_one_space_after_exact(self):
+        """Test exactly one space is appended after an exact match."""
+        # Actual command run is 'echo "prog basic foo "'.
+        result = self.sh.run_command('prog basic f\t"\1echo "')
+        self.assertEqual(result, 'prog basic foo \r\n')
+
 
 @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'complete -D not supported')
 class TestBashGlobal(TestBash):
