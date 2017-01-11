@@ -39,7 +39,7 @@ elif not os.path.exists(args.dest) and args.dest != '-':
 activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete.sh')
 
 if args.complete_arguments is None:
-    complete_options = '-o default -o bashdefault' if args.use_defaults else '-o bashdefault'
+    complete_options = '-o nospace -o default -o bashdefault' if args.use_defaults else '-o nospace -o bashdefault'
 else:
     complete_options = " ".join(args.complete_arguments)
 complete_call = "complete{} -D -F _python_argcomplete_global".format(" " + complete_options if complete_options else "")
