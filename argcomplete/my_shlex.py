@@ -13,7 +13,7 @@
 # iterator interface by Gustavo Niemeyer, April 2003.
 # changes to tokenize more like Posix shells by Vinay Sajip, January 2012.
 
-import os.path, sys, re
+import os.path, sys
 from collections import deque
 
 # Note: cStringIO is not compatible with Unicode
@@ -28,16 +28,6 @@ except NameError:
     basestring = str
 
 __all__ = ["shlex", "split"]
-
-class UnicodeWordchars:
-    ''' A replacement for shlex.wordchars that also matches (__contains__) any Unicode wordchars.
-    '''
-    def __init__(self, wordchars):
-        self.wordchars = wordchars
-        self.uw_regex = re.compile('\w', flags=re.UNICODE)
-
-    def __contains__(self, c):
-        return c in self.wordchars or self.uw_regex.match(c)
 
 class shlex:
     "A lexical analyzer class for simple shell-like syntaxes."
@@ -87,9 +77,6 @@ class shlex:
             for c in punctuation_chars:
                 if c in self.wordchars:
                     self.wordchars.remove(c)
-
-        if self.posix:
-            self.wordchars = UnicodeWordchars(self.wordchars)
 
         self.first_colon_pos = None
 

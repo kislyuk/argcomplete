@@ -795,7 +795,6 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.prefix('a\$b'), 'a$b')
         self.assertEqual(self.prefix('a\`b'), 'a`b')
 
-    @unittest.expectedFailure
     def test_unescaped_special(self):
         self.assertEqual(self.prefix('a$b'), 'a$b')
         self.assertEqual(self.prefix('a`b'), 'a`b')
@@ -804,6 +803,9 @@ class TestSplitLine(unittest.TestCase):
     def test_escaped_special_in_double_quotes(self):
         self.assertEqual(self.prefix('"a\$b'), 'a$b')
         self.assertEqual(self.prefix('"a\`b'), 'a`b')
+
+    def test_punctuation(self):
+        self.assertEqual(self.prefix('a,'), 'a,')
 
 
 class _TestSh(object):
@@ -873,12 +875,11 @@ class _TestSh(object):
         self.assertEqual(self.sh.run_command('prog spec a:b\tc'), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command("prog spec 'a:b\tc\t"), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command('prog spec "a:b\tc\t'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog spec d$e$\tf'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
         self.assertEqual(self.sh.run_command("prog spec 'd$e\tf\t"), 'd$e$f\r\n')
 
     def test_parse_special_characters_dollar(self):
-        # my_shlex.shlex splits on '$'.
-        self.assertEqual(self.sh.run_command('prog spec d$e$\tf'), 'd$e$f\r\n')
-        self.assertEqual(self.sh.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
         # First tab expands to 'd\$e\$'; completion works with 'd$' but not 'd\$'.
         self.assertEqual(self.sh.run_command('prog spec "d$e\tf\t'), 'd$e$f\r\n')
 

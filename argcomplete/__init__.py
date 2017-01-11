@@ -53,7 +53,8 @@ class ArgcompleteException(Exception):
 def split_line(line, point=None):
     if point is None:
         point = len(line)
-    lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+    lexer = shlex.shlex(line, posix=True)
+    lexer.whitespace_split = True
     words = []
 
     def split_word(word):
