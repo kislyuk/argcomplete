@@ -308,6 +308,25 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(c("def/k"), set([]))
         return
 
+    def test_default_completer(self):
+        def make_parser():
+            parser = ArgumentParser(add_help=False)
+            parser.add_argument("--one")
+            parser.add_argument("--many", nargs="+")
+            return parser
+
+        with TempDir(prefix="test_dir_dc", dir="."):
+            os.mkdir("test")
+
+            expected_outputs = (
+                ("prog --one ", ["test/"]),
+                ("prog --many ", ["test/"]),
+                ("prog --many test/ ", ["test/", "--one", "--many"]),
+            )
+
+            for cmd, output in expected_outputs:
+                self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_subparsers(self):
         def make_parser():
             parser = ArgumentParser()
