@@ -5,7 +5,7 @@ lint: test_deps
 	./setup.py flake8
 
 test: lint test_deps
-	coverage run --source=argcomplete ./test/test.py -v
+	coverage run --source=argcomplete --omit=argcomplete/my_shlex.py ./test/test.py -v
 
 init_docs:
 	cd docs; sphinx-quickstart
