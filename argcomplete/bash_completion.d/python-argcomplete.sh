@@ -20,7 +20,6 @@ _python_argcomplete_global() {
     if [[ "$executable" == python* ]] || [[ "$executable" == pypy* ]]; then
         if [[ -f "${COMP_WORDS[1]}" ]] && (head -c 1024 "${COMP_WORDS[1]}" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
             local ARGCOMPLETE=2
-            executable="${COMP_WORDS[1]}"
         else
             compopt +o nospace
             return
@@ -51,7 +50,7 @@ _python_argcomplete_global() {
             _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
             _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-            "$executable" 8>&1 9>&2 1>/dev/null 2>&1) )
+            "$executable" "${COMP_WORDS[@]:1:ARGCOMPLETE}" 8>&1 9>&2 1>/dev/null 2>&1) )
         if [[ $? != 0 ]]; then
             unset COMPREPLY
         elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then

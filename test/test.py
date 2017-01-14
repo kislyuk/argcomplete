@@ -983,6 +983,16 @@ class TestBashGlobal(TestBash):
         self.sh.run_command('cd ' + TEST_DIR)
         self.assertEqual(self.sh.run_command('python ./pro\tbasic f\t'), 'foo\r\n')
 
+    def test_python_not_executable(self):
+        """Test completing a script that cannot be run directly."""
+        prog = os.path.join(TEST_DIR, 'prog')
+        with TempDir(prefix='test_dir_py', dir='.'):
+            shutil.copy(prog, '.')
+            self.sh.run_command('cd ' + os.getcwd())
+            self.sh.run_command('chmod -x ./prog')
+            self.assertIn('Permission denied', self.sh.run_command('./prog'))
+            self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+
 
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [
