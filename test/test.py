@@ -847,7 +847,7 @@ class _TestSh(object):
         for name in cls.expected_failures:
             test = getattr(cls, name)
             @unittest.expectedFailure
-            def wrapped(self):
+            def wrapped(self, test=test):
                 test(self)
             setattr(cls, name, wrapped)
         super(_TestSh, cls).setUpClass(*args, **kwargs)
