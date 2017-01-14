@@ -689,6 +689,17 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(parser, cmd, completer=completer)), set(output))
 
+    def test_escape_special_chars(self):
+        def make_parser():
+            parser = ArgumentParser(add_help=False)
+            parser.add_argument("foo", choices=["bar<$>baz"])
+            return parser
+
+        self.assertEqual(set(self.run_completer(make_parser(), "prog ")), {r"bar\<\$\>baz "})
+        os.environ["_ARGCOMPLETE_SHELL"] = "tcsh"
+        self.assertEqual(set(self.run_completer(make_parser(), "prog ")), {"bar<$>baz "})
+
+
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
         pass
@@ -954,12 +965,8 @@ class TestTcsh(_TestSh, unittest.TestCase):
         'test_unquoted_space',
         'test_quoted_space',
         'test_continuation',
-        'test_special_characters',
-        'test_special_characters_single_quoted',
-        'test_special_characters_double_quoted',
         'test_parse_special_characters',
         'test_parse_special_characters_dollar',
-        'test_exclamation_in_double_quotes',
     ]
 
     def setUp(self):

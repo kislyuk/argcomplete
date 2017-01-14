@@ -526,6 +526,9 @@ class CompletionFinder(object):
             special_chars = cword_prequote
             if cword_prequote == '"':
                 special_chars += "`$!"
+        if os.environ.get("_ARGCOMPLETE_SHELL") == "tcsh":
+            # tcsh escapes special characters itself.
+            special_chars = ""
 
         for char in special_chars:
             completions = [c.replace(char, "\\" + char) for c in completions]
