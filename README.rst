@@ -43,6 +43,10 @@ Shellcode (only necessary if global completion is not activated - see `Global co
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
+Note that the script name is passed directly to ``complete``, meaning it is only tab completed when invoked exactly
+as it was registered. The above line will **not** allow you to complete ``./my-awesome-script.py``, or
+``/path/to/my-awesome-script.py``.
+
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
