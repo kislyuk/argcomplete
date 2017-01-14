@@ -61,7 +61,7 @@ class TestArgcomplete(unittest.TestCase):
     def setUp(self):
         self._os_environ = os.environ
         os.environ = os.environ.copy()
-        os.environ["_ARGCOMPLETE"] = "yes"
+        os.environ["_ARGCOMPLETE"] = "1"
         os.environ["_ARC_DEBUG"] = "yes"
         os.environ["IFS"] = IFS
         os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = COMP_WORDBREAKS
@@ -1039,6 +1039,16 @@ class TestBashGlobal(TestBash):
             self.sh.run_command('chmod -x ./prog')
             self.assertIn('Permission denied', self.sh.run_command('./prog'))
             self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+
+    def test_python_module(self):
+        """Test completing a module run with python -m."""
+        prog = os.path.join(TEST_DIR, 'prog')
+        with TempDir(prefix='test_dir_py', dir='.'):
+            os.mkdir('package')
+            open('package/__init__.py', 'w').close()
+            shutil.copy(prog, 'package/prog.py')
+            self.sh.run_command('cd ' + os.getcwd())
+            self.assertEqual(self.sh.run_command('python -m package.prog basic f\t'), 'foo\r\n')
 
 
 class TestTcsh(_TestSh, unittest.TestCase):

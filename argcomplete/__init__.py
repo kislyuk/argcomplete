@@ -203,7 +203,7 @@ class CompletionFinder(object):
         comp_line = ensure_str(comp_line)
         cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
-        if os.environ["_ARGCOMPLETE"] == "2":
+        for _ in range(int(os.environ["_ARGCOMPLETE"]) - 1):
             # Shell hook recognized the first word as the interpreter; discard it
             comp_words.pop(0)
 

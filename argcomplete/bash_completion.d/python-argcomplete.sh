@@ -18,7 +18,13 @@ _python_argcomplete_global() {
 
     local ARGCOMPLETE=0
     if [[ "$executable" == python* ]] || [[ "$executable" == pypy* ]]; then
-        if [[ -f "${COMP_WORDS[1]}" ]] && (head -c 1024 "${COMP_WORDS[1]}" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
+        if [[ "${COMP_WORDS[1]}" == -m ]]; then
+            if "$executable" -m argcomplete._scripts.check_module "${COMP_WORDS[2]}" >/dev/null 2>&1; then
+                ARGCOMPLETE=3
+            else
+                return
+            fi
+        elif [[ -f "${COMP_WORDS[1]}" ]] && (head -c 1024 "${COMP_WORDS[1]}" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
             local ARGCOMPLETE=2
         else
             return
@@ -36,7 +42,7 @@ _python_argcomplete_global() {
         fi
     fi
 
-    if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
+    if [[ $ARGCOMPLETE != 0 ]]; then
         local IFS=$(echo -e '\v')
         COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
