@@ -65,7 +65,9 @@ parser.add_argument(
     choices=('bash', 'tcsh'), default='bash',
     help='output code for the specified shell')
 
-parser.add_argument("executable")
+parser.add_argument(
+    'executable',
+    help='executable to completed (when invoked by exactly this name)')
 
 if len(sys.argv) == 1:
     parser.print_help()
