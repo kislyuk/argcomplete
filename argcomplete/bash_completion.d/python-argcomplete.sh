@@ -20,7 +20,10 @@ _python_argcomplete_global() {
     if [[ "$executable" == python* ]] || [[ "$executable" == pypy* ]]; then
         if [[ -f "${COMP_WORDS[1]}" ]] && (head -c 1024 "${COMP_WORDS[1]}" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
             local ARGCOMPLETE=2
-            set -- "${COMP_WORDS[1]}"
+            executable="${COMP_WORDS[1]}"
+        else
+            compopt +o nospace
+            return
         fi
     elif which "$executable" >/dev/null 2>&1; then
         local SCRIPT_NAME=$(which "$executable")

@@ -975,6 +975,14 @@ class TestBash(_TestSh, unittest.TestCase):
 class TestBashGlobal(TestBash):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
+    def test_python_completion(self):
+        self.sh.run_command('cd ' + TEST_DIR)
+        self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+
+    def test_python_filename_completion(self):
+        self.sh.run_command('cd ' + TEST_DIR)
+        self.assertEqual(self.sh.run_command('python ./pro\tbasic f\t'), 'foo\r\n')
+
 
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [
