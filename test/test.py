@@ -341,10 +341,10 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", ["--help", "eggs", "-h", "spam", "--age"]),
             ("prog --age 1 eggs", ["eggs "]),
-            ("prog --age 2 eggs ", ["on a train", "with a goat", "on a boat", "in the rain", "--help", "-h"]),
-            ("prog eggs ", ["on a train", "with a goat", "on a boat", "in the rain", "--help", "-h"]),
+            ("prog --age 2 eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
+            ("prog eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs \"on a", ['on a train', 'on a boat']),
-            ("prog eggs on\\ a", ["on a train", "on a boat"]),
+            ("prog eggs on\\ a", [r"on\ a\ train", "on\ a\ boat"]),
             ("prog spam ", ["iberico", "ham", "--help", "-h"]),
         )
 
@@ -369,8 +369,8 @@ class TestArgcomplete(unittest.TestCase):
 
         expected_outputs = (
             ("prog ", ["--книга", "-h", "--help"]),
-            ("prog --книга ", ["Трудно быть богом", "Парень из преисподней", "Понедельник начинается в субботу"]),
-            ("prog --книга П", ["Парень из преисподней", "Понедельник начинается в субботу"]),
+            ("prog --книга ", [r"Трудно\ быть\ богом", r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
+            ("prog --книга П", [r"Парень\ из\ преисподней", "Понедельник\ начинается\ в\ субботу"]),
             ("prog --книга Пу", [""]),
         )
 
@@ -692,12 +692,23 @@ class TestArgcomplete(unittest.TestCase):
     def test_escape_special_chars(self):
         def make_parser():
             parser = ArgumentParser(add_help=False)
-            parser.add_argument("foo", choices=["bar<$>baz"])
+            parser.add_argument("-1", choices=["bar<$>baz"])
+            parser.add_argument("-2", choices=[r"\* "])
+            parser.add_argument("-3", choices=["\"'"])
             return parser
 
-        self.assertEqual(set(self.run_completer(make_parser(), "prog ")), {r"bar\<\$\>baz "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ")), {r"bar\<\$\>baz "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -2 ")), {r"\\\*\  "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ")), {r"\"\' "})
+        self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "')), {r"\"'"})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '")), {"\"'\\''"})
         os.environ["_ARGCOMPLETE_SHELL"] = "tcsh"
-        self.assertEqual(set(self.run_completer(make_parser(), "prog ")), {"bar<$>baz "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ")), {"bar<$>baz "})
+        # The trailing space won't actually work correctly in tcsh.
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -2 ")), {r"\*  "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ")), {"\"' "})
+        self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "')), {"\"'"})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '")), {"\"'"})
 
 
 class TestArgcompleteREPL(unittest.TestCase):
@@ -891,6 +902,8 @@ class _TestSh(object):
     def test_special_characters(self):
         self.assertEqual(self.sh.run_command('prog spec a\tc'), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command('prog spec d\tf'), 'd$e$f\r\n')
+        self.assertEqual(self.sh.run_command('prog spec x\t'), 'x!x\r\n')
+        self.assertEqual(self.sh.run_command('prog spec y\t'), 'y\\y\r\n')
 
     def test_special_characters_single_quoted(self):
         self.assertEqual(self.sh.run_command("prog spec 'a\tc'"), 'a:b:c\r\n')
@@ -918,6 +931,10 @@ class _TestSh(object):
         # 'a!b' == "a"\!"b"
         self.assertEqual(self.sh.run_command('prog spec "x\t'), 'x!x\r\n')
 
+    def test_quotes(self):
+        self.assertEqual(self.sh.run_command('prog quote 1\t'), "1'1\r\n")
+        self.assertEqual(self.sh.run_command('prog quote 2\t'), '2"2\r\n')
+
     def test_single_quotes_in_double_quotes(self):
         self.assertEqual(self.sh.run_command('prog quote "1\t'), "1'1\r\n")
 
@@ -931,7 +948,6 @@ class TestBash(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_parse_special_characters_dollar',
         'test_exclamation_in_double_quotes',
-        'test_single_quotes_in_single_quotes',
     ]
     if BASH_MAJOR_VERSION < 4:
         # This requires compopt which is not available in 3.x.

@@ -514,6 +514,7 @@ class CompletionFinder(object):
         comp_wordbreaks = ensure_str(os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS",
                                                     os.environ.get("COMP_WORDBREAKS",
                                                                    " \t\"'@><=;|&(:.")))
+        special_chars = "\\"
         # If the word under the cursor was quoted, escape the quote char.
         # Otherwise, escape all COMP_WORDBREAKS chars.
         if cword_prequote == "":
@@ -521,14 +522,18 @@ class CompletionFinder(object):
             # This workaround has the same effect as __ltrim_colon_completions in bash_completion.
             if ":" in comp_wordbreaks and first_colon_pos:
                 completions = [c[first_colon_pos + 1:] for c in completions]
-            special_chars = set(comp_wordbreaks + "();<>|&!`$")
-        else:
-            special_chars = cword_prequote
-            if cword_prequote == '"':
-                special_chars += "`$!"
+            special_chars += ''.join(set(comp_wordbreaks + "();<>|&!`$* \t\n\"'"))
+        elif cword_prequote == '"':
+            special_chars += '"`$!'
+
         if os.environ.get("_ARGCOMPLETE_SHELL") == "tcsh":
             # tcsh escapes special characters itself.
             special_chars = ""
+        elif cword_prequote == "'":
+            # Nothing can be escaped in single quotes, so we need to close
+            # the string, escape the single quote, then open a new string.
+            special_chars = ""
+            completions = [c.replace("'", r"'\''") for c in completions]
 
         for char in special_chars:
             completions = [c.replace(char, "\\" + char) for c in completions]
@@ -539,7 +544,7 @@ class CompletionFinder(object):
             # This code is retained for environments where this isn't done natively.
             continuation_chars = "=/:"
             if len(completions) == 1 and completions[0][-1] not in continuation_chars:
-                if cword_prequote == "" and not completions[0].endswith(" "):
+                if cword_prequote == "":
                     completions[0] += " "
 
         return completions
