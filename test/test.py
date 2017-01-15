@@ -868,6 +868,25 @@ class TestSplitLine(unittest.TestCase):
 
 
 class _TestSh(object):
+    """
+    Contains tests which should work in any shell using argcomplete.
+
+    Tests use the test program in this directory named ``prog``.
+    All commands are expected to input one of the valid choices
+    which is then printed and collected by the shell wrapper.
+
+    Any tabs in the input line simulate the user pressing tab.
+    For example, ``self.sh.run_command('prog basic "b\tr\t')`` will
+    simulate having the user:
+
+    1. Type ``prog basic "b``
+    2. Push tab, which returns ``['bar', 'baz']``, filling in ``a``
+    3. Type ``r``
+    4. Push tab, which returns ``['bar']``, filling in ``" ``
+    5. Push enter, submitting ``prog basic "bar" ``
+
+    The end result should be ``bar`` being printed to the screen.
+    """
     sh = None
     expected_failures = []
 
