@@ -943,6 +943,9 @@ class _TestSh(object):
         # "a'b" == 'a'\''b'
         self.assertEqual(self.sh.run_command("prog quote '1\t"), "1'1\r\n")
 
+    def test_completion_environment(self):
+        self.assertEqual(self.sh.run_command('prog env o\t'), 'ok\r\n')
+
 
 class TestBash(_TestSh, unittest.TestCase):
     expected_failures = [
@@ -982,6 +985,16 @@ class TestBashGlobal(TestBash):
     def test_python_filename_completion(self):
         self.sh.run_command('cd ' + TEST_DIR)
         self.assertEqual(self.sh.run_command('python ./pro\tbasic f\t'), 'foo\r\n')
+
+    def test_python_not_executable(self):
+        """Test completing a script that cannot be run directly."""
+        prog = os.path.join(TEST_DIR, 'prog')
+        with TempDir(prefix='test_dir_py', dir='.'):
+            shutil.copy(prog, '.')
+            self.sh.run_command('cd ' + os.getcwd())
+            self.sh.run_command('chmod -x ./prog')
+            self.assertIn('Permission denied', self.sh.run_command('./prog'))
+            self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
 
 
 class TestTcsh(_TestSh, unittest.TestCase):
