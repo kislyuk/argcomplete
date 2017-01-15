@@ -943,6 +943,9 @@ class _TestSh(object):
         # "a'b" == 'a'\''b'
         self.assertEqual(self.sh.run_command("prog quote '1\t"), "1'1\r\n")
 
+    def test_completion_environment(self):
+        self.assertEqual(self.sh.run_command('prog env o\t'), 'ok\r\n')
+
 
 class TestBash(_TestSh, unittest.TestCase):
     expected_failures = [
