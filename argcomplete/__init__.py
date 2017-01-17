@@ -55,6 +55,7 @@ def split_line(line, point=None):
         point = len(line)
     lexer = shlex.shlex(line, posix=True)
     lexer.whitespace_split = True
+    lexer.wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
     words = []
 
     def split_word(word):
@@ -75,9 +76,7 @@ def split_line(line, point=None):
         # if len(prefix) > 0 and prefix[0] in lexer.quotes:
         #    prequote, prefix = prefix[0], prefix[1:]
 
-        first_colon_pos = lexer.first_colon_pos if ":" in word else None
-
-        return prequote, prefix, suffix, words, first_colon_pos
+        return prequote, prefix, suffix, words, lexer.last_wordbreak_pos
 
     while True:
         try:
@@ -202,7 +201,7 @@ class CompletionFinder(object):
             comp_point = len(comp_line.encode(sys_encoding)[:comp_point].decode(sys_encoding))
 
         comp_line = ensure_str(comp_line)
-        cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
+        cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
         if os.environ["_ARGCOMPLETE"] == "2":
             # Shell hook recognized the first word as the interpreter; discard it
@@ -212,7 +211,7 @@ class CompletionFinder(object):
               "\nSUFFIX: '{s}'".format(s=cword_suffix),
               "\nWORDS:", comp_words)
 
-        completions = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
+        completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions).encode(sys_encoding))
@@ -220,7 +219,7 @@ class CompletionFinder(object):
         debug_stream.flush()
         exit_method(0)
 
-    def _get_completions(self, comp_words, cword_prefix, cword_prequote, first_colon_pos):
+    def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
         active_parsers = self._patch_argument_parser()
 
         parsed_args = argparse.Namespace()
@@ -244,7 +243,7 @@ class CompletionFinder(object):
 
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
         completions = self.filter_completions(completions)
-        completions = self.quote_completions(completions, cword_prequote, first_colon_pos)
+        completions = self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
         return completions
 
     def _patch_argument_parser(self):
@@ -499,7 +498,7 @@ class CompletionFinder(object):
         seen = set(self.exclude)
         return [c for c in completions if c not in seen and not seen.add(c)]
 
-    def quote_completions(self, completions, cword_prequote, first_colon_pos):
+    def quote_completions(self, completions, cword_prequote, last_wordbreak_pos):
         """
         If the word under the cursor started with a quote (as indicated by a nonempty ``cword_prequote``), escapes
         occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.
@@ -511,18 +510,16 @@ class CompletionFinder(object):
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        comp_wordbreaks = ensure_str(os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS",
-                                                    os.environ.get("COMP_WORDBREAKS",
-                                                                   " \t\"'@><=;|&(:.")))
         special_chars = "\\"
         # If the word under the cursor was quoted, escape the quote char.
-        # Otherwise, escape all COMP_WORDBREAKS chars.
+        # Otherwise, escape all special characters and specially handle all COMP_WORDBREAKS chars.
         if cword_prequote == "":
-            # Bash mangles completions which contain colons if COMP_WORDBREAKS contains a colon.
-            # This workaround has the same effect as __ltrim_colon_completions in bash_completion.
-            if ":" in comp_wordbreaks and first_colon_pos:
-                completions = [c[first_colon_pos + 1:] for c in completions]
-            special_chars += ''.join(set(comp_wordbreaks + "();<>|&!`$* \t\n\"'"))
+            # Bash mangles completions which contain characters in COMP_WORDBREAKS.
+            # This workaround has the same effect as __ltrim_colon_completions in bash_completion
+            # (extended to characters other than the colon).
+            if last_wordbreak_pos:
+                completions = [c[last_wordbreak_pos + 1:] for c in completions]
+            special_chars += "();<>|&!`$* \t\n\"'"
         elif cword_prequote == '"':
             special_chars += '"`$!'
 

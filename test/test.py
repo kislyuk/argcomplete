@@ -27,6 +27,7 @@ else:
     import unittest2 as unittest
 
 IFS = "\013"
+COMP_WORDBREAKS = " \t\n\"'><=;&(:"
 
 BASH_VERSION = subprocess.check_output(['bash', '-c', 'echo $BASH_VERSION']).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split('.')[0])
@@ -63,6 +64,7 @@ class TestArgcomplete(unittest.TestCase):
         os.environ["_ARGCOMPLETE"] = "yes"
         os.environ["_ARC_DEBUG"] = "yes"
         os.environ["IFS"] = IFS
+        os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = COMP_WORDBREAKS
 
     def tearDown(self):
         os.environ = self._os_environ
@@ -76,7 +78,6 @@ class TestArgcomplete(unittest.TestCase):
         with TemporaryFile() as t:
             os.environ["COMP_LINE"] = ensure_bytes(command) if USING_PYTHON2 else command
             os.environ["COMP_POINT"] = point
-            os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = '"\'@><=;|&(:'
             self.assertRaises(SystemExit, completer, parser, output_stream=t,
                               exit_method=sys.exit, **kwargs)
             t.seek(0)
@@ -211,10 +212,10 @@ class TestArgcomplete(unittest.TestCase):
             return parser
 
         expected_outputs = (
-            ("prog --url ", ["http\\://url1", "http\\://url2"]),
+            ("prog --url ", ["http://url1", "http://url2"]),
             ("prog --url \"", ['http://url1', 'http://url2']),
-            ("prog --url \"http://url1\" --email ", ["a\\@b.c", "a\\@b.d", "ab\\@c.d", "bcd\\@e.f", "bce\\@f.g"]),
-            ("prog --url \"http://url1\" --email a", ["a\\@b.c", "a\\@b.d", "ab\\@c.d"]),
+            ("prog --url \"http://url1\" --email ", ["a@b.c", "a@b.d", "ab@c.d", "bcd@e.f", "bce@f.g"]),
+            ("prog --url \"http://url1\" --email a", ["a@b.c", "a@b.d", "ab@c.d"]),
             ("prog --url \"http://url1\" --email \"a@", ['a@b.c', 'a@b.d']),
             ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"a@", ['a@b.c', 'a@b.d']),
             ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ", ["--url", "--email", "-h", "--help"]),
@@ -826,8 +827,19 @@ class TestArgcompleteREPL(unittest.TestCase):
 
 
 class TestSplitLine(unittest.TestCase):
+    def setUp(self):
+        self._os_environ = os.environ
+        os.environ = os.environ.copy()
+        os.environ['_ARGCOMPLETE_COMP_WORDBREAKS'] = COMP_WORDBREAKS
+
+    def tearDown(self):
+        os.environ = self._os_environ
+
     def prefix(self, line):
         return split_line(line)[1]
+
+    def wordbreak(self, line):
+        return split_line(line)[4]
 
     def test_simple(self):
         self.assertEqual(self.prefix('a b c'), 'c')
@@ -848,8 +860,33 @@ class TestSplitLine(unittest.TestCase):
     def test_punctuation(self):
         self.assertEqual(self.prefix('a,'), 'a,')
 
+    def test_last_wordbreak_pos(self):
+        self.assertEqual(self.wordbreak('a'), None)
+        self.assertEqual(self.wordbreak('a b:c'), 1)
+        self.assertEqual(self.wordbreak('a b:c=d'), 3)
+        self.assertEqual(self.wordbreak('a b:c=d e'), None)
+
 
 class _TestSh(object):
+    """
+    Contains tests which should work in any shell using argcomplete.
+
+    Tests use the test program in this directory named ``prog``.
+    All commands are expected to input one of the valid choices
+    which is then printed and collected by the shell wrapper.
+
+    Any tabs in the input line simulate the user pressing tab.
+    For example, ``self.sh.run_command('prog basic "b\tr\t')`` will
+    simulate having the user:
+
+    1. Type ``prog basic "b``
+    2. Push tab, which returns ``['bar', 'baz']``, filling in ``a``
+    3. Type ``r``
+    4. Push tab, which returns ``['bar']``, filling in ``" ``
+    5. Push enter, submitting ``prog basic "bar" ``
+
+    The end result should be ``bar`` being printed to the screen.
+    """
     sh = None
     expected_failures = []
 
@@ -900,24 +937,17 @@ class _TestSh(object):
         self.assertEqual(self.sh.run_command('prog basic "f\t--'), 'foo\r\n')
 
     def test_special_characters(self):
-        self.assertEqual(self.sh.run_command('prog spec a\tc'), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command('prog spec d\tf'), 'd$e$f\r\n')
         self.assertEqual(self.sh.run_command('prog spec x\t'), 'x!x\r\n')
         self.assertEqual(self.sh.run_command('prog spec y\t'), 'y\\y\r\n')
 
     def test_special_characters_single_quoted(self):
-        self.assertEqual(self.sh.run_command("prog spec 'a\tc'"), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command("prog spec 'd\tf'"), 'd$e$f\r\n')
 
     def test_special_characters_double_quoted(self):
-        self.assertEqual(self.sh.run_command('prog spec "a\tc"'), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command('prog spec "d\tf"'), 'd$e$f\r\n')
 
     def test_parse_special_characters(self):
-        self.assertEqual(self.sh.run_command('prog spec a:b:\tc'), 'a:b:c\r\n')
-        self.assertEqual(self.sh.run_command('prog spec a:b\tc'), 'a:b:c\r\n')
-        self.assertEqual(self.sh.run_command("prog spec 'a:b\tc\t"), 'a:b:c\r\n')
-        self.assertEqual(self.sh.run_command('prog spec "a:b\tc\t'), 'a:b:c\r\n')
         self.assertEqual(self.sh.run_command('prog spec d$e$\tf'), 'd$e$f\r\n')
         self.assertEqual(self.sh.run_command('prog spec d$e\tf'), 'd$e$f\r\n')
         self.assertEqual(self.sh.run_command("prog spec 'd$e\tf\t"), 'd$e$f\r\n')
@@ -942,6 +972,15 @@ class _TestSh(object):
         # Single quotes cannot be escaped within single quotes.
         # "a'b" == 'a'\''b'
         self.assertEqual(self.sh.run_command("prog quote '1\t"), "1'1\r\n")
+
+    def test_wordbreak_chars(self):
+        self.assertEqual(self.sh.run_command('prog break a\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog break a:b:\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog break a:b\tc'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command("prog break 'a\tc'"), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command("prog break 'a:b\tc\t"), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog break "a\tc"'), 'a:b:c\r\n')
+        self.assertEqual(self.sh.run_command('prog break "a:b\tc\t'), 'a:b:c\r\n')
 
     def test_completion_environment(self):
         self.assertEqual(self.sh.run_command('prog env o\t'), 'ok\r\n')
