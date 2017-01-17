@@ -29,8 +29,6 @@ try:
 except NameError:
     basestring = str
 
-__all__ = ["shlex", "split"]
-
 class shlex:
     "A lexical analyzer class for simple shell-like syntaxes."
     def __init__(self, instream=None, infile=None, posix=False,
