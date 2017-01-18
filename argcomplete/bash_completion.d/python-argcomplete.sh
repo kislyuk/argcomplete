@@ -21,7 +21,6 @@ _python_argcomplete_global() {
         if [[ -f "${COMP_WORDS[1]}" ]] && (head -c 1024 "${COMP_WORDS[1]}" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
             local ARGCOMPLETE=2
         else
-            compopt +o nospace
             return
         fi
     elif which "$executable" >/dev/null 2>&1; then
@@ -39,25 +38,21 @@ _python_argcomplete_global() {
 
     if [[ $ARGCOMPLETE == 1 ]] || [[ $ARGCOMPLETE == 2 ]]; then
         local IFS=$(echo -e '\v')
-        local SUPPRESS_SPACE=0
-        if compopt +o nospace 2> /dev/null; then
-            SUPPRESS_SPACE=1
-        fi
         COMPREPLY=( $(_ARGCOMPLETE_IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
             COMP_TYPE="$COMP_TYPE" \
             _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
-            _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
+            _ARGCOMPLETE_SUPPRESS_SPACE=1 \
             "$executable" "${COMP_WORDS[@]:1:ARGCOMPLETE-1}" 8>&1 9>&2 1>/dev/null 2>&1) )
         if [[ $? != 0 ]]; then
             unset COMPREPLY
-        elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
+        elif [[ "$COMPREPLY" =~ [=/:]$ ]]; then
             compopt -o nospace
         fi
     else
         type -t _completion_loader | grep -q 'function' && _completion_loader "$@"
     fi
 }
-complete -o nospace -o default -o bashdefault -D -F _python_argcomplete_global
+complete -o default -o bashdefault -D -F _python_argcomplete_global
