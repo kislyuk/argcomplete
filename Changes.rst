@@ -1,3 +1,41 @@
+Changes for v1.8.0 (2017-01-19)
+===============================
+
+This release contains work by @evanunderscore with numerous improvements
+to the handling of special characters in completions.
+
+-  Simplify nospace handling in global completion (#195)
+
+-  Specially handle all characters in COMP\_WORDBREAKS (#187)
+
+-  Use setuptools tests-require directive, fixes #186
+
+-  Complete files using the specified interpreter (#192)
+
+-  Fix completion for scripts run via python (#191)
+
+-  Clarify argument to register-python-argcomplete (#190)
+
+-  Fix handling of commas and other special chars (#172); handle more
+   special characters (#189)
+
+-  Fix handling of special characters in tcsh (#188)
+
+-  Update my\_shlex to Python 3.6 version (#184)
+
+-  Fix additional trailing space in exact matches (#183)
+
+-  Adjust tests to handle development environments (#180)
+
+-  Fix tcsh tests on OSX (#177); Update bash on OSX (#176); Check output
+   of test setup command (#179)
+
+-  Optionally disable duplicated flags (#143)
+
+-  Add default\_completer option to CompletionFinder.\ **call** (#167)
+
+-  Let bash add or suppress trailing space (#159)
+
 Changes for v1.7.0 (2016-11-30)
 ===============================
 
