@@ -13,11 +13,15 @@ init_docs:
 docs:
 	$(MAKE) -C docs html
 
-install:
+install: clean
 	pip install wheel
 	python setup.py bdist_wheel
 	pip install --upgrade dist/*.whl
 
-.PHONY: test docs lint lint_deps
+clean:
+	-rm -rf build dist
+	-rm -rf *.egg-info
+
+.PHONY: test test_deps docs install clean lint lint_deps
 
 include common.mk
