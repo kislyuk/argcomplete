@@ -864,7 +864,12 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.wordbreak('a'), None)
         self.assertEqual(self.wordbreak('a b:c'), 1)
         self.assertEqual(self.wordbreak('a b:c=d'), 3)
+        self.assertEqual(self.wordbreak('a b:c=d '), None)
         self.assertEqual(self.wordbreak('a b:c=d e'), None)
+        self.assertEqual(self.wordbreak('"b:c'), None)
+        self.assertEqual(self.wordbreak('"b:c=d'), None)
+        self.assertEqual(self.wordbreak('"b:c=d"'), None)
+        self.assertEqual(self.wordbreak('"b:c=d" '), None)
 
 
 class _TestSh(object):

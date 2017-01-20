@@ -147,8 +147,6 @@ class shlex:
         return raw
 
     def read_token(self):
-        # Modified by argcomplete: Record last wordbreak position
-        self.last_wordbreak_pos = None
         quoted = False
         escapedstate = ' '
         while True:
@@ -294,6 +292,9 @@ class shlex:
                 print("shlex: raw token=" + repr(result))
             else:
                 print("shlex: raw token=EOF")
+        # Modified by argcomplete: Record last wordbreak position
+        if self.state == ' ':
+            self.last_wordbreak_pos = None
         return result
 
     def sourcehook(self, newfile):
