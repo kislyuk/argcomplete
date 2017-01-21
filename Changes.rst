@@ -1,3 +1,8 @@
+Changes for v1.8.1 (2017-01-21)
+===============================
+
+-  Fix completion after tokens with wordbreak chars (#197)
+
 Changes for v1.8.0 (2017-01-19)
 ===============================
 
