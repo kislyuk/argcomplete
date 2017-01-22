@@ -253,6 +253,17 @@ The following is an example of the tcsh completion syntax for
 
     complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
 
+Common Problems
+---------------
+If global completion is not completing your script, bash may have registered a
+default completion function::
+
+    $ complete | grep my-awesome-script
+    complete -F _minimal my-awesome-script.py
+
+You can fix this by restarting your shell, or by running
+``complete -r my-awesome-script.py``.
+
 Debugging
 ---------
 Set the ``_ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. Alternatively,
