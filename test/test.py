@@ -20,6 +20,7 @@ from argcomplete import (
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
+from argcomplete._scripts import check_module
 
 if sys.version_info >= (2, 7):
     import unittest
@@ -870,6 +871,58 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.wordbreak('"b:c=d'), None)
         self.assertEqual(self.wordbreak('"b:c=d"'), None)
         self.assertEqual(self.wordbreak('"b:c=d" '), None)
+
+
+class TestCheckModule(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, '.')
+
+    @classmethod
+    def tearDownClass(cls):
+        sys.path.pop(0)
+
+    def setUp(self):
+        self.dir = TempDir(prefix="test_dir_module", dir=".")
+        self.dir.__enter__()
+
+    def tearDown(self):
+        self.dir.__exit__()
+
+    def test_module(self):
+        open('module.py', 'w').close()
+        path = check_module.find('module')
+        self.assertEqual(path, './module.py')
+        self.assertNotIn('module', sys.modules)
+
+    def test_package(self):
+        os.mkdir('package')
+        open('package/__init__.py', 'w').close()
+        open('package/module.py', 'w').close()
+        path = check_module.find('package.module')
+        self.assertEqual(path, './package/module.py')
+        self.assertNotIn('package', sys.modules)
+        self.assertNotIn('package.module', sys.modules)
+
+    def test_subpackage(self):
+        os.mkdir('package')
+        open('package/__init__.py', 'w').close()
+        os.mkdir('package/subpackage')
+        open('package/subpackage/__init__.py', 'w').close()
+        open('package/subpackage/module.py', 'w').close()
+        path = check_module.find('package.subpackage.module')
+        self.assertEqual(path, './package/subpackage/module.py')
+        self.assertNotIn('package', sys.modules)
+        self.assertNotIn('package.subpackage', sys.modules)
+        self.assertNotIn('package.subpackage.module', sys.modules)
+
+    def test_package_main(self):
+        os.mkdir('package')
+        open('package/__init__.py', 'w').close()
+        open('package/__main__.py', 'w').close()
+        path = check_module.find('package')
+        self.assertEqual(path, './package/__main__.py')
+        self.assertNotIn('package', sys.modules)
 
 
 class _TestSh(object):
