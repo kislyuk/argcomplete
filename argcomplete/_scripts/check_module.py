@@ -1,17 +1,41 @@
-import imp
 import os
 import sys
 
+try:
+    from importlib.util import find_spec
+except ImportError:
+    from collections import namedtuple
+    from imp import find_module
 
-def find(spec):
-    module = None
-    for name in spec.split('.'):
-        f, module, _ = imp.find_module(name, module and [module])
-        if f is not None:
-            f.close()
-    if f is None:
-        module = os.path.join(module, '__main__.py')
-    return module
+    ModuleSpec = namedtuple(
+        'ModuleSpec', ['origin', 'has_location', 'submodule_search_locations'])
+
+    def find_spec(name):
+        """Minimal implementation as required by `find`."""
+        f, path, _ = find_module(name)
+        has_location = path is not None
+        if f is None:
+            return ModuleSpec(None, has_location, [path])
+        f.close()
+        return ModuleSpec(path, has_location, None)
+
+
+def find(name):
+    names = name.split('.')
+    spec = find_spec(names[0])
+    if not spec.has_location:
+        raise Exception('cannot locate file')
+    if spec.submodule_search_locations is None:
+        if len(names) != 1:
+            raise Exception('{} is not a package'.format(names[0]))
+        return spec.origin
+    if len(spec.submodule_search_locations) != 1:
+        raise Exception('expecting one search location')
+    path = os.path.join(spec.submodule_search_locations[0], *names[1:])
+    if os.path.isdir(path):
+        return os.path.join(path, '__main__.py')
+    else:
+        return path + '.py'
 
 
 if __name__ == '__main__':
