@@ -2,9 +2,9 @@
 # PYTHON_ARGCOMPLETE_OK
 import argcomplete, argparse, requests, pprint
 
-def github_org_members(prefix, parsed_args, **kwargs):
+def github_org_members(parsed_args, **kwargs):
     resource = "https://api.github.com/orgs/{org}/members".format(org=parsed_args.organization)
-    return (member['login'] for member in requests.get(resource).json() if member['login'].startswith(prefix))
+    return (member['login'] for member in requests.get(resource).json())
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--organization", help="GitHub organization")
