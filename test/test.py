@@ -1069,17 +1069,13 @@ class TestTcsh(_TestSh, unittest.TestCase):
 
 class Shell(object):
     def __init__(self, shell):
-        timeout = 5
-        if os.environ.get('TRAVIS_OS_NAME') == 'osx':
-            # This builder can be slow - give it ample time.
-            timeout = 60
-        self.child = pexpect.spawn(shell, encoding='utf-8', timeout=timeout)
+        self.child = pexpect.spawn(shell, encoding='utf-8')
 
     def run_command(self, command):
         try:
             self.child.sendline(r"echo -n \#\#\#; {0}; echo -n \#\#\#".format(command))
-            self.child.expect_exact('###', timeout=1)
-            self.child.expect_exact('###', timeout=1)
+            self.child.expect_exact('###', timeout=5)
+            self.child.expect_exact('###', timeout=5)
             return self.child.before
         finally:
             # Send Ctrl+C in case we get stuck.
