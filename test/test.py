@@ -416,7 +416,7 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", ["-h", "--help"], validators[0]),
             ("prog ", ["bus", "car", "-h", "--help"], validators[1]),
-            ("prog bu", ["bus "], validators[1]),
+            ("prog bu", ["bus", "car"], validators[1]),
             ("prog bus ", ["apple", "orange", "-h", "--help"], validators[1]),
             ("prog bus appl", ["apple "], validators[2]),
             ("prog bus cappl", [""], validators[2]),

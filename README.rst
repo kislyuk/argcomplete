@@ -75,7 +75,8 @@ Specifying completers
 You can specify custom completion functions for your options and arguments. Two styles are supported: callable and
 readline-style. Callable completers are simpler. They are called with the following keyword arguments:
 
-* ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
+* ``prefix``: The prefix text of the last word before the cursor on the command line.
+  For dynamic completers, this can be used to reduce the work required to generate possible completions.
 * ``action``: The ``argparse.Action`` instance that this completer was called for.
 * ``parser``: The ``argparse.ArgumentParser`` instance that the action was taken by.
 * ``parsed_args``: The result of argument parsing so far (the ``argparse.Namespace`` args object normally returned by
@@ -86,8 +87,8 @@ variables might look like this:
 
 .. code-block:: python
 
-    def EnvironCompleter(prefix, **kwargs):
-        return (v for v in os.environ if v.startswith(prefix))
+    def EnvironCompleter(**kwargs):
+        return os.environ
 
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is:
@@ -109,11 +110,11 @@ A completer that is initialized with a set of all possible choices of values for
 .. code-block:: python
 
     class ChoicesCompleter(object):
-        def __init__(self, choices=[]):
-            self.choices = [str(choice) for choice in choices]
+        def __init__(self, choices):
+            self.choices = choices
 
-        def __call__(self, prefix, **kwargs):
-            return (c for c in self.choices if c.startswith(prefix))
+        def __call__(self, **kwargs):
+            return self.choices
 
 The following two ways to specify a static set of choices are equivalent for completion purposes:
 
