@@ -404,7 +404,7 @@ class CompletionFinder(object):
             if completer:
                 if callable(completer):
                     completions_from_callable = [c for c in completer(
-                        prefix=cword_prefix, action=active_action, parsed_args=parsed_args)
+                        prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args)
                         if self.validator(c, cword_prefix)]
 
                     if completions_from_callable:
