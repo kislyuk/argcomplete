@@ -1,3 +1,11 @@
+Changes for v1.8.2 (2017-01-26)
+===============================
+
+-  Fix bug introduced in v0.7.1 where completers would not receive the
+   parser keyword argument.
+
+-  Documentation improvements.
+
 Changes for v1.8.1 (2017-01-21)
 ===============================
 
