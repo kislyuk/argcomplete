@@ -874,25 +874,22 @@ class TestSplitLine(unittest.TestCase):
 
 
 class TestCheckModule(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        sys.path.insert(0, '.')
-
-    @classmethod
-    def tearDownClass(cls):
-        sys.path.pop(0)
-
     def setUp(self):
         self.dir = TempDir(prefix="test_dir_module", dir=".")
         self.dir.__enter__()
+        # There is some odd bug that seems to only come up in Python 3.4 where
+        # using "." in sys.path sometimes won't find modules, so we'll use the
+        # full path each time.
+        sys.path.insert(0, os.getcwd())
 
     def tearDown(self):
+        sys.path.pop(0)
         self.dir.__exit__()
 
     def test_module(self):
         self._mkfile('module.py')
         path = check_module.find('module')
-        self.assertEqual(path, './module.py')
+        self.assertEqual(path, os.path.abspath('module.py'))
         self.assertNotIn('module', sys.modules)
 
     def test_package(self):
@@ -900,7 +897,7 @@ class TestCheckModule(unittest.TestCase):
         self._mkfile('package/__init__.py')
         self._mkfile('package/module.py')
         path = check_module.find('package.module')
-        self.assertEqual(path, './package/module.py')
+        self.assertEqual(path, os.path.abspath('package/module.py'))
         self.assertNotIn('package', sys.modules)
         self.assertNotIn('package.module', sys.modules)
 
@@ -911,7 +908,7 @@ class TestCheckModule(unittest.TestCase):
         self._mkfile('package/subpackage/__init__.py')
         self._mkfile('package/subpackage/module.py')
         path = check_module.find('package.subpackage.module')
-        self.assertEqual(path, './package/subpackage/module.py')
+        self.assertEqual(path, os.path.abspath('package/subpackage/module.py'))
         self.assertNotIn('package', sys.modules)
         self.assertNotIn('package.subpackage', sys.modules)
         self.assertNotIn('package.subpackage.module', sys.modules)
@@ -921,7 +918,7 @@ class TestCheckModule(unittest.TestCase):
         self._mkfile('package/__init__.py')
         self._mkfile('package/__main__.py')
         path = check_module.find('package')
-        self.assertEqual(path, './package/__main__.py')
+        self.assertEqual(path, os.path.abspath('package/__main__.py'))
         self.assertNotIn('package', sys.modules)
 
     def test_not_package(self):
