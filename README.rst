@@ -15,6 +15,8 @@ the network).
 
 Installation
 ------------
+Argcomplete requires Python 2.7 or 3.3+.
+
 ::
 
     pip install argcomplete

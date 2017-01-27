@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse, subprocess
+import os, sys, shutil, argparse, subprocess, unittest
 import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, mkdtemp
 
@@ -20,11 +20,6 @@ from argcomplete import (
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
-
-if sys.version_info >= (2, 7):
-    import unittest
-else:
-    import unittest2 as unittest
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;&(:"
