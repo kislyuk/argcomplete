@@ -38,8 +38,12 @@ def find(name):
         return path + '.py'
 
 
-if __name__ == '__main__':
+def main():
     with open(find(sys.argv[1])) as f:
         head = f.read(1024)
     if 'PYTHON_ARGCOMPLETE_OK' not in head:
         raise Exception('marker not found')
+
+
+if __name__ == '__main__':
+    main()

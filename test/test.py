@@ -890,15 +890,15 @@ class TestCheckModule(unittest.TestCase):
         self.dir.__exit__()
 
     def test_module(self):
-        open('module.py', 'w').close()
+        self._mkfile('module.py')
         path = check_module.find('module')
         self.assertEqual(path, './module.py')
         self.assertNotIn('module', sys.modules)
 
     def test_package(self):
         os.mkdir('package')
-        open('package/__init__.py', 'w').close()
-        open('package/module.py', 'w').close()
+        self._mkfile('package/__init__.py')
+        self._mkfile('package/module.py')
         path = check_module.find('package.module')
         self.assertEqual(path, './package/module.py')
         self.assertNotIn('package', sys.modules)
@@ -906,10 +906,10 @@ class TestCheckModule(unittest.TestCase):
 
     def test_subpackage(self):
         os.mkdir('package')
-        open('package/__init__.py', 'w').close()
+        self._mkfile('package/__init__.py')
         os.mkdir('package/subpackage')
-        open('package/subpackage/__init__.py', 'w').close()
-        open('package/subpackage/module.py', 'w').close()
+        self._mkfile('package/subpackage/__init__.py')
+        self._mkfile('package/subpackage/module.py')
         path = check_module.find('package.subpackage.module')
         self.assertEqual(path, './package/subpackage/module.py')
         self.assertNotIn('package', sys.modules)
@@ -918,11 +918,20 @@ class TestCheckModule(unittest.TestCase):
 
     def test_package_main(self):
         os.mkdir('package')
-        open('package/__init__.py', 'w').close()
-        open('package/__main__.py', 'w').close()
+        self._mkfile('package/__init__.py')
+        self._mkfile('package/__main__.py')
         path = check_module.find('package')
         self.assertEqual(path, './package/__main__.py')
         self.assertNotIn('package', sys.modules)
+
+    def test_not_package(self):
+        self._mkfile('module.py')
+        with self.assertRaisesRegexp(Exception, 'module is not a package'):
+            check_module.find('module.bad')
+        self.assertNotIn('module', sys.modules)
+
+    def _mkfile(self, path):
+        open(path, 'w').close()
 
 
 class _TestSh(object):

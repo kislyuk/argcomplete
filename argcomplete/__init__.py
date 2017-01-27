@@ -203,9 +203,13 @@ class CompletionFinder(object):
         comp_line = ensure_str(comp_line)
         cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
-        for _ in range(int(os.environ["_ARGCOMPLETE"]) - 1):
-            # Shell hook recognized the first word as the interpreter; discard it
-            comp_words.pop(0)
+        # _ARGCOMPLETE is set by the shell script to tell us where comp_words
+        # should start, based on what we're completing.
+        # 1: <script> [args]
+        # 2: python <script> [args]
+        # 3: python -m <module> [args]
+        start = int(os.environ["_ARGCOMPLETE"]) - 1
+        comp_words = comp_words[start:]
 
         debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix),
               "\nSUFFIX: '{s}'".format(s=cword_suffix),
