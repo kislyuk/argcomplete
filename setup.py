@@ -6,11 +6,6 @@ from setuptools import setup, find_packages
 install_requires = []
 tests_require = ["coverage", "flake8", "pexpect", "wheel"]
 
-try:
-    import argparse  # noqa
-except ImportError:
-    install_requires.append('argparse')
-
 setup(
     name='argcomplete',
     version='1.8.2',
