@@ -20,7 +20,6 @@ __python_argcomplete_run() {
     else
         "$@" 8>&1 9>&2 1>&9 2>&1
     fi
-    return $?
 }
 
 _python_argcomplete_global() {
