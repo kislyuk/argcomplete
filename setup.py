@@ -6,11 +6,6 @@ from setuptools import setup, find_packages
 install_requires = []
 tests_require = ["coverage", "flake8", "pexpect", "wheel"]
 
-try:
-    import argparse  # noqa
-except ImportError:
-    install_requires.append('argparse')
-
 setup(
     name='argcomplete',
     version='1.8.2',
@@ -37,9 +32,13 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 5 - Production/Stable',

@@ -258,6 +258,10 @@ The following is an example of the tcsh completion syntax for
 
     complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
 
+Python Support
+--------------
+Argcomplete requires Python 2.7 or 3.3+.
+
 Common Problems
 ---------------
 If global completion is not completing your script, bash may have registered a
@@ -290,7 +294,7 @@ Inspired and informed by the optcomplete_ module by Martin Blais.
 Links
 -----
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
-* `Documentation (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
+* `Documentation (Read the Docs) <https://argcomplete.readthedocs.io/en/latest/>`_
 * `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 * `Change log <https://github.com/kislyuk/argcomplete/blob/master/Changes.rst>`_
 
