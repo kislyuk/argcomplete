@@ -17,10 +17,10 @@ from argcomplete import (
     CompletionFinder,
     split_line,
     ExclusiveCompletionFinder,
+    _check_module
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
-from argcomplete._scripts import check_module
 
 if sys.version_info >= (2, 7):
     import unittest
@@ -888,7 +888,7 @@ class TestCheckModule(unittest.TestCase):
 
     def test_module(self):
         self._mkfile('module.py')
-        path = check_module.find('module')
+        path = _check_module.find('module')
         self.assertEqual(path, os.path.abspath('module.py'))
         self.assertNotIn('module', sys.modules)
 
@@ -896,7 +896,7 @@ class TestCheckModule(unittest.TestCase):
         os.mkdir('package')
         self._mkfile('package/__init__.py')
         self._mkfile('package/module.py')
-        path = check_module.find('package.module')
+        path = _check_module.find('package.module')
         self.assertEqual(path, os.path.abspath('package/module.py'))
         self.assertNotIn('package', sys.modules)
         self.assertNotIn('package.module', sys.modules)
@@ -907,7 +907,7 @@ class TestCheckModule(unittest.TestCase):
         os.mkdir('package/subpackage')
         self._mkfile('package/subpackage/__init__.py')
         self._mkfile('package/subpackage/module.py')
-        path = check_module.find('package.subpackage.module')
+        path = _check_module.find('package.subpackage.module')
         self.assertEqual(path, os.path.abspath('package/subpackage/module.py'))
         self.assertNotIn('package', sys.modules)
         self.assertNotIn('package.subpackage', sys.modules)
@@ -917,14 +917,14 @@ class TestCheckModule(unittest.TestCase):
         os.mkdir('package')
         self._mkfile('package/__init__.py')
         self._mkfile('package/__main__.py')
-        path = check_module.find('package')
+        path = _check_module.find('package')
         self.assertEqual(path, os.path.abspath('package/__main__.py'))
         self.assertNotIn('package', sys.modules)
 
     def test_not_package(self):
         self._mkfile('module.py')
         with self.assertRaisesRegexp(Exception, 'module is not a package'):
-            check_module.find('module.bad')
+            _check_module.find('module.bad')
         self.assertNotIn('module', sys.modules)
 
     def _mkfile(self, path):

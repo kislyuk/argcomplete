@@ -19,7 +19,7 @@ _python_argcomplete_global() {
     local ARGCOMPLETE=0
     if [[ "$executable" == python* ]] || [[ "$executable" == pypy* ]]; then
         if [[ "${COMP_WORDS[1]}" == -m ]]; then
-            if "$executable" -m argcomplete._scripts.check_module "${COMP_WORDS[2]}" >/dev/null 2>&1; then
+            if "$executable" -m argcomplete._check_module "${COMP_WORDS[2]}" >/dev/null 2>&1; then
                 ARGCOMPLETE=3
             else
                 return
