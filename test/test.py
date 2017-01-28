@@ -1071,6 +1071,14 @@ class TestBash(_TestSh, unittest.TestCase):
         result = self.sh.run_command('prog basic f\t"\1echo "')
         self.assertEqual(result, 'prog basic foo \r\n')
 
+    def test_debug_output(self):
+        self.assertEqual(self.sh.run_command('prog debug f\t'), 'foo\r\n')
+        self.sh.run_command('export _ARC_DEBUG=1')
+        output = self.sh.run_command('prog debug f\t')
+        self.assertIn('PYTHON_ARGCOMPLETE_STDOUT\r\n', output)
+        self.assertIn('PYTHON_ARGCOMPLETE_STDERR\r\n', output)
+        self.assertTrue(output.endswith('foo\r\n'))
+
 
 @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'complete -D not supported')
 class TestBashGlobal(TestBash):
