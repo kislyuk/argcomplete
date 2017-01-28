@@ -212,6 +212,10 @@ In global completion mode, you don't have to register each argcomplete-capable e
 will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
 completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
 
+Additionally, completion is activated for scripts run as ``python <script>`` and ``python -m <module>``.
+This also works for alternate Python versions (e.g. ``python3`` and ``pypy``), as long as that version of Python has
+argcomplete installed.
+
 .. admonition:: Bash version compatibility
 
  Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On OS X or older Linux

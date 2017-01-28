@@ -17,6 +17,7 @@ from argcomplete import (
     CompletionFinder,
     split_line,
     ExclusiveCompletionFinder,
+    _check_module
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
@@ -61,7 +62,7 @@ class TestArgcomplete(unittest.TestCase):
     def setUp(self):
         self._os_environ = os.environ
         os.environ = os.environ.copy()
-        os.environ["_ARGCOMPLETE"] = "yes"
+        os.environ["_ARGCOMPLETE"] = "1"
         os.environ["_ARC_DEBUG"] = "yes"
         os.environ["IFS"] = IFS
         os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = COMP_WORDBREAKS
@@ -872,6 +873,64 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.wordbreak('"b:c=d" '), None)
 
 
+class TestCheckModule(unittest.TestCase):
+    def setUp(self):
+        self.dir = TempDir(prefix="test_dir_module", dir=".")
+        self.dir.__enter__()
+        # There is some odd bug that seems to only come up in Python 3.4 where
+        # using "." in sys.path sometimes won't find modules, so we'll use the
+        # full path each time.
+        sys.path.insert(0, os.getcwd())
+
+    def tearDown(self):
+        sys.path.pop(0)
+        self.dir.__exit__()
+
+    def test_module(self):
+        self._mkfile('module.py')
+        path = _check_module.find('module')
+        self.assertEqual(path, os.path.abspath('module.py'))
+        self.assertNotIn('module', sys.modules)
+
+    def test_package(self):
+        os.mkdir('package')
+        self._mkfile('package/__init__.py')
+        self._mkfile('package/module.py')
+        path = _check_module.find('package.module')
+        self.assertEqual(path, os.path.abspath('package/module.py'))
+        self.assertNotIn('package', sys.modules)
+        self.assertNotIn('package.module', sys.modules)
+
+    def test_subpackage(self):
+        os.mkdir('package')
+        self._mkfile('package/__init__.py')
+        os.mkdir('package/subpackage')
+        self._mkfile('package/subpackage/__init__.py')
+        self._mkfile('package/subpackage/module.py')
+        path = _check_module.find('package.subpackage.module')
+        self.assertEqual(path, os.path.abspath('package/subpackage/module.py'))
+        self.assertNotIn('package', sys.modules)
+        self.assertNotIn('package.subpackage', sys.modules)
+        self.assertNotIn('package.subpackage.module', sys.modules)
+
+    def test_package_main(self):
+        os.mkdir('package')
+        self._mkfile('package/__init__.py')
+        self._mkfile('package/__main__.py')
+        path = _check_module.find('package')
+        self.assertEqual(path, os.path.abspath('package/__main__.py'))
+        self.assertNotIn('package', sys.modules)
+
+    def test_not_package(self):
+        self._mkfile('module.py')
+        with self.assertRaisesRegexp(Exception, 'module is not a package'):
+            _check_module.find('module.bad')
+        self.assertNotIn('module', sys.modules)
+
+    def _mkfile(self, path):
+        open(path, 'w').close()
+
+
 class _TestSh(object):
     """
     Contains tests which should work in any shell using argcomplete.
@@ -1039,6 +1098,16 @@ class TestBashGlobal(TestBash):
             self.sh.run_command('chmod -x ./prog')
             self.assertIn('Permission denied', self.sh.run_command('./prog'))
             self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+
+    def test_python_module(self):
+        """Test completing a module run with python -m."""
+        prog = os.path.join(TEST_DIR, 'prog')
+        with TempDir(prefix='test_dir_py', dir='.'):
+            os.mkdir('package')
+            open('package/__init__.py', 'w').close()
+            shutil.copy(prog, 'package/prog.py')
+            self.sh.run_command('cd ' + os.getcwd())
+            self.assertEqual(self.sh.run_command('python -m package.prog basic f\t'), 'foo\r\n')
 
 
 class TestTcsh(_TestSh, unittest.TestCase):
