@@ -4,6 +4,7 @@ import glob
 from setuptools import setup, find_packages
 
 install_requires = []
+tests_require = ["coverage", "flake8", "pexpect", "wheel"]
 
 try:
     import argparse  # noqa
@@ -12,7 +13,7 @@ except ImportError:
 
 setup(
     name='argcomplete',
-    version='1.4.1',
+    version='1.8.2',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',
@@ -20,6 +21,8 @@ setup(
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
     install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require={"test": tests_require},
     packages=find_packages(exclude=['test']),
     scripts=glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
