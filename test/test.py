@@ -1099,7 +1099,9 @@ class TestBashGlobal(TestBash):
             shutil.copy(prog, '.')
             self.sh.run_command('cd ' + os.getcwd())
             self.sh.run_command('chmod -x ./prog')
-            self.assertIn('Permission denied', self.sh.run_command('./prog'))
+            # Ensure prog is no longer able to be run as "./prog".
+            self.assertIn('<<126>>', self.sh.run_command('./prog; echo "<<$?>>"'))
+            # Ensure completion still functions when run via python.
             self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
 
     def test_python_module(self):
