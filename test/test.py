@@ -67,7 +67,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def run_completer(self, parser, command, point=None, completer=autocomplete, **kwargs):
         command = ensure_str(command)
-        
+
         if point is None:
             # Adjust point for wide chars
             point = str(len(command.encode(sys_encoding)))
@@ -214,7 +214,8 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --url \"http://url1\" --email a", ["a@b.c", "a@b.d", "ab@c.d"]),
             ("prog --url \"http://url1\" --email \"a@", ['a@b.c', 'a@b.d']),
             ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"a@", ['a@b.c', 'a@b.d']),
-            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ", ["--url", "--email", "-h", "--help"]),
+            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ",
+             ["--url", "--email", "-h", "--help"]),
         )
 
         for cmd, output in expected_outputs:
@@ -282,6 +283,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_directory_completion(self):
         completer = DirectoriesCompleter()
+
         def c(prefix):
             return set(completer(prefix))
         with TempDir(prefix="test_dir", dir="."):
@@ -338,7 +340,8 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", ["--help", "eggs", "-h", "spam", "--age"]),
             ("prog --age 1 eggs", ["eggs "]),
-            ("prog --age 2 eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
+            ("prog --age 2 eggs ",
+             [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs \"on a", ['on a train', 'on a boat']),
             ("prog eggs on\\ a", [r"on\ a\ train", "on\ a\ boat"]),
@@ -366,7 +369,8 @@ class TestArgcomplete(unittest.TestCase):
 
         expected_outputs = (
             ("prog ", ["--книга", "-h", "--help"]),
-            ("prog --книга ", [r"Трудно\ быть\ богом", r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
+            ("prog --книга ",
+             [r"Трудно\ быть\ богом", r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
             ("prog --книга П", [r"Парень\ из\ преисподней", "Понедельник\ начинается\ в\ субботу"]),
             ("prog --книга Пу", [""]),
         )
@@ -611,7 +615,10 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", {"long": long_opts, "short": short_opts, True: long_opts + short_opts, False: [""]}),
             ("prog --foo", {"long": ["--foo "], "short": ["--foo "], True: ["--foo "], False: ["--foo "]}),
-            ("prog --b", {"long": ["--bar", "--baz"], "short": ["--bar", "--baz"], True: ["--bar", "--baz"], False: ["--bar", "--baz"]}),
+            ("prog --b", {"long": ["--bar", "--baz"],
+                          "short": ["--bar", "--baz"],
+                          True: ["--bar", "--baz"],
+                          False: ["--bar", "--baz"]}),
             ("prog -z -x", {"long": ["-x "], "short": ["-x "], True: ["-x "], False: ["-x "]}),
         )
         for cmd, outputs in expected_outputs:
@@ -953,6 +960,7 @@ class _TestSh(object):
     def setUpClass(cls, *args, **kwargs):
         for name in cls.expected_failures:
             test = getattr(cls, name)
+
             @unittest.expectedFailure
             def wrapped(self, test=test):
                 test(self)
@@ -1061,6 +1069,8 @@ class TestBash(_TestSh, unittest.TestCase):
         path = ':'.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$PATH'])
         sh.run_command('export PATH={0}'.format(path))
         sh.run_command('export PYTHONPATH={0}'.format(BASE_DIR))
+        # Disable the "python" module provided by bash-completion
+        sh.run_command('complete -r python python2 python3')
         output = sh.run_command(self.install_cmd)
         self.assertEqual(output, '')
         self.sh = sh
