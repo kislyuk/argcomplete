@@ -21,7 +21,8 @@ before_install:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then python setup.py bdist_rpm; fi
-  - make install
+#  - make install
+  - python setup.py install
 
 script:
   - make lint
