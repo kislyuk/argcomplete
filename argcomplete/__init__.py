@@ -169,11 +169,12 @@ class CompletionFinder(object):
             # not an argument completion invocation
             return
 
-        global debug_stream
-        try:
-            debug_stream = os.fdopen(9, "w")
-        except:
-            debug_stream = sys.stderr
+        if _DEBUG:
+            global debug_stream
+            try:
+                debug_stream = os.fdopen(9, "w")
+            except:
+                debug_stream = sys.stderr
 
         if output_stream is None:
             try:
@@ -220,7 +221,8 @@ class CompletionFinder(object):
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions).encode(sys_encoding))
         output_stream.flush()
-        debug_stream.flush()
+        if _DEBUG:
+            debug_stream.flush()
         exit_method(0)
 
     def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
