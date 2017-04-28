@@ -53,7 +53,9 @@ class ArgcompleteException(Exception):
 def split_line(line, point=None):
     if point is None:
         point = len(line)
-    lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+    lexer = shlex.shlex(line, posix=True)
+    lexer.whitespace_split = True
+    lexer.wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
     words = []
 
     def split_word(word):
@@ -74,9 +76,7 @@ def split_line(line, point=None):
         # if len(prefix) > 0 and prefix[0] in lexer.quotes:
         #    prequote, prefix = prefix[0], prefix[1:]
 
-        first_colon_pos = lexer.first_colon_pos if ":" in word else None
-
-        return prequote, prefix, suffix, words, first_colon_pos
+        return prequote, prefix, suffix, words, lexer.last_wordbreak_pos
 
     while True:
         try:
@@ -106,7 +106,7 @@ class CompletionFinder(object):
     :meth:`CompletionFinder.__call__()`.
     """
     def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
-                 print_suppressed=False, default_completer=FilesCompleter()):
+                 print_suppressed=False, default_completer=FilesCompleter(), append_space=None):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
         self.exclude = exclude
@@ -117,9 +117,13 @@ class CompletionFinder(object):
         self.completing = False
         self._display_completions = {}
         self.default_completer = default_completer
+        if append_space is None:
+            append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
+        self.append_space = append_space
 
     def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None, validator=None, print_suppressed=False):
+                 exclude=None, validator=None, print_suppressed=False, append_space=None,
+                 default_completer=FilesCompleter()):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
@@ -143,6 +147,9 @@ class CompletionFinder(object):
         :param print_suppressed:
             Whether or not to autocomplete options that have the ``help=argparse.SUPPRESS`` keyword argument set.
         :type print_suppressed: boolean
+        :param append_space:
+            Whether to append a space to unique matches. The default is ``True``.
+        :type append_space: boolean
 
         .. note::
             If you are not subclassing CompletionFinder to override its behaviors,
@@ -155,7 +162,8 @@ class CompletionFinder(object):
         their execution is otherwise desirable.
         """
         self.__init__(argument_parser, always_complete_options=always_complete_options, exclude=exclude,
-                      validator=validator, print_suppressed=print_suppressed)
+                      validator=validator, print_suppressed=print_suppressed, append_space=append_space,
+                      default_completer=default_completer)
 
         if "_ARGCOMPLETE" not in os.environ:
             # not an argument completion invocation
@@ -193,7 +201,7 @@ class CompletionFinder(object):
             comp_point = len(comp_line.encode(sys_encoding)[:comp_point].decode(sys_encoding))
 
         comp_line = ensure_str(comp_line)
-        cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(comp_line, comp_point)
+        cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
         if os.environ["_ARGCOMPLETE"] == "2":
             # Shell hook recognized the first word as the interpreter; discard it
@@ -203,7 +211,7 @@ class CompletionFinder(object):
               "\nSUFFIX: '{s}'".format(s=cword_suffix),
               "\nWORDS:", comp_words)
 
-        completions = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
+        completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions).encode(sys_encoding))
@@ -211,7 +219,7 @@ class CompletionFinder(object):
         debug_stream.flush()
         exit_method(0)
 
-    def _get_completions(self, comp_words, cword_prefix, cword_prequote, first_colon_pos):
+    def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
         active_parsers = self._patch_argument_parser()
 
         parsed_args = argparse.Namespace()
@@ -235,7 +243,7 @@ class CompletionFinder(object):
 
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
         completions = self.filter_completions(completions)
-        completions = self.quote_completions(completions, cword_prequote, first_colon_pos)
+        completions = self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
         return completions
 
     def _patch_argument_parser(self):
@@ -336,9 +344,20 @@ class CompletionFinder(object):
         for action in parser._actions:
             if action.help == argparse.SUPPRESS and not self.print_suppressed:
                 continue
+            if not self._action_allowed(action, parser):
+                continue
             if not isinstance(action, argparse._SubParsersAction):
                 option_completions += self._include_options(action, cword_prefix)
         return option_completions
+
+    @staticmethod
+    def _action_allowed(action, parser):
+        # Logic adapted from take_action in ArgumentParser._parse_known_args
+        # (members are saved by my_argparse.IntrospectiveArgumentParser)
+        for conflict_action in parser._action_conflicts.get(action, []):
+            if conflict_action in parser._seen_non_default_actions:
+                return False
+        return True
 
     def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
         debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
@@ -385,7 +404,7 @@ class CompletionFinder(object):
             if completer:
                 if callable(completer):
                     completions_from_callable = [c for c in completer(
-                        prefix=cword_prefix, action=active_action, parsed_args=parsed_args)
+                        prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args)
                         if self.validator(c, cword_prefix)]
 
                     if completions_from_callable:
@@ -479,7 +498,7 @@ class CompletionFinder(object):
         seen = set(self.exclude)
         return [c for c in completions if c not in seen and not seen.add(c)]
 
-    def quote_completions(self, completions, cword_prequote, first_colon_pos):
+    def quote_completions(self, completions, cword_prequote, last_wordbreak_pos):
         """
         If the word under the cursor started with a quote (as indicated by a nonempty ``cword_prequote``), escapes
         occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.
@@ -491,38 +510,39 @@ class CompletionFinder(object):
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        comp_wordbreaks = ensure_str(os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS",
-                                                    os.environ.get("COMP_WORDBREAKS",
-                                                                   " \t\"'@><=;|&(:.")))
-
-        punctuation_chars = "();<>|&!`"
-        for char in punctuation_chars:
-            if char not in comp_wordbreaks:
-                comp_wordbreaks += char
-
-        # If the word under the cursor was quoted, escape the quote char and add the leading quote back in.
-        # Otherwise, escape all COMP_WORDBREAKS chars.
+        special_chars = "\\"
+        # If the word under the cursor was quoted, escape the quote char.
+        # Otherwise, escape all special characters and specially handle all COMP_WORDBREAKS chars.
         if cword_prequote == "":
-            # Bash mangles completions which contain colons if COMP_WORDBREAKS contains a colon.
-            # This workaround has the same effect as __ltrim_colon_completions in bash_completion.
-            if ":" in comp_wordbreaks and first_colon_pos:
-                completions = [c[first_colon_pos + 1:] for c in completions]
+            # Bash mangles completions which contain characters in COMP_WORDBREAKS.
+            # This workaround has the same effect as __ltrim_colon_completions in bash_completion
+            # (extended to characters other than the colon).
+            if last_wordbreak_pos:
+                completions = [c[last_wordbreak_pos + 1:] for c in completions]
+            special_chars += "();<>|&!`$* \t\n\"'"
+        elif cword_prequote == '"':
+            special_chars += '"`$!'
 
-            for wordbreak_char in comp_wordbreaks:
-                completions = [c.replace(wordbreak_char, "\\" + wordbreak_char) for c in completions]
-        else:
-            if cword_prequote == '"':
-                for char in "`$!":
-                    completions = [c.replace(char, "\\" + char) for c in completions]
-            completions = [cword_prequote + c.replace(cword_prequote, "\\" + cword_prequote) for c in completions]
+        if os.environ.get("_ARGCOMPLETE_SHELL") == "tcsh":
+            # tcsh escapes special characters itself.
+            special_chars = ""
+        elif cword_prequote == "'":
+            # Nothing can be escaped in single quotes, so we need to close
+            # the string, escape the single quote, then open a new string.
+            special_chars = ""
+            completions = [c.replace("'", r"'\''") for c in completions]
 
-        # Note: similar functionality in bash is turned off by supplying the "-o nospace" option to complete.
-        # We can't use that functionality because bash is not smart enough to recognize continuation characters (/) for
-        # which no space should be added.
-        continuation_chars = "=/:"
-        if len(completions) == 1 and completions[0][-1] not in continuation_chars:
-            if cword_prequote == "" and not completions[0].endswith(" "):
-                completions[0] += " "
+        for char in special_chars:
+            completions = [c.replace(char, "\\" + char) for c in completions]
+
+        if self.append_space:
+            # Similar functionality in bash was previously turned off by supplying the "-o nospace" option to complete.
+            # Now it is conditionally disabled using "compopt -o nospace" if the match ends in a continuation character.
+            # This code is retained for environments where this isn't done natively.
+            continuation_chars = "=/:"
+            if len(completions) == 1 and completions[0][-1] not in continuation_chars:
+                if cword_prequote == "":
+                    completions[0] += " "
 
         return completions
 
@@ -588,6 +608,21 @@ class CompletionFinder(object):
 
         """
         return self._display_completions
+
+class ExclusiveCompletionFinder(CompletionFinder):
+    @staticmethod
+    def _action_allowed(action, parser):
+        if not CompletionFinder._action_allowed(action, parser):
+            return False
+
+        append_classes = (argparse._AppendAction, argparse._AppendConstAction)
+        if action._orig_class in append_classes:
+            return True
+
+        if action not in parser._seen_non_default_actions:
+            return True
+
+        return False
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """

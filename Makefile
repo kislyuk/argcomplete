@@ -1,20 +1,27 @@
-test: lint
-	python setup.py test -v
+test_deps:
+	pip install .[test]
 
-lint_deps:
-	pip install flake8
+lint: test_deps
+	./setup.py flake8
 
-lint: lint_deps
-	python setup.py flake8 -v
-#	flake8 . --max-line-length 159 --exclude=conf.py,describe_github_user.py,my_shlex.py,.tox,dist,docs,build,.git --show-source --statistics
+test: lint test_deps
+	coverage run --source=argcomplete --omit=argcomplete/my_shlex.py ./test/test.py -v
 
-release: docs
-	python setup.py sdist bdist_wheel upload -s -i D2069255
+init_docs:
+	cd docs; sphinx-quickstart
 
 docs:
 	$(MAKE) -C docs html
 
-install:
-	./setup.py install
+install: clean
+	pip install wheel
+	python setup.py bdist_wheel
+	pip install --upgrade dist/*.whl
 
-.PHONY: test lint lint_deps release docs
+clean:
+	-rm -rf build dist
+	-rm -rf *.egg-info
+
+.PHONY: test test_deps docs install clean lint lint_deps
+
+include common.mk

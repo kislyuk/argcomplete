@@ -6,7 +6,7 @@ Argcomplete provides easy, extensible command line tab completion of arguments f
 
 It makes two assumptions:
 
-* You're using bash or zsh as your shell
+* You're using bash as your shell (limited support for zsh and tcsh is available)
 * You're using `argparse <http://docs.python.org/2.7/library/argparse.html>`_ to manage your command line arguments/options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
@@ -43,6 +43,10 @@ Shellcode (only necessary if global completion is not activated - see `Global co
 
     eval "$(register-python-argcomplete my-awesome-script.py)"
 
+Note that the script name is passed directly to ``complete``, meaning it is only tab completed when invoked exactly
+as it was registered. The above line will **not** allow you to complete ``./my-awesome-script.py``, or
+``/path/to/my-awesome-script.py``.
+
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
@@ -71,7 +75,8 @@ Specifying completers
 You can specify custom completion functions for your options and arguments. Two styles are supported: callable and
 readline-style. Callable completers are simpler. They are called with the following keyword arguments:
 
-* ``prefix``: The prefix text of the last word before the cursor on the command line. All returned completions should begin with this prefix.
+* ``prefix``: The prefix text of the last word before the cursor on the command line.
+  For dynamic completers, this can be used to reduce the work required to generate possible completions.
 * ``action``: The ``argparse.Action`` instance that this completer was called for.
 * ``parser``: The ``argparse.ArgumentParser`` instance that the action was taken by.
 * ``parsed_args``: The result of argument parsing so far (the ``argparse.Namespace`` args object normally returned by
@@ -82,8 +87,8 @@ variables might look like this:
 
 .. code-block:: python
 
-    def EnvironCompleter(prefix, **kwargs):
-        return (v for v in os.environ if v.startswith(prefix))
+    def EnvironCompleter(**kwargs):
+        return os.environ
 
 To specify a completer for an argument or option, set the ``completer`` attribute of its associated action. An easy
 way to do this at definition time is:
@@ -105,11 +110,11 @@ A completer that is initialized with a set of all possible choices of values for
 .. code-block:: python
 
     class ChoicesCompleter(object):
-        def __init__(self, choices=[]):
-            self.choices = [str(choice) for choice in choices]
+        def __init__(self, choices):
+            self.choices = choices
 
-        def __call__(self, prefix, **kwargs):
-            return (c for c in self.choices if c.startswith(prefix))
+        def __call__(self, **kwargs):
+            return self.choices
 
 The following two ways to specify a static set of choices are equivalent for completion purposes:
 
@@ -237,6 +242,29 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
 
+Tcsh Support
+------------
+To activate completions for tcsh use::
+
+    eval `register-python-argcomplete --shell tcsh my-awesome-script.py`
+
+The ``python-argcomplete-tcsh`` script provides completions for tcsh.
+The following is an example of the tcsh completion syntax for
+``my-awesome-script.py`` emitted by ``register-python-argcomplete``::
+
+    complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
+
+Common Problems
+---------------
+If global completion is not completing your script, bash may have registered a
+default completion function::
+
+    $ complete | grep my-awesome-script
+    complete -F _minimal my-awesome-script.py
+
+You can fix this by restarting your shell, or by running
+``complete -r my-awesome-script.py``.
+
 Debugging
 ---------
 Set the ``_ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. Alternatively,
@@ -275,8 +303,6 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
 .. image:: https://codecov.io/github/kislyuk/argcomplete/coverage.svg?branch=master
         :target: https://codecov.io/github/kislyuk/argcomplete?branch=master
 .. image:: https://img.shields.io/pypi/v/argcomplete.svg
-        :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://img.shields.io/pypi/dm/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://img.shields.io/pypi/l/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
