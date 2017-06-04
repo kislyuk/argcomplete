@@ -26,7 +26,7 @@ Refresh your bash environment (start a new shell or ``source /etc/profile``).
 
 Synopsis
 --------
-Python code (e.g. ``my-awesome-script.py``):
+Python code (e.g. ``my-awesome-script``):
 
 .. code-block:: python
 
@@ -41,11 +41,12 @@ Python code (e.g. ``my-awesome-script.py``):
 
 Shellcode (only necessary if global completion is not activated - see `Global completion`_ below), to be put in e.g. ``.bashrc``::
 
-    eval "$(register-python-argcomplete my-awesome-script.py)"
+    eval "$(register-python-argcomplete my-awesome-script)"
 
 Note that the script name is passed directly to ``complete``, meaning it is only tab completed when invoked exactly
-as it was registered. The above line will **not** allow you to complete ``./my-awesome-script.py``, or
-``/path/to/my-awesome-script.py``.
+as it was registered. In the above example, ``my-awesome-script`` must be on the path, and the user must be
+attempting to complete it by that name. The above line alone would **not** allow you to complete ``./my-awesome-script``,
+or ``/path/to/my-awesome-script``. If you need this, you must register them separately, or use global completion.
 
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,13 +251,13 @@ Tcsh Support
 ------------
 To activate completions for tcsh use::
 
-    eval `register-python-argcomplete --shell tcsh my-awesome-script.py`
+    eval `register-python-argcomplete --shell tcsh my-awesome-script`
 
 The ``python-argcomplete-tcsh`` script provides completions for tcsh.
 The following is an example of the tcsh completion syntax for
-``my-awesome-script.py`` emitted by ``register-python-argcomplete``::
+``my-awesome-script`` emitted by ``register-python-argcomplete``::
 
-    complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
+    complete my-awesome-script 'p@*@`python-argcomplete-tcsh my-awesome-script`@'
 
 Python Support
 --------------
@@ -268,10 +269,10 @@ If global completion is not completing your script, bash may have registered a
 default completion function::
 
     $ complete | grep my-awesome-script
-    complete -F _minimal my-awesome-script.py
+    complete -F _minimal my-awesome-script
 
 You can fix this by restarting your shell, or by running
-``complete -r my-awesome-script.py``.
+``complete -r my-awesome-script``.
 
 Debugging
 ---------
