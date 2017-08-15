@@ -348,7 +348,7 @@ class CompletionFinder(object):
         for action in parser._actions:
             if not self.print_suppressed:
                 completer = getattr(action, "completer", None)
-                if isinstance(completer, SuppressCompleter):
+                if isinstance(completer, SuppressCompleter) and completer.suppress():
                     continue
                 if action.help == argparse.SUPPRESS:
                     continue

@@ -96,3 +96,9 @@ class DirectoriesCompleter(_FilteredFilesCompleter):
 class SuppressCompleter(object):
     def __init__(self):
         pass
+
+    def suppress(self):
+        """
+        Decide if the completion should be suppressed
+        """
+        return True
