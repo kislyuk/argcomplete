@@ -135,7 +135,29 @@ class TestArgcomplete(unittest.TestCase):
             parser = ArgumentParser()
             parser.add_argument("--foo")
             parser.add_argument("--bar", help=SUPPRESS)
-            arg = parser.add_argument("--baz")
+            return parser
+
+        expected_outputs = (
+            ("prog ", ["--foo", "-h", "--help"]),
+            ("prog --b", [""])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+        expected_outputs = (
+            ("prog ", ["--foo", "--bar", "-h", "--help"]),
+            ("prog --b", ["--bar "])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, print_suppressed=True)), set(output))
+
+    def test_suppress_completer(self):
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("--foo")
+            arg = parser.add_argument("--bar")
             arg.completer = SuppressCompleter()
             return parser
 
@@ -148,8 +170,8 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
         expected_outputs = (
-            ("prog ", ["--foo", "--bar", "--baz", "-h", "--help"]),
-            ("prog --b", ["--bar", "--baz"])
+            ("prog ", ["--foo", "--bar", "-h", "--help"]),
+            ("prog --b", ["--bar "])
         )
 
         for cmd, output in expected_outputs:
