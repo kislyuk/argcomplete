@@ -92,3 +92,7 @@ class _FilteredFilesCompleter(object):
 class DirectoriesCompleter(_FilteredFilesCompleter):
     def __init__(self):
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
+
+class SuppressCompleter(object):
+    def __init__(self):
+        pass
