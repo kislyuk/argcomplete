@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os, sys, argparse, contextlib
 from . import completers, my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
-from .completers import FilesCompleter
+from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
 
 _DEBUG = "_ARC_DEBUG" in os.environ
@@ -346,8 +346,12 @@ class CompletionFinder(object):
 
         option_completions = []
         for action in parser._actions:
-            if action.help == argparse.SUPPRESS and not self.print_suppressed:
-                continue
+            if not self.print_suppressed:
+                completer = getattr(action, "completer", None)
+                if isinstance(completer, SuppressCompleter) and completer.suppress():
+                    continue
+                if action.help == argparse.SUPPRESS:
+                    continue
             if not self._action_allowed(action, parser):
                 continue
             if not isinstance(action, argparse._SubParsersAction):
