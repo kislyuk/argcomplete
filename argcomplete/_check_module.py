@@ -27,7 +27,7 @@ class ArgcompleteMarkerNotFound(RuntimeError):
     pass
 
 
-def find(name):
+def find(name, return_package=False):
     names = name.split('.')
     spec = find_spec(names[0])
     if spec is None:
@@ -44,7 +44,10 @@ def find(name):
         raise ArgcompleteMarkerNotFound('expecting one search location')
     path = os.path.join(spec.submodule_search_locations[0], *names[1:])
     if os.path.isdir(path):
-        return os.path.join(path, '__main__.py')
+        filename = '__main__.py'
+        if return_package:
+            filename = '__init__.py'
+        return os.path.join(path, filename)
     else:
         return path + '.py'
 

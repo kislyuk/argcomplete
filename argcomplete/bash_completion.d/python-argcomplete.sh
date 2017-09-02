@@ -46,10 +46,14 @@ _python_argcomplete_global() {
         fi
         if (head -c 1024 "$SCRIPT_NAME" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
             local ARGCOMPLETE=1
-        elif (head -c 1024 "$SCRIPT_NAME" | egrep --quiet "(PBR Generated)|(EASY-INSTALL-(SCRIPT|ENTRY-SCRIPT|DEV-SCRIPT))" \
-            && [[ "$(head -n 1 "$SCRIPT_NAME")" =~ ^#!(.*)$ ]] && [[ "${BASH_REMATCH[1]}" =~ ^.*(python|pypy)[0-9\.]*$ ]] \
-            && "$BASH_REMATCH" "$(which python-argcomplete-check-easy-install-script)" "$SCRIPT_NAME") >/dev/null 2>&1; then
-            local ARGCOMPLETE=1
+        elif [[ "$(head -n 1 "$SCRIPT_NAME")" =~ ^#!(.*)$ ]] && [[ "${BASH_REMATCH[1]}" =~ ^.*(python|pypy)[0-9\.]*$ ]]; then
+            local interpreter="$BASH_REMATCH"
+            if (head -c 1024 "$SCRIPT_NAME" | egrep --quiet "(PBR Generated)|(EASY-INSTALL-(SCRIPT|ENTRY-SCRIPT|DEV-SCRIPT))" \
+                && "$interpreter" "$(which python-argcomplete-check-easy-install-script)" "$SCRIPT_NAME") >/dev/null 2>&1; then
+                local ARGCOMPLETE=1
+            elif "$interpreter" -m argcomplete._check_console_script "$SCRIPT_NAME" >/dev/null 2>&1; then
+                local ARGCOMPLETE=1
+            fi
         fi
     fi
 
