@@ -15,6 +15,11 @@ debug_stream = sys.stderr
 
 def debug(*args):
     if _DEBUG:
+        if USING_PYTHON2:
+            # debug_stream has to be binary mode in Python 2.
+            # Attempting to write unicode directly uses the default ascii conversion.
+            # Convert any unicode to bytes, leaving non-string input alone.
+            args = [ensure_bytes(x) if isinstance(x, str) else x for x in args]
         print(file=debug_stream, *args)
 
 BASH_FILE_COMPLETION_FALLBACK = 79
