@@ -1,3 +1,23 @@
+Changes for v1.9.2 (2017-08-23)
+===============================
+
+-  Fix release
+
+Changes for v1.9.1 (2017-08-23)
+===============================
+
+-  Fix release
+
+Changes for v1.9.0 (2017-08-23)
+===============================
+
+-  Add SuppressCompleter to skip completion for specific arguments while
+   allowing help text (#224)
+
+-  Redirect all output to debug stream in debug mode (#206)
+
+-  Complete python -m module (#204)
+
 Changes for v1.8.2 (2017-01-26)
 ===============================
 
