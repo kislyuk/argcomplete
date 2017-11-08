@@ -1,4 +1,4 @@
-# Copyright 2012-2015, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2017, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
