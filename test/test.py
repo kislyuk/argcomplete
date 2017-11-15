@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse, subprocess
+import os, sys, shutil, argparse, subprocess, unittest
 import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, mkdtemp
 
@@ -17,14 +17,10 @@ from argcomplete import (
     CompletionFinder,
     split_line,
     ExclusiveCompletionFinder,
+    _check_module
 )
-from argcomplete.completers import FilesCompleter, DirectoriesCompleter
+from argcomplete.completers import FilesCompleter, DirectoriesCompleter, SuppressCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
-
-if sys.version_info >= (2, 7):
-    import unittest
-else:
-    import unittest2 as unittest
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;&(:"
@@ -61,7 +57,7 @@ class TestArgcomplete(unittest.TestCase):
     def setUp(self):
         self._os_environ = os.environ
         os.environ = os.environ.copy()
-        os.environ["_ARGCOMPLETE"] = "yes"
+        os.environ["_ARGCOMPLETE"] = "1"
         os.environ["_ARC_DEBUG"] = "yes"
         os.environ["IFS"] = IFS
         os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = COMP_WORDBREAKS
@@ -71,7 +67,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def run_completer(self, parser, command, point=None, completer=autocomplete, **kwargs):
         command = ensure_str(command)
-        
+
         if point is None:
             # Adjust point for wide chars
             point = str(len(command.encode(sys_encoding)))
@@ -157,6 +153,30 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd, print_suppressed=True)), set(output))
 
+    def test_suppress_completer(self):
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("--foo")
+            arg = parser.add_argument("--bar")
+            arg.completer = SuppressCompleter()
+            return parser
+
+        expected_outputs = (
+            ("prog ", ["--foo", "-h", "--help"]),
+            ("prog --b", [""])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+        expected_outputs = (
+            ("prog ", ["--foo", "--bar", "-h", "--help"]),
+            ("prog --b", ["--bar "])
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, print_suppressed=True)), set(output))
+
     def test_action_activation(self):
         def make_parser():
             parser = ArgumentParser()
@@ -218,7 +238,8 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --url \"http://url1\" --email a", ["a@b.c", "a@b.d", "ab@c.d"]),
             ("prog --url \"http://url1\" --email \"a@", ['a@b.c', 'a@b.d']),
             ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"a@", ['a@b.c', 'a@b.d']),
-            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ", ["--url", "--email", "-h", "--help"]),
+            ("prog --url \"http://url1\" --email \"a@b.c\" \"a@b.d\" \"ab@c.d\" ",
+             ["--url", "--email", "-h", "--help"]),
         )
 
         for cmd, output in expected_outputs:
@@ -286,6 +307,7 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_directory_completion(self):
         completer = DirectoriesCompleter()
+
         def c(prefix):
             return set(completer(prefix))
         with TempDir(prefix="test_dir", dir="."):
@@ -342,7 +364,8 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", ["--help", "eggs", "-h", "spam", "--age"]),
             ("prog --age 1 eggs", ["eggs "]),
-            ("prog --age 2 eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
+            ("prog --age 2 eggs ",
+             [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs \"on a", ['on a train', 'on a boat']),
             ("prog eggs on\\ a", [r"on\ a\ train", "on\ a\ boat"]),
@@ -370,7 +393,8 @@ class TestArgcomplete(unittest.TestCase):
 
         expected_outputs = (
             ("prog ", ["--книга", "-h", "--help"]),
-            ("prog --книга ", [r"Трудно\ быть\ богом", r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
+            ("prog --книга ",
+             [r"Трудно\ быть\ богом", r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
             ("prog --книга П", [r"Парень\ из\ преисподней", "Понедельник\ начинается\ в\ субботу"]),
             ("prog --книга Пу", [""]),
         )
@@ -615,7 +639,10 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", {"long": long_opts, "short": short_opts, True: long_opts + short_opts, False: [""]}),
             ("prog --foo", {"long": ["--foo "], "short": ["--foo "], True: ["--foo "], False: ["--foo "]}),
-            ("prog --b", {"long": ["--bar", "--baz"], "short": ["--bar", "--baz"], True: ["--bar", "--baz"], False: ["--bar", "--baz"]}),
+            ("prog --b", {"long": ["--bar", "--baz"],
+                          "short": ["--bar", "--baz"],
+                          True: ["--bar", "--baz"],
+                          False: ["--bar", "--baz"]}),
             ("prog -z -x", {"long": ["-x "], "short": ["-x "], True: ["-x "], False: ["-x "]}),
         )
         for cmd, outputs in expected_outputs:
@@ -872,6 +899,64 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.wordbreak('"b:c=d" '), None)
 
 
+class TestCheckModule(unittest.TestCase):
+    def setUp(self):
+        self.dir = TempDir(prefix="test_dir_module", dir=".")
+        self.dir.__enter__()
+        # There is some odd bug that seems to only come up in Python 3.4 where
+        # using "." in sys.path sometimes won't find modules, so we'll use the
+        # full path each time.
+        sys.path.insert(0, os.getcwd())
+
+    def tearDown(self):
+        sys.path.pop(0)
+        self.dir.__exit__()
+
+    def test_module(self):
+        self._mkfile('module.py')
+        path = _check_module.find('module')
+        self.assertEqual(path, os.path.abspath('module.py'))
+        self.assertNotIn('module', sys.modules)
+
+    def test_package(self):
+        os.mkdir('package')
+        self._mkfile('package/__init__.py')
+        self._mkfile('package/module.py')
+        path = _check_module.find('package.module')
+        self.assertEqual(path, os.path.abspath('package/module.py'))
+        self.assertNotIn('package', sys.modules)
+        self.assertNotIn('package.module', sys.modules)
+
+    def test_subpackage(self):
+        os.mkdir('package')
+        self._mkfile('package/__init__.py')
+        os.mkdir('package/subpackage')
+        self._mkfile('package/subpackage/__init__.py')
+        self._mkfile('package/subpackage/module.py')
+        path = _check_module.find('package.subpackage.module')
+        self.assertEqual(path, os.path.abspath('package/subpackage/module.py'))
+        self.assertNotIn('package', sys.modules)
+        self.assertNotIn('package.subpackage', sys.modules)
+        self.assertNotIn('package.subpackage.module', sys.modules)
+
+    def test_package_main(self):
+        os.mkdir('package')
+        self._mkfile('package/__init__.py')
+        self._mkfile('package/__main__.py')
+        path = _check_module.find('package')
+        self.assertEqual(path, os.path.abspath('package/__main__.py'))
+        self.assertNotIn('package', sys.modules)
+
+    def test_not_package(self):
+        self._mkfile('module.py')
+        with self.assertRaisesRegexp(Exception, 'module is not a package'):
+            _check_module.find('module.bad')
+        self.assertNotIn('module', sys.modules)
+
+    def _mkfile(self, path):
+        open(path, 'w').close()
+
+
 class _TestSh(object):
     """
     Contains tests which should work in any shell using argcomplete.
@@ -899,6 +984,7 @@ class _TestSh(object):
     def setUpClass(cls, *args, **kwargs):
         for name in cls.expected_failures:
             test = getattr(cls, name)
+
             @unittest.expectedFailure
             def wrapped(self, test=test):
                 test(self)
@@ -1007,6 +1093,8 @@ class TestBash(_TestSh, unittest.TestCase):
         path = ':'.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$PATH'])
         sh.run_command('export PATH={0}'.format(path))
         sh.run_command('export PYTHONPATH={0}'.format(BASE_DIR))
+        # Disable the "python" module provided by bash-completion
+        sh.run_command('complete -r python python2 python3')
         output = sh.run_command(self.install_cmd)
         self.assertEqual(output, '')
         self.sh = sh
@@ -1016,6 +1104,14 @@ class TestBash(_TestSh, unittest.TestCase):
         # Actual command run is 'echo "prog basic foo "'.
         result = self.sh.run_command('prog basic f\t"\1echo "')
         self.assertEqual(result, 'prog basic foo \r\n')
+
+    def test_debug_output(self):
+        self.assertEqual(self.sh.run_command('prog debug f\t'), 'foo\r\n')
+        self.sh.run_command('export _ARC_DEBUG=1')
+        output = self.sh.run_command('prog debug f\t')
+        self.assertIn('PYTHON_ARGCOMPLETE_STDOUT\r\n', output)
+        self.assertIn('PYTHON_ARGCOMPLETE_STDERR\r\n', output)
+        self.assertTrue(output.endswith('foo\r\n'))
 
 
 @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'complete -D not supported')
@@ -1037,8 +1133,20 @@ class TestBashGlobal(TestBash):
             shutil.copy(prog, '.')
             self.sh.run_command('cd ' + os.getcwd())
             self.sh.run_command('chmod -x ./prog')
-            self.assertIn('Permission denied', self.sh.run_command('./prog'))
+            # Ensure prog is no longer able to be run as "./prog".
+            self.assertIn('<<126>>', self.sh.run_command('./prog; echo "<<$?>>"'))
+            # Ensure completion still functions when run via python.
             self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+
+    def test_python_module(self):
+        """Test completing a module run with python -m."""
+        prog = os.path.join(TEST_DIR, 'prog')
+        with TempDir(prefix='test_dir_py', dir='.'):
+            os.mkdir('package')
+            open('package/__init__.py', 'w').close()
+            shutil.copy(prog, 'package/prog.py')
+            self.sh.run_command('cd ' + os.getcwd())
+            self.assertEqual(self.sh.run_command('python -m package.prog basic f\t'), 'foo\r\n')
 
 
 class TestTcsh(_TestSh, unittest.TestCase):

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os, sys, argparse, contextlib
 from . import completers, my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
-from .completers import FilesCompleter
+from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
 
 _DEBUG = "_ARC_DEBUG" in os.environ
@@ -203,9 +203,13 @@ class CompletionFinder(object):
         comp_line = ensure_str(comp_line)
         cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
-        if os.environ["_ARGCOMPLETE"] == "2":
-            # Shell hook recognized the first word as the interpreter; discard it
-            comp_words.pop(0)
+        # _ARGCOMPLETE is set by the shell script to tell us where comp_words
+        # should start, based on what we're completing.
+        # 1: <script> [args]
+        # 2: python <script> [args]
+        # 3: python -m <module> [args]
+        start = int(os.environ["_ARGCOMPLETE"]) - 1
+        comp_words = comp_words[start:]
 
         debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix),
               "\nSUFFIX: '{s}'".format(s=cword_suffix),
@@ -342,8 +346,12 @@ class CompletionFinder(object):
 
         option_completions = []
         for action in parser._actions:
-            if action.help == argparse.SUPPRESS and not self.print_suppressed:
-                continue
+            if not self.print_suppressed:
+                completer = getattr(action, "completer", None)
+                if isinstance(completer, SuppressCompleter) and completer.suppress():
+                    continue
+                if action.help == argparse.SUPPRESS:
+                    continue
             if not self._action_allowed(action, parser):
                 continue
             if not isinstance(action, argparse._SubParsersAction):

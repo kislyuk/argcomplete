@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
 """Test script used by test.TestBash."""
+from __future__ import print_function
+
 import argparse
 import argcomplete
 import os
@@ -17,6 +19,12 @@ def check_environ(*args, **kwargs):
     return ['ok']
 
 
+def print_output(*args, **kwargs):
+    print('PYTHON_ARGCOMPLETE_STDOUT')
+    print('PYTHON_ARGCOMPLETE_STDERR', file=sys.stderr)
+    return ['foo']
+
+
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
 subparsers.add_parser('basic').add_argument('arg', choices=['foo', 'bar', 'baz'])
@@ -26,6 +34,7 @@ subparsers.add_parser('spec').add_argument('arg', choices=['d$e$f', 'd$e$g', 'x!
 subparsers.add_parser('quote').add_argument('arg', choices=["1'1", '2"2'])
 subparsers.add_parser('break').add_argument('arg', choices=['a:b:c', 'a:b:d'])
 subparsers.add_parser('env').add_argument('arg').completer = check_environ
+subparsers.add_parser('debug').add_argument('arg').completer = print_output
 
 
 argcomplete.autocomplete(parser)

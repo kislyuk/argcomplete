@@ -2,17 +2,20 @@
 # - A leading slash means the pattern is anchored at the root.
 # - No leading slash means the pattern matches at any depth.
 
+# Python files
 *.pyc
 __pycache__/
 .tox/
 *.egg-info/
 /build/
 /dist/
-/.pydevproject
+/.eggs/
+.coverage
 
 # Sphinx documentation
 /docs/_build/
 
+# IDE project files
 /.pydevproject
 
 # vim python-mode plugin
@@ -21,3 +24,10 @@ __pycache__/
 # IntelliJ IDEA / PyCharm project files
 /.idea
 /*.iml
+
+# JS/node/npm/web dev files
+node_modules
+npm-debug.log
+
+# OS X metadata files
+.DS_Store

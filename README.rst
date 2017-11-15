@@ -26,7 +26,7 @@ Refresh your bash environment (start a new shell or ``source /etc/profile``).
 
 Synopsis
 --------
-Python code (e.g. ``my-awesome-script.py``):
+Python code (e.g. ``my-awesome-script``):
 
 .. code-block:: python
 
@@ -41,11 +41,12 @@ Python code (e.g. ``my-awesome-script.py``):
 
 Shellcode (only necessary if global completion is not activated - see `Global completion`_ below), to be put in e.g. ``.bashrc``::
 
-    eval "$(register-python-argcomplete my-awesome-script.py)"
+    eval "$(register-python-argcomplete my-awesome-script)"
 
 Note that the script name is passed directly to ``complete``, meaning it is only tab completed when invoked exactly
-as it was registered. The above line will **not** allow you to complete ``./my-awesome-script.py``, or
-``/path/to/my-awesome-script.py``.
+as it was registered. In the above example, ``my-awesome-script`` must be on the path, and the user must be
+attempting to complete it by that name. The above line alone would **not** allow you to complete ``./my-awesome-script``,
+or ``/path/to/my-awesome-script``. If you need this, you must register them separately, or use global completion.
 
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -212,6 +213,10 @@ In global completion mode, you don't have to register each argcomplete-capable e
 will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
 completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
 
+Additionally, completion is activated for scripts run as ``python <script>`` and ``python -m <module>``.
+This also works for alternate Python versions (e.g. ``python3`` and ``pypy``), as long as that version of Python has
+argcomplete installed.
+
 .. admonition:: Bash version compatibility
 
  Global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. On OS X or older Linux
@@ -246,13 +251,17 @@ Tcsh Support
 ------------
 To activate completions for tcsh use::
 
-    eval `register-python-argcomplete --shell tcsh my-awesome-script.py`
+    eval `register-python-argcomplete --shell tcsh my-awesome-script`
 
 The ``python-argcomplete-tcsh`` script provides completions for tcsh.
 The following is an example of the tcsh completion syntax for
-``my-awesome-script.py`` emitted by ``register-python-argcomplete``::
+``my-awesome-script`` emitted by ``register-python-argcomplete``::
 
-    complete my-awesome-script.py 'p@*@`python-argcomplete-tcsh my-awesome-script.py`@'
+    complete my-awesome-script 'p@*@`python-argcomplete-tcsh my-awesome-script`@'
+
+Python Support
+--------------
+Argcomplete requires Python 2.7 or 3.3+.
 
 Common Problems
 ---------------
@@ -260,10 +269,10 @@ If global completion is not completing your script, bash may have registered a
 default completion function::
 
     $ complete | grep my-awesome-script
-    complete -F _minimal my-awesome-script.py
+    complete -F _minimal my-awesome-script
 
 You can fix this by restarting your shell, or by running
-``complete -r my-awesome-script.py``.
+``complete -r my-awesome-script``.
 
 Debugging
 ---------
@@ -286,7 +295,7 @@ Inspired and informed by the optcomplete_ module by Martin Blais.
 Links
 -----
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
-* `Documentation (Read the Docs) <https://argcomplete.readthedocs.org/en/latest/>`_
+* `Documentation (Read the Docs) <https://argcomplete.readthedocs.io/en/latest/>`_
 * `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 * `Change log <https://github.com/kislyuk/argcomplete/blob/master/Changes.rst>`_
 
