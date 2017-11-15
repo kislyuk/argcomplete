@@ -8,6 +8,7 @@ from . import completers, my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
+from .shellintegration import shellcode # noqa
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
