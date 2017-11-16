@@ -1,3 +1,10 @@
+Changes for v1.9.3 (2017-11-16)
+===============================
+
+-  Fix handling of COMP\_POINT (#236)
+
+-  Fix crash when writing unicode to debug\_stream in Python 2 (#230)
+
 Changes for v1.9.2 (2017-08-23)
 ===============================
 
