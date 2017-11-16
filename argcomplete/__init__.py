@@ -199,12 +199,6 @@ class CompletionFinder(object):
         comp_line = os.environ["COMP_LINE"]
         comp_point = int(os.environ["COMP_POINT"])
 
-        # Adjust comp_point for wide chars
-        if USING_PYTHON2:
-            comp_point = len(comp_line[:comp_point].decode(sys_encoding))
-        else:
-            comp_point = len(comp_line.encode(sys_encoding)[:comp_point].decode(sys_encoding))
-
         comp_line = ensure_str(comp_line)
         cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
@@ -216,8 +210,11 @@ class CompletionFinder(object):
         start = int(os.environ["_ARGCOMPLETE"]) - 1
         comp_words = comp_words[start:]
 
-        debug("\nLINE: '{l}'\nPREQUOTE: '{pq}'\nPREFIX: '{p}'".format(l=comp_line, pq=cword_prequote, p=cword_prefix),
-              "\nSUFFIX: '{s}'".format(s=cword_suffix),
+        debug("\nLINE: {!r}".format(comp_line),
+              "\nPOINT: {!r}".format(comp_point),
+              "\nPREQUOTE: {!r}".format(cword_prequote),
+              "\nPREFIX: {!r}".format(cword_prefix),
+              "\nSUFFIX: {!r}".format(cword_suffix),
               "\nWORDS:", comp_words)
 
         completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)

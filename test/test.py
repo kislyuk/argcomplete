@@ -69,8 +69,7 @@ class TestArgcomplete(unittest.TestCase):
         command = ensure_str(command)
 
         if point is None:
-            # Adjust point for wide chars
-            point = str(len(command.encode(sys_encoding)))
+            point = str(len(command))
         with TemporaryFile() as t:
             os.environ["COMP_LINE"] = ensure_bytes(command) if USING_PYTHON2 else command
             os.environ["COMP_POINT"] = point
@@ -1076,6 +1075,14 @@ class _TestSh(object):
     def test_completion_environment(self):
         self.assertEqual(self.sh.run_command('prog env o\t'), 'ok\r\n')
 
+    def test_comp_point(self):
+        # Use environment variable to change how prog behaves
+        self.assertEqual(self.sh.run_command('export POINT=1'), '')
+        self.assertEqual(self.sh.run_command('prog point hi\t'), '13\r\n')
+        self.assertEqual(self.sh.run_command('prog point hi \t'), '14\r\n')
+        self.assertEqual(self.sh.run_command('prog point 你好嘚瑟\t'), '15\r\n')
+        self.assertEqual(self.sh.run_command('prog point 你好嘚瑟 \t'), '16\r\n')
+
 
 class TestBash(_TestSh, unittest.TestCase):
     expected_failures = [
@@ -1156,6 +1163,8 @@ class TestTcsh(_TestSh, unittest.TestCase):
         'test_continuation',
         'test_parse_special_characters',
         'test_parse_special_characters_dollar',
+        # Test case doesn't work under tcsh, could be fixed.
+        'test_comp_point',
     ]
 
     def setUp(self):
