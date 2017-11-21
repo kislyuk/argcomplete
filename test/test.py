@@ -3,13 +3,13 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse, subprocess, unittest
+import os, sys, shutil, argparse, subprocess, unittest, io
 import pexpect, pexpect.replwrap
-from tempfile import TemporaryFile, mkdtemp
+from tempfile import TemporaryFile, NamedTemporaryFile, mkdtemp
 
-TEST_DIR = os.path.abspath(os.path.dirname(__file__))
-BASE_DIR = os.path.dirname(TEST_DIR)
-sys.path.insert(0, BASE_DIR)
+TEST_DIR = os.path.abspath(os.path.dirname(__file__))  # noqa
+BASE_DIR = os.path.dirname(TEST_DIR)  # noqa
+sys.path.insert(0, BASE_DIR)  # noqa
 
 from argparse import ArgumentParser, SUPPRESS
 from argcomplete import (
@@ -17,7 +17,8 @@ from argcomplete import (
     CompletionFinder,
     split_line,
     ExclusiveCompletionFinder,
-    _check_module
+    _check_module,
+    shellcode
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter, SuppressCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
@@ -737,6 +738,19 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "')), {"\"'"})
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '")), {"\"'"})
 
+    def test_shellcode_utility(self):
+        with NamedTemporaryFile() as fh:
+            sc = shellcode("prog", use_defaults=True, shell="bash", complete_arguments=None)
+            fh.write(sc.encode())
+            fh.flush()
+            subprocess.check_call(['bash', '-n', fh.name])
+        with NamedTemporaryFile() as fh:
+            sc = shellcode("prog", use_defaults=False, shell="bash", complete_arguments=["-o", "nospace"])
+            fh.write(sc.encode())
+            fh.flush()
+            subprocess.check_call(['bash', '-n', fh.name])
+        sc = shellcode("prog", use_defaults=False, shell="tcsh", complete_arguments=["-o", "nospace"])
+        sc = shellcode("prog", use_defaults=False, shell="woosh", complete_arguments=["-o", "nospace"])
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
