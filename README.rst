@@ -279,15 +279,9 @@ You can fix this by restarting your shell, or by running
 
 Debugging
 ---------
-Set the ``_ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. Alternatively,
-you can bypass the bash completion shellcode altogether, and interact with the Python code directly with something like
-this::
-
-    PROGNAME=./{YOUR_PY_SCRIPT} TEST_ARGS='some_arguments with autocompl' _ARC_DEBUG=1 COMP_LINE="$PROGNAME $TEST_ARGS" COMP_POINT=31 _ARGCOMPLETE=1 $PROGNAME 8>&1 9>>~/autocomplete_debug.log
-
-Then tail::
-
-    tail -f ~/autocomplete_debug.log
+Set the ``_ARC_DEBUG`` variable in your shell to enable verbose debug output every time argcomplete runs. This will
+disrupt the command line composition state of your terminal, but make it possible to see the internal state of the
+completer if it encounters problems.
 
 Acknowledgments
 ---------------
