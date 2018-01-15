@@ -43,11 +43,6 @@ Shellcode (only necessary if global completion is not activated - see `Global co
 
     eval "$(register-python-argcomplete my-awesome-script)"
 
-Note that the script name is passed directly to ``complete``, meaning it is only tab completed when invoked exactly
-as it was registered. In the above example, ``my-awesome-script`` must be on the path, and the user must be
-attempting to complete it by that name. The above line alone would **not** allow you to complete ``./my-awesome-script``,
-or ``/path/to/my-awesome-script``. If you need this, you must register them separately, or use global completion.
-
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
@@ -229,6 +224,14 @@ argcomplete installed.
 .. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
  argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
  destination code.
+
+If you choose not to use global completion, or ship a bash completion module that depends on argcomplete, you must
+register your script explicitly using ``eval "$(register-python-argcomplete my-awesome-script)"``. Standard bash
+completion registration roules apply: namely, the script name is passed directly to ``complete``, meaning it is only tab
+completed when invoked exactly as it was registered. In the above example, ``my-awesome-script`` must be on the path,
+and the user must be attempting to complete it by that name. The above line alone would **not** allow you to complete
+``./my-awesome-script``, or ``/path/to/my-awesome-script``.
+
 
 Activating global completion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
