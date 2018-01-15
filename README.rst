@@ -250,6 +250,17 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete.sh
 
+Zsh Support
+------------
+To activate completions for zsh you need to have ``bashcompinit`` enabled in zsh::
+
+    autoload -U bashcompinit
+    bashcompinit
+
+Afterwards you can enable completion for your scripts with ``register-python-argcomplete``::
+
+    eval "$(register-python-argcomplete my-awesome-script)"
+
 Tcsh Support
 ------------
 To activate completions for tcsh use::
