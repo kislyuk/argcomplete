@@ -41,6 +41,7 @@ parser.add_argument(
 
 parser.add_argument(
     'executable',
+    nargs='+',
     help='executable to completed (when invoked by exactly this name)')
 
 if len(sys.argv) == 1:
