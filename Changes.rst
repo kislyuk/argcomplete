@@ -1,3 +1,10 @@
+Changes for v1.9.4 (2018-02-13)
+===============================
+
+-  Use the correct interpreter when checking wrappers (#226)
+
+-  Provide shellcode as a module function (#237)
+
 Changes for v1.9.3 (2017-11-16)
 ===============================
 
