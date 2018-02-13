@@ -8,7 +8,7 @@ from . import completers, my_shlex as shlex
 from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
-from .shellintegration import shellcode # noqa
+from .shellintegration import shellcode
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -100,7 +100,9 @@ def split_line(line, point=None):
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:
-                raise ArgcompleteException("Unexpected internal state. Please report this bug at https://github.com/kislyuk/argcomplete/issues.")  # noqa
+                msg = ("Unexpected internal state. "
+                       "Please report this bug at https://github.com/kislyuk/argcomplete/issues.")
+                raise ArgcompleteException(msg)
 
 def default_validator(completion, prefix):
     return completion.startswith(prefix)
@@ -343,7 +345,8 @@ class CompletionFinder(object):
 
     def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
-            [[" ".join(ensure_str(x) for x in action.option_strings if ensure_str(x).startswith(cword_prefix)), action.help]  # noqa
+            [[" ".join(ensure_str(x) for x in action.option_strings
+                       if ensure_str(x).startswith(cword_prefix)), action.help]
              for action in parser._actions
              if action.option_strings])
 
