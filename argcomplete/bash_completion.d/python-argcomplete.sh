@@ -12,14 +12,23 @@ __python_argcomplete_expand_tilde_by_ref () {
     fi
 }
 
-# Run something, muting output or redirecting it to the debug stream
-# depending on the value of _ARC_DEBUG.
-__python_argcomplete_run() {
-    if [[ -z "$_ARC_DEBUG" ]]; then
-        "$@" 8>&1 9>&2 1>/dev/null 2>&1
+# Returns the suggested completion list
+__python_argcomplete_get_compreply() {
+    local executable="python"
+    local pyFile="${COMP_WORDS[$((_ARGCOMPLETE-1))]}"
+    if [[ _ARGCOMPLETE -gt 1 ]]; then
+        # first word is the python executable
+        executable="${COMP_WORDS[0]}"
     else
-        "$@" 8>&1 9>&2 1>&9 2>&1
+        # first word is a python file
+        # use the shebang as executable
+        local shebang=$(head -n 1 "$pyFile")
+        if [[ "$shebang" == '#!'* ]]; then
+            executable=$(echo "$shebang" | tr -d '\r#!')
+        fi
     fi
+    # get completions
+    eval "$executable" -m argcomplete._suppressStdOutErr "$pyFile"
 }
 
 _python_argcomplete_global() {
@@ -62,7 +71,7 @@ _python_argcomplete_global() {
             _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
             _ARGCOMPLETE=$ARGCOMPLETE \
             _ARGCOMPLETE_SUPPRESS_SPACE=1 \
-            __python_argcomplete_run "$executable" "${COMP_WORDS[@]:1:ARGCOMPLETE-1}") )
+            __python_argcomplete_get_compreply) )
         if [[ $? != 0 ]]; then
             unset COMPREPLY
         elif [[ "$COMPREPLY" =~ [=/:]$ ]]; then

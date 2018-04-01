@@ -177,18 +177,12 @@ class CompletionFinder(object):
             # not an argument completion invocation
             return
 
+        # print result of argcomplete to original streams
+        # they will print to stdout/stderr even if sys.stdout/sys.stderr were redirected to devnull
         global debug_stream
-        try:
-            debug_stream = os.fdopen(9, "w")
-        except:
-            debug_stream = sys.stderr
-
+        debug_stream = sys.__stderr__
         if output_stream is None:
-            try:
-                output_stream = os.fdopen(8, "wb")
-            except:
-                debug("Unable to open fd 8 for writing, quitting")
-                exit_method(1)
+            output_stream = os.fdopen(1, "wb")
 
         # print("", stream=debug_stream)
         # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():
