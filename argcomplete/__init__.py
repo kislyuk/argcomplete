@@ -180,9 +180,9 @@ class CompletionFinder(object):
         # print result of argcomplete to original streams
         # they will print to stdout/stderr even if sys.stdout/sys.stderr were redirected to devnull
         global debug_stream
-        debug_stream = sys.__stderr__
+        debug_stream = os.fdopen(2, "w")
         if output_stream is None:
-            output_stream = sys.__stdout__
+            output_stream = os.fdopen(1, "wb")
 
         # print("", stream=debug_stream)
         # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():
@@ -217,7 +217,8 @@ class CompletionFinder(object):
         completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
 
         debug("\nReturning completions:", completions)
-        output_stream.write(ifs.join(completions))
+        if TypeError:
+        output_stream.write(ifs.join(completions).encode(sys_encoding))
         output_stream.flush()
         debug_stream.flush()
         exit_method(0)
