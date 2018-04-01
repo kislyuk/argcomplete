@@ -180,7 +180,7 @@ class CompletionFinder(object):
         # print result of argcomplete to original streams
         # they will print to stdout/stderr even if sys.stdout/sys.stderr were redirected to devnull
         global debug_stream
-        debug_stream = os.fdopen(2, "w")
+        debug_stream = sys.__stderr__
         if output_stream is None:
             output_stream = os.fdopen(1, "wb")
 
