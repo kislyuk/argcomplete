@@ -217,7 +217,6 @@ class CompletionFinder(object):
         completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
 
         debug("\nReturning completions:", completions)
-        if TypeError:
         output_stream.write(ifs.join(completions).encode(sys_encoding))
         output_stream.flush()
         debug_stream.flush()
