@@ -20,4 +20,4 @@ export _ARGCOMPLETE
 _ARGCOMPLETE_SHELL=tcsh
 export _ARGCOMPLETE_SHELL
 
-"$1" 8>&1 9>&2 1>/dev/null 2>/dev/null
+"$1"
