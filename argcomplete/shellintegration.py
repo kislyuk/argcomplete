@@ -1,14 +1,9 @@
 #!/usr/bin/env python
 
 bashcode = r'''
-# Run something, muting output or redirecting it to the debug stream
-# depending on the value of _ARC_DEBUG.
+# Run something
 __python_argcomplete_run() {
-    if [[ -z "$_ARC_DEBUG" ]]; then
-        "$@" 8>&1 9>&2 1>/dev/null 2>&1
-    else
-        "$@" 8>&1 9>&2 1>&9 2>&1
-    fi
+    "$@"
 }
 
 _python_argcomplete() {
