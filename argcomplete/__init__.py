@@ -12,7 +12,16 @@ from .shellintegration import shellcode
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
-debug_stream = sys.stderr
+debug_stream = sys.__stderr__
+
+# mute print function if _ARGCOMPLETE is defined and _DEBUG undefined
+# debug_stream and output_stream_default, however, are not muted
+if "_ARGCOMPLETE" in os.environ:
+    if _DEBUG:
+        sys.stdout = sys.stderr
+    else:
+        sys.stderr = None
+        sys.stdout = None
 
 def debug(*args):
     if _DEBUG:
@@ -178,17 +187,10 @@ class CompletionFinder(object):
             return
 
         global debug_stream
-        try:
-            debug_stream = os.fdopen(9, "w")
-        except:
-            debug_stream = sys.stderr
+        debug_stream = sys.__stderr__
 
         if output_stream is None:
-            try:
-                output_stream = os.fdopen(8, "wb")
-            except:
-                debug("Unable to open fd 8 for writing, quitting")
-                exit_method(1)
+            output_stream = os.fdopen(1, "wb")
 
         # print("", stream=debug_stream)
         # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():
