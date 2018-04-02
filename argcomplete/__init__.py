@@ -17,11 +17,9 @@ debug_stream = sys.__stderr__
 # mute print function if _ARGCOMPLETE is defined and _DEBUG undefined
 # debug_stream and output_stream_default, however, are not muted
 if "_ARGCOMPLETE" in os.environ:
-    if _DEBUG:
-        sys.stdout = sys.stderr
-    else:
-        sys.stderr = None
-        sys.stdout = None
+    if not _DEBUG:
+        sys.stderr = open(os.devnull, "w")
+    sys.stdout = sys.stderr
 
 def debug(*args):
     if _DEBUG:
