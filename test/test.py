@@ -740,17 +740,17 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_shellcode_utility(self):
         with NamedTemporaryFile() as fh:
-            sc = shellcode("prog", use_defaults=True, shell="bash", complete_arguments=None)
+            sc = shellcode(["prog"], use_defaults=True, shell="bash", complete_arguments=None)
             fh.write(sc.encode())
             fh.flush()
             subprocess.check_call(['bash', '-n', fh.name])
         with NamedTemporaryFile() as fh:
-            sc = shellcode("prog", use_defaults=False, shell="bash", complete_arguments=["-o", "nospace"])
+            sc = shellcode(["prog", "prog2"], use_defaults=False, shell="bash", complete_arguments=["-o", "nospace"])
             fh.write(sc.encode())
             fh.flush()
             subprocess.check_call(['bash', '-n', fh.name])
-        sc = shellcode("prog", use_defaults=False, shell="tcsh", complete_arguments=["-o", "nospace"])
-        sc = shellcode("prog", use_defaults=False, shell="woosh", complete_arguments=["-o", "nospace"])
+        sc = shellcode(["prog"], use_defaults=False, shell="tcsh", complete_arguments=["-o", "nospace"])
+        sc = shellcode(["prog"], use_defaults=False, shell="woosh", complete_arguments=["-o", "nospace"])
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):

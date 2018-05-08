@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote
+
 bashcode = r'''
 # Run something, muting output or redirecting it to the debug stream
 # depending on the value of _ARC_DEBUG.
@@ -31,18 +36,18 @@ _python_argcomplete() {
         compopt -o nospace
     fi
 }
-complete %(complete_opts)s -F _python_argcomplete "%(executable)s"
+complete %(complete_opts)s -F _python_argcomplete %(executables)s
 '''
 
 tcshcode = '''\
-complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(executable)s"`@'
+complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(executable)s"`@' ;
 '''
 
-def shellcode(executable, use_defaults=True, shell='bash', complete_arguments=None):
+def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=None):
     '''
     Provide the shell code required to register a python executable for use with the argcomplete module.
 
-    :param str executable: Executable to be completed (when invoked exactly with this name
+    :param str executables: Executables to be completed (when invoked exactly with this name
     :param bool use_defaults: Whether to fallback to readline's default completion when no matches are generated.
     :param str shell: Name of the shell to output code for (bash or tcsh)
     :param complete_arguments: Arguments to call complete with
@@ -55,8 +60,12 @@ def shellcode(executable, use_defaults=True, shell='bash', complete_arguments=No
         complete_options = " ".join(complete_arguments)
 
     if shell == 'bash':
-        code = bashcode
+        quoted_executables = [quote(i) for i in executables]
+        executables_list = " ".join(quoted_executables)
+        code = bashcode % dict(complete_opts=complete_options, executables=executables_list)
     else:
-        code = tcshcode
+        code = ""
+        for executable in executables:
+            code += tcshcode % dict(executable=executable)
 
-    return code % dict(complete_opts=complete_options, executable=executable)
+    return code
