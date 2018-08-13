@@ -1141,11 +1141,11 @@ class TestBashGlobal(TestBash):
 
     def test_python_completion(self):
         self.sh.run_command('cd ' + TEST_DIR)
-        self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('{python} ./prog basic f\t'), 'foo\r\n'.format(python=sys.executable))
 
     def test_python_filename_completion(self):
         self.sh.run_command('cd ' + TEST_DIR)
-        self.assertEqual(self.sh.run_command('python ./pro\tbasic f\t'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('{python} ./pro\tbasic f\t'), 'foo\r\n'.format(python=sys.executable))
 
     def test_python_not_executable(self):
         """Test completing a script that cannot be run directly."""
@@ -1157,7 +1157,7 @@ class TestBashGlobal(TestBash):
             # Ensure prog is no longer able to be run as "./prog".
             self.assertIn('<<126>>', self.sh.run_command('./prog; echo "<<$?>>"'))
             # Ensure completion still functions when run via python.
-            self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+            self.assertEqual(self.sh.run_command('{python} ./prog basic f\t'), 'foo\r\n'.format(python=sys.executable))
 
     def test_python_module(self):
         """Test completing a module run with python -m."""
@@ -1167,8 +1167,8 @@ class TestBashGlobal(TestBash):
             open('package/__init__.py', 'w').close()
             shutil.copy(prog, 'package/prog.py')
             self.sh.run_command('cd ' + os.getcwd())
-            self.assertEqual(self.sh.run_command('python -m package.prog basic f\t'), 'foo\r\n')
-
+            self.assertEqual(self.sh.run_command('{python} -m package.prog basic f\t'.format(python=sys.executable)),
+                             'foo\r\n')
 
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [
