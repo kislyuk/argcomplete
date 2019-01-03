@@ -262,6 +262,16 @@ The following is an example of the tcsh completion syntax for
 
     complete my-awesome-script 'p@*@`python-argcomplete-tcsh my-awesome-script`@'
 
+Fish Support
+------------
+To activate completions for fish use::
+
+    register-python-argcomplete --shell fish my-awesome-script | .
+
+or create new completion file, e.g::
+
+    register-python-argcomplete --shell fish ~/.config/fish/completions/my-awesome-script.fish
+
 Python Support
 --------------
 Argcomplete requires Python 2.7 or 3.3+.

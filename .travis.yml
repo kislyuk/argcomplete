@@ -15,12 +15,12 @@ matrix:
     - language: generic
       python: 2.7
       os: osx
-      osx_image: xcode7.3
 
 before_install:
-  - pip install --quiet --upgrade pip codecov
+  - python -m pip install --quiet --upgrade pip codecov
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install bash; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install fish; fi
 
 install:
   - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then python setup.py bdist_rpm; fi
@@ -35,6 +35,9 @@ after_success:
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:fish-shell/release-3'
     packages:
       - rpm
       - tcsh
+      - fish
