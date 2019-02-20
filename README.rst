@@ -7,7 +7,7 @@ Argcomplete provides easy, extensible command line tab completion of arguments f
 It makes two assumptions:
 
 * You're using bash as your shell (limited support for zsh and tcsh is available)
-* You're using `argparse <http://docs.python.org/2.7/library/argparse.html>`_ to manage your command line arguments/options
+* You're using `argparse <http://docs.python.org/3/library/argparse.html>`_ to manage your command line arguments/options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
 dynamically suggest completions for your argument/option values (for example, if the user is browsing resources over
@@ -163,8 +163,8 @@ argcomplete, so you can use the same completer object both in an interactive rea
 command line. For example, you can use the readline-style completer provided by IPython_ to get introspective
 completions like you would get in the IPython shell:
 
-.. _readline: http://docs.python.org/2/library/readline.html
-.. _rlcompleter: http://docs.python.org/2/library/rlcompleter.html#completer-objects
+.. _readline: http://docs.python.org/3/library/readline.html
+.. _rlcompleter: http://docs.python.org/3/library/rlcompleter.html#completer-objects
 .. _IPython: http://ipython.org/
 
 .. code-block:: python
