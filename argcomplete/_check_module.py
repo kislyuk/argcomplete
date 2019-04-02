@@ -12,7 +12,10 @@ except ImportError:
 
     def find_spec(name):
         """Minimal implementation as required by `find`."""
-        f, path, _ = find_module(name)
+        try:
+            f, path, _ = find_module(name)
+        except ImportError:
+            return None
         has_location = path is not None
         if f is None:
             return ModuleSpec(None, has_location, [path])
@@ -20,17 +23,25 @@ except ImportError:
         return ModuleSpec(path, has_location, None)
 
 
+class ArgcompleteMarkerNotFound(RuntimeError):
+    pass
+
+
 def find(name):
     names = name.split('.')
     spec = find_spec(names[0])
+    if spec is None:
+        raise ArgcompleteMarkerNotFound(
+            'no module named "{}"'.format(names[0]))
     if not spec.has_location:
-        raise Exception('cannot locate file')
+        raise ArgcompleteMarkerNotFound('cannot locate file')
     if spec.submodule_search_locations is None:
         if len(names) != 1:
-            raise Exception('{} is not a package'.format(names[0]))
+            raise ArgcompleteMarkerNotFound(
+                '{} is not a package'.format(names[0]))
         return spec.origin
     if len(spec.submodule_search_locations) != 1:
-        raise Exception('expecting one search location')
+        raise ArgcompleteMarkerNotFound('expecting one search location')
     path = os.path.join(spec.submodule_search_locations[0], *names[1:])
     if os.path.isdir(path):
         return os.path.join(path, '__main__.py')
@@ -42,8 +53,11 @@ def main():
     with open(find(sys.argv[1])) as f:
         head = f.read(1024)
     if 'PYTHON_ARGCOMPLETE_OK' not in head:
-        raise Exception('marker not found')
+        raise ArgcompleteMarkerNotFound('marker not found')
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except ArgcompleteMarkerNotFound as e:
+        sys.exit(e)
