@@ -1,3 +1,10 @@
+Changes for v1.9.5 (2019-04-02)
+===============================
+
+-  check_module: Don’t crash, exit with error instead (#261)
+
+-  Register completion for multiple commands (#246)
+
 Changes for v1.9.4 (2018-02-13)
 ===============================
 
