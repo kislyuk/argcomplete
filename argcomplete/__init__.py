@@ -537,8 +537,8 @@ class CompletionFinder(object):
         elif cword_prequote == '"':
             special_chars += '"`$!'
 
-        if os.environ.get("_ARGCOMPLETE_SHELL") == "tcsh":
-            # tcsh escapes special characters itself.
+        if os.environ.get("_ARGCOMPLETE_SHELL") in ("tcsh", "fish"):
+            # tcsh and fish escapes special characters itself.
             special_chars = ""
         elif cword_prequote == "'":
             # Nothing can be escaped in single quotes, so we need to close

@@ -1,5 +1,5 @@
 test_deps:
-	pip install .[test]
+	python -m pip install .[test]
 
 lint: test_deps
 	./setup.py flake8

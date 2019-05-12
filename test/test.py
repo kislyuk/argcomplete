@@ -751,6 +751,7 @@ class TestArgcomplete(unittest.TestCase):
             subprocess.check_call(['bash', '-n', fh.name])
         sc = shellcode(["prog"], use_defaults=False, shell="tcsh", complete_arguments=["-o", "nospace"])
         sc = shellcode(["prog"], use_defaults=False, shell="woosh", complete_arguments=["-o", "nospace"])
+        sc = shellcode(["prog"], shell="fish")
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
@@ -992,6 +993,7 @@ class _TestSh(object):
     """
     sh = None
     expected_failures = []
+    skipped = []
 
     @classmethod
     def setUpClass(cls, *args, **kwargs):
@@ -1001,6 +1003,13 @@ class _TestSh(object):
             @unittest.expectedFailure
             def wrapped(self, test=test):
                 test(self)
+            setattr(cls, name, wrapped)
+        for name in cls.skipped:
+            test = getattr(cls, name)
+
+            @unittest.skip('skip')
+            def wrapped(self, test=test):
+                pass
             setattr(cls, name, wrapped)
         super(_TestSh, cls).setUpClass(*args, **kwargs)
 
@@ -1187,6 +1196,36 @@ class TestTcsh(_TestSh, unittest.TestCase):
         sh.run_command('set path = ({0})'.format(path))
         sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
         output = sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
+        self.assertEqual(output, '')
+        self.sh = sh
+
+    def tearDown(self):
+        # The shell wrapper is fragile; exactly which exception is raised
+        # differs depending on environment.
+        with self.assertRaises((pexpect.EOF, OSError)):
+            self.sh.run_command('exit')
+            self.sh.run_command('')
+
+
+class TestFish(_TestSh, unittest.TestCase):
+    expected_failures = [
+        'test_parse_special_characters',
+        'test_comp_point',
+        'test_special_characters_double_quoted'
+    ]
+
+    skipped = [
+        'test_single_quotes_in_single_quotes',
+        'test_parse_special_characters_dollar'
+    ]
+
+    def setUp(self):
+
+        sh = Shell('fish')
+        path = ' '.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$PATH'])
+        sh.run_command('set -x PATH {0}'.format(path))
+        sh.run_command('set -x PYTHONPATH {0}'.format(BASE_DIR))
+        output = sh.run_command('register-python-argcomplete --shell fish prog | .')
         self.assertEqual(output, '')
         self.sh = sh
 

@@ -16,6 +16,10 @@ Example:
 For Tcsh
 
     $ eval `register-python-argcomplete --shell tcsh my-favorite-script.py`
+
+For Fish
+
+    $ register-python-argcomplete --shell fish my-favourite-script.py > ~/.config/fish/my-favourite-script.py.fish
 '''
 
 import sys
@@ -36,13 +40,15 @@ parser.add_argument(
     help='arguments to call complete with; use of this option discards default options')
 parser.add_argument(
     '-s', '--shell',
-    choices=('bash', 'tcsh'), default='bash',
+    choices=('bash', 'tcsh', 'fish'), default='bash',
     help='output code for the specified shell')
 
 parser.add_argument(
     'executable',
     nargs='+',
     help='executable to completed (when invoked by exactly this name)')
+
+argcomplete.autocomplete(parser)
 
 if len(sys.argv) == 1:
     parser.print_help()

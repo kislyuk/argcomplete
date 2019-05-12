@@ -43,6 +43,25 @@ tcshcode = '''\
 complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(executable)s"`@' ;
 '''
 
+fishcode = r'''
+function __fish_%(executable)s_complete
+    set -x _ARGCOMPLETE 1
+    set -x _ARGCOMPLETE_IFS \n
+    set -x _ARGCOMPLETE_SUPPRESS_SPACE 1
+    set -x _ARGCOMPLETE_SHELL fish
+    set -x COMP_LINE (commandline -p)
+    set -x COMP_POINT (string length (commandline -cp))
+    set -x COMP_TYPE
+    if set -q _ARC_DEBUG
+        %(executable)s 8>&1 9>&2 1>/dev/null 2>&1
+    else
+        %(executable)s 8>&1 9>&2 1>&9 2>&1
+    end
+end
+complete -c %(executable)s -f -a '(__fish_%(executable)s_complete)'
+'''
+
+
 def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=None):
     '''
     Provide the shell code required to register a python executable for use with the argcomplete module.
@@ -63,6 +82,10 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
         quoted_executables = [quote(i) for i in executables]
         executables_list = " ".join(quoted_executables)
         code = bashcode % dict(complete_opts=complete_options, executables=executables_list)
+    elif shell == 'fish':
+        code = ""
+        for executable in executables:
+            code += fishcode % dict(executable=executable)
     else:
         code = ""
         for executable in executables:
