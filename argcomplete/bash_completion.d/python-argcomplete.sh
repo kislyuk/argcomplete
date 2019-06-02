@@ -29,7 +29,7 @@ _python_argcomplete_global() {
     local ARGCOMPLETE=0
     if [[ "$executable" == python* ]] || [[ "$executable" == pypy* ]]; then
         if [[ "${COMP_WORDS[1]}" == -m ]]; then
-            if "$executable" -m argcomplete._check_module "${COMP_WORDS[2]}" >/dev/null 2>&1; then
+            if __python_argcomplete_run "$executable" -m argcomplete._check_module "${COMP_WORDS[2]}"; then
                 ARGCOMPLETE=3
             else
                 return
@@ -51,7 +51,7 @@ _python_argcomplete_global() {
             if (head -c 1024 "$SCRIPT_NAME" | egrep --quiet "(PBR Generated)|(EASY-INSTALL-(SCRIPT|ENTRY-SCRIPT|DEV-SCRIPT))" \
                 && "$interpreter" "$(which python-argcomplete-check-easy-install-script)" "$SCRIPT_NAME") >/dev/null 2>&1; then
                 local ARGCOMPLETE=1
-            elif "$interpreter" -m argcomplete._check_console_script "$SCRIPT_NAME" >/dev/null 2>&1; then
+            elif __python_argcomplete_run "$interpreter" -m argcomplete._check_console_script "$SCRIPT_NAME"; then
                 local ARGCOMPLETE=1
             fi
         fi
