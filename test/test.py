@@ -1187,7 +1187,11 @@ class TestBashGlobal(TestBash):
             command = 'pip install {} --target .'.format(test_package)
             if not wheel:
                 command += ' --no-binary :all:'
-            self.sh.run_command(command)
+                if sys.platform == 'darwin':
+                    # Work around https://stackoverflow.com/questions/24257803
+                    command += ' --install-option="--prefix="'
+            install_output = self.sh.run_command(command)
+            self.assertEqual(self.sh.run_command('echo $?'), '0\r\n', install_output)
             command = 'test-module'
             if package:
                 command = 'test-package'
