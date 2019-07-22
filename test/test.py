@@ -1178,6 +1178,42 @@ class TestBashGlobal(TestBash):
             self.sh.run_command('cd ' + os.getcwd())
             self.assertEqual(self.sh.run_command('python -m package.prog basic f\t'), 'foo\r\n')
 
+    def _test_console_script(self, package=False, wheel=False):
+        with TempDir(prefix='test_dir_py', dir='.'):
+            self.sh.run_command('cd ' + os.getcwd())
+            self.sh.run_command('export PATH=$PATH:./bin')
+            self.sh.run_command('export PYTHONPATH=.')
+            test_package = os.path.join(TEST_DIR, 'test_package')
+            command = 'pip install {} --target .'.format(test_package)
+            if not wheel:
+                command += ' --no-binary :all:'
+                if sys.platform == 'darwin':
+                    # Work around https://stackoverflow.com/questions/24257803
+                    command += ' --install-option="--prefix="'
+            install_output = self.sh.run_command(command)
+            self.assertEqual(self.sh.run_command('echo $?'), '0\r\n', install_output)
+            command = 'test-module'
+            if package:
+                command = 'test-package'
+            command += ' a\t'
+            self.assertEqual(self.sh.run_command(command), 'arg\r\n')
+
+    def test_console_script_module(self):
+        """Test completing a console_script for a module."""
+        self._test_console_script()
+
+    def test_console_script_package(self):
+        """Test completing a console_script for a package."""
+        self._test_console_script(package=True)
+
+    def test_console_script_module_wheel(self):
+        """Test completing a console_script for a module from a wheel."""
+        self._test_console_script(wheel=True)
+
+    def test_console_script_package_wheel(self):
+        """Test completing a console_script for a package from a wheel."""
+        self._test_console_script(package=True, wheel=True)
+
 
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [

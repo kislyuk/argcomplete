@@ -18,6 +18,11 @@ matrix:
 
 before_install:
   - python -m pip install --quiet --upgrade pip codecov
+  # OSX tests require https://github.com/pypa/pip/pull/6008
+  # which is not in 19.1.1 (latest release at time of writing)
+  # in order to address https://stackoverflow.com/questions/24257803
+  # (the fix recommended there does not appear to work without it).
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then python -m pip install https://github.com/pypa/pip/archive/master.zip; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install bash; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install fish; fi
