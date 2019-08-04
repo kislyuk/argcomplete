@@ -1,3 +1,16 @@
+"""
+Utility for locating the module (or package's __init__.py)
+associated with a given console_script name
+and verifying it contains the PYTHON_ARGCOMPLETE_OK marker.
+
+Such scripts are automatically generated and cannot contain
+the marker themselves, so we defer to the containing module or package.
+
+For more information on setuptools console_scripts, see
+https://setuptools.readthedocs.io/en/latest/setuptools.html#automatic-script-creation
+
+Intended to be invoked by argcomplete's global completion function.
+"""
 import os
 import sys
 
@@ -11,7 +24,7 @@ def main():
     script_path = sys.argv[1]
 
     # Find the module and function names that correspond to this
-    # assuming it as actually a console script.
+    # assuming it is actually a console script.
     name = os.path.basename(script_path)
     entry_points = list(iter_entry_points('console_scripts', name))
     if not entry_points:

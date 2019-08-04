@@ -1,3 +1,11 @@
+"""
+Utility for locating a module (or package's __main__.py) with a given name
+and verifying it contains the PYTHON_ARGCOMPLETE_OK marker.
+
+The module name should be specified in a form usable with `python -m`.
+
+Intended to be invoked by argcomplete's global completion function.
+"""
 import os
 import sys
 
