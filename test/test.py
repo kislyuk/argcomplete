@@ -1215,6 +1215,7 @@ class TestBashGlobal(TestBash):
         self._test_console_script(package=True, wheel=True)
 
 
+@unittest.skipIf(pexpect.which('tcsh') is None, 'tcsh is not installed')
 class TestTcsh(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_unquoted_space',
@@ -1243,6 +1244,7 @@ class TestTcsh(_TestSh, unittest.TestCase):
             self.sh.run_command('')
 
 
+@unittest.skipIf(pexpect.which('fish') is None, 'fish is not installed')
 class TestFish(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_parse_special_characters',
