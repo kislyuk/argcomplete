@@ -8,6 +8,7 @@ Intended to be invoked by argcomplete's global completion function.
 """
 import os
 import sys
+import tokenize
 
 try:
     from importlib.util import find_spec
@@ -61,8 +62,20 @@ def find(name, return_package=False):
 
 
 def main():
-    with open(find(sys.argv[1])) as f:
-        head = f.read(1024)
+    try:
+        name = sys.argv[1]
+    except IndexError:
+        raise ArgcompleteMarkerNotFound('missing argument on the command line')
+
+    filename = find(name)
+    try:
+        fp = tokenize.open(filename)
+    except FileNotFoundError:
+        raise ArgcompleteMarkerNotFound('file not found')
+
+    with fp:
+        head = fp.read(1024)
+
     if 'PYTHON_ARGCOMPLETE_OK' not in head:
         raise ArgcompleteMarkerNotFound('marker not found')
 
