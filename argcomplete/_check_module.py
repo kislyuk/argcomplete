@@ -68,10 +68,15 @@ def main():
         raise ArgcompleteMarkerNotFound('missing argument on the command line')
 
     filename = find(name)
+    if hasattr(tokenize, 'open'):
+        open_func = tokenize.open
+    else:
+        open_func = open
+
     try:
-        fp = tokenize.open(filename)
-    except FileNotFoundError:
-        raise ArgcompleteMarkerNotFound('file not found')
+        fp = open_func(filename)
+    except OSError:
+        raise ArgcompleteMarkerNotFound('cannot open file')
 
     with fp:
         head = fp.read(1024)
