@@ -249,8 +249,9 @@ class CompletionFinder(object):
         self.completing = False
 
         # key: complete word, value: description.
-
-        completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
+        after_opt_disable = "--" in comp_words
+        completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug,
+                                               after_opt_disable)
         completions = self.filter_completions(completions)
         completions = self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
         return completions
@@ -441,7 +442,7 @@ class CompletionFinder(object):
                 debug("Completions:", completions)
         return completions
 
-    def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
+    def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug, after_opt_disable):
         """
         Visits the active parsers and their actions, executes their completers or introspects them to collect their
         option strings. Returns the resulting completions as a list of strings.
@@ -453,7 +454,9 @@ class CompletionFinder(object):
         debug("all active parsers:", active_parsers)
         active_parser = active_parsers[-1]
         debug("active_parser:", active_parser)
-        if self.always_complete_options or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars):
+        if ((self.always_complete_options
+             or (len(cword_prefix) > 0 and cword_prefix[0] in active_parser.prefix_chars))
+            and not after_opt_disable):
             completions += self._get_option_completions(active_parser, cword_prefix)
         debug("optional options:", completions)
 
