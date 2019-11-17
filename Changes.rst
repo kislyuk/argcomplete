@@ -1,3 +1,10 @@
+Changes for v1.10.1 (2019-11-16)
+================================
+
+-  Trigger completers on –optional=PARTIAL_VALUE
+
+-  Complete console scripts installed from wheels (#241)
+
 Changes for v1.10.0 (2019-05-12)
 ================================
 
