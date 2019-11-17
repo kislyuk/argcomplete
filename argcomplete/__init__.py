@@ -1,4 +1,4 @@
-# Copyright 2012-2017, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2019, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -213,6 +213,10 @@ class CompletionFinder(object):
         start = int(os.environ["_ARGCOMPLETE"]) - 1
         comp_words = comp_words[start:]
 
+        if cword_prefix and cword_prefix[0] in self._parser.prefix_chars and "=" in cword_prefix:
+            # Special case for when the current word is "--optional=PARTIAL_VALUE". Give the optional to the parser.
+            comp_words.append(cword_prefix.split("=", 1)[0])
+
         debug("\nLINE: {!r}".format(comp_line),
               "\nPOINT: {!r}".format(comp_point),
               "\nPREQUOTE: {!r}".format(cword_prequote),
@@ -377,6 +381,7 @@ class CompletionFinder(object):
         debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
 
         isoptional = cword_prefix and cword_prefix[0] in parser.prefix_chars
+        optional_prefix = ""
         greedy_actions = [x for x in parser.active_actions if action_is_greedy(x, isoptional)]
         if greedy_actions:
             assert len(greedy_actions) == 1, "expect at most 1 greedy action"
@@ -386,8 +391,14 @@ class CompletionFinder(object):
             self._display_completions = {}
             completions = []
         elif isoptional:
-            # Only run completers if current word does not start with - (is not an optional)
-            return completions
+            if "=" in cword_prefix:
+                # Special case for when the current word is "--optional=PARTIAL_VALUE".
+                # The completer runs on PARTIAL_VALUE. The prefix is added back to the completions
+                # (and chopped back off later in quote_completions() by the COMP_WORDBREAKS logic).
+                optional_prefix, _, cword_prefix = cword_prefix.partition("=")
+            else:
+                # Only run completers if current word does not start with - (is not an optional)
+                return completions
 
         complete_remaining_positionals = False
         # Use the single greedy action (if there is one) or all active actions.
@@ -438,6 +449,8 @@ class CompletionFinder(object):
                         if self.validator(next_completion, cword_prefix):
                             self._display_completions.update({next_completion: ""})
                             completions.append(next_completion)
+                if optional_prefix:
+                    completions = [optional_prefix + "=" + completion for completion in completions]
                 debug("Completions:", completions)
         return completions
 

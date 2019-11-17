@@ -24,7 +24,7 @@ from argcomplete.completers import FilesCompleter, DirectoriesCompleter, Suppres
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 
 IFS = "\013"
-COMP_WORDBREAKS = " \t\n\"'><=;&(:"
+COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(['bash', '-c', 'echo $BASH_VERSION']).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split('.')[0])
@@ -107,7 +107,10 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --shi", ["--ship "]),
             ("prog --ship ", ["submarine", "speedboat"]),
             ("prog --ship s", ["submarine", "speedboat"]),
-            ("prog --ship su", ["submarine "])
+            ("prog --ship su", ["submarine "]),
+            ("prog --ship=", ["submarine", "speedboat"]),
+            ("prog --ship=s", ["submarine", "speedboat"]),
+            ("prog --ship=su", ["submarine "]),
         )
 
         for cmd, output in expected_outputs:
