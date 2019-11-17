@@ -1,3 +1,8 @@
+Changes for v1.10.2 (2019-11-17)
+================================
+
+-  Include all test directory contents in source distribution
+
 Changes for v1.10.1 (2019-11-16)
 ================================
 
