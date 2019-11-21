@@ -1185,7 +1185,7 @@ class TestBashGlobal(TestBash):
         with TempDir(prefix='test_dir_py', dir='.'):
             self.sh.run_command('cd ' + os.getcwd())
             self.sh.run_command('export PATH=$PATH:./bin')
-            self.sh.run_command('export PYTHONPATH=.')
+            self.sh.run_command('export PYTHONPATH=.:$PYTHONPATH')
             test_package = os.path.join(TEST_DIR, 'test_package')
             command = 'pip install {} --target .'.format(test_package)
             if not wheel:
