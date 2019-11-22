@@ -252,7 +252,8 @@ class CompletionFinder(object):
 
         self.completing = False
 
-        # key: complete word, value: description.
+        if "--" in comp_words:
+            self.always_complete_options = False
 
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
         completions = self.filter_completions(completions)

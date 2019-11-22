@@ -684,6 +684,7 @@ class TestArgcomplete(unittest.TestCase):
         expected_outputs = (
             ("prog ", ["--get", "--set", "name1", "name2"]),
             ("prog --", ["--get", "--set"]),
+            ("prog -- ", ["name1", "name2"]),
             ("prog --get ", ["--get", "name1", "name2"]),
             ("prog --get name1 ", ["--get "])
         )
