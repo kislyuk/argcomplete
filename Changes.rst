@@ -1,3 +1,8 @@
+Changes for v1.10.3 (2019-11-26)
+================================
+
+-  Do not suggest options after – (end-of-options delimiter)
+
 Changes for v1.10.2 (2019-11-17)
 ================================
 

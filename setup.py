@@ -8,7 +8,7 @@ tests_require = ["coverage", "flake8", "pexpect", "wheel"]
 
 setup(
     name='argcomplete',
-    version='1.10.2',
+    version='1.10.3',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',
