@@ -54,6 +54,9 @@ _python_argcomplete_global() {
             elif __python_argcomplete_run "$interpreter" -m argcomplete._check_console_script "$SCRIPT_NAME"; then
                 local ARGCOMPLETE=1
             fi
+        elif [[ "$(head -n 1 "$SCRIPT_NAME")" =~ ^"#"!/bin/sh$ ]] && [[ "$(head -n 2 "$SCRIPT_NAME" | tail -n 1)" =~ ^\'\'\'exec\'.*(python|pypy)[0-9\.]*.*$ ]]; then
+            # Spack alters shebang using a trick with exec
+            local ARGCOMPLETE=1
         fi
     fi
 
