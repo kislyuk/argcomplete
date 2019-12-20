@@ -22,6 +22,15 @@ __python_argcomplete_run() {
     fi
 }
 
+# Scan the beginning of an executable file ($1) for a regexp ($2). By default,
+# scan for the magic string indicating that the executable supports the
+# argcomplete completion protocol. By default, scan the first kilobyte;
+# if $3 is set to -n, scan until the first line break up to a kilobyte.
+__python_argcomplete_scan_head() {
+    local HEAD=$((read -s -r ${3:--N} 1024 < "$1"; echo "$REPLY") 2>/dev/null)
+    [[ "$HEAD" =~ ${2:-PYTHON_ARGCOMPLETE_OK} ]]
+}
+
 _python_argcomplete_global() {
     local executable=$1
     __python_argcomplete_expand_tilde_by_ref executable
@@ -34,21 +43,21 @@ _python_argcomplete_global() {
             else
                 return
             fi
-        elif [[ -f "${COMP_WORDS[1]}" ]] && (head -c 1024 "${COMP_WORDS[1]}" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
+        elif [[ -f "${COMP_WORDS[1]}" ]] && __python_argcomplete_scan_head "${COMP_WORDS[1]}"; then
             local ARGCOMPLETE=2
         else
             return
         fi
-    elif which "$executable" >/dev/null 2>&1; then
-        local SCRIPT_NAME=$(which "$executable")
+    elif type -P "$executable" >/dev/null 2>&1; then
+        local SCRIPT_NAME=$(type -P "$executable")
         if (type -t pyenv && [[ "$SCRIPT_NAME" = $(pyenv root)/shims/* ]]) >/dev/null 2>&1; then
             local SCRIPT_NAME=$(pyenv which "$executable")
         fi
-        if (head -c 1024 "$SCRIPT_NAME" | grep --quiet "PYTHON_ARGCOMPLETE_OK") >/dev/null 2>&1; then
+        if __python_argcomplete_scan_head "$SCRIPT_NAME"; then
             local ARGCOMPLETE=1
-        elif [[ "$(head -n 1 "$SCRIPT_NAME")" =~ ^#!(.*)$ ]] && [[ "${BASH_REMATCH[1]}" =~ ^.*(python|pypy)[0-9\.]*$ ]]; then
+        elif __python_argcomplete_scan_head "$SCRIPT_NAME" "^#!(.*)$" -n && [[ "${BASH_REMATCH[1]}" =~ ^.*(python|pypy)[0-9\.]*$ ]]; then
             local interpreter="$BASH_REMATCH"
-            if (head -c 1024 "$SCRIPT_NAME" | egrep --quiet "(PBR Generated)|(EASY-INSTALL-(SCRIPT|ENTRY-SCRIPT|DEV-SCRIPT))" \
+            if (__python_argcomplete_scan_head "$SCRIPT_NAME" "(PBR Generated)|(EASY-INSTALL-(SCRIPT|ENTRY-SCRIPT|DEV-SCRIPT))" \
                 && "$interpreter" "$(which python-argcomplete-check-easy-install-script)" "$SCRIPT_NAME") >/dev/null 2>&1; then
                 local ARGCOMPLETE=1
             elif __python_argcomplete_run "$interpreter" -m argcomplete._check_console_script "$SCRIPT_NAME"; then
