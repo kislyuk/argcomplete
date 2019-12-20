@@ -20,7 +20,7 @@ setup(
     extras_require={"test": tests_require},
     packages=find_packages(exclude=['test']),
     scripts=glob.glob('scripts/*'),
-    package_data={'argcomplete': ['bash_completion.d/python-argcomplete.sh']},
+    package_data={'argcomplete': ['bash_completion.d/python-argcomplete']},
     zip_safe=False,
     include_package_data=True,
     platforms=['MacOS X', 'Posix'],

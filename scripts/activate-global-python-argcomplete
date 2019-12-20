@@ -36,7 +36,7 @@ elif not os.path.exists(args.dest) and args.dest != '-':
     else:
         parser.error("Path {d} does not exist".format(d=args.dest))
 
-activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete.sh')
+activator = os.path.join(os.path.dirname(argcomplete.__file__), 'bash_completion.d', 'python-argcomplete')
 
 if args.complete_arguments is None:
     complete_options = '-o default -o bashdefault' if args.use_defaults else '-o bashdefault'
@@ -53,7 +53,7 @@ if args.dest == '-':
     for l in open(activator):
         sys.stdout.write(replaceCompleteCall(l))
 else:
-    dest = os.path.join(args.dest, "python-argcomplete.sh")
+    dest = os.path.join(args.dest, "python-argcomplete")
 
     sys.stdout.write("Installing bash completion script " + dest)
     if not args.use_defaults:
