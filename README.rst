@@ -285,7 +285,7 @@ or create new completion file, e.g::
 
 Python Support
 --------------
-Argcomplete requires Python 2.7 or 3.3+.
+Argcomplete requires Python 2.7 or 3.5+.
 
 Common Problems
 ---------------
