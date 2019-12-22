@@ -14,7 +14,10 @@ Intended to be invoked by argcomplete's global completion function.
 import os
 import sys
 
-from pkg_resources import iter_entry_points
+try:
+    from importlib.metadata import entry_points as importlib_entry_points
+except ImportError:
+    from importlib_metadata import entry_points as importlib_entry_points
 
 from ._check_module import ArgcompleteMarkerNotFound, find
 
@@ -26,12 +29,11 @@ def main():
     # Find the module and function names that correspond to this
     # assuming it is actually a console script.
     name = os.path.basename(script_path)
-    entry_points = list(iter_entry_points('console_scripts', name))
+    entry_points = [ep for ep in importlib_entry_points()["console_scripts"] if ep.name == name]
     if not entry_points:
         raise ArgcompleteMarkerNotFound('no entry point found matching script')
-    [entry_point] = entry_points
-    module_name = entry_point.module_name
-    function_name = entry_point.attrs[0]
+    entry_point = entry_points[0]
+    module_name, function_name = entry_point.value.split(":", 1)
 
     # Check this looks like the script we really expected.
     with open(script_path) as f:

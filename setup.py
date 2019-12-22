@@ -5,6 +5,7 @@ from setuptools import setup, find_packages
 
 install_requires = []
 tests_require = ["coverage", "flake8", "pexpect", "wheel"]
+importlib_backport_requires = ["importlib-metadata >= 0.23, < 2"]
 
 setup(
     name='argcomplete',
@@ -17,7 +18,13 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=install_requires,
     tests_require=tests_require,
-    extras_require={"test": tests_require},
+    extras_require={
+        "test": tests_require,
+        ':python_version == "2.7"': importlib_backport_requires,
+        ':python_version == "3.5"': importlib_backport_requires,
+        ':python_version == "3.6"': importlib_backport_requires,
+        ':python_version == "3.7"': importlib_backport_requires
+    },
     packages=find_packages(exclude=['test']),
     scripts=glob.glob('scripts/*'),
     package_data={'argcomplete': ['bash_completion.d/python-argcomplete']},
@@ -35,10 +42,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 5 - Production/Stable',
