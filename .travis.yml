@@ -31,7 +31,6 @@ install:
   - make install
 
 script:
-  - make lint
   - make test
 
 after_success:
