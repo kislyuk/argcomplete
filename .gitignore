@@ -12,9 +12,6 @@ __pycache__/
 /.eggs/
 .coverage
 
-# Sphinx documentation
-/docs/_build/
-
 # IDE project files
 /.pydevproject
 

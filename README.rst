@@ -172,8 +172,7 @@ completions like you would get in the IPython shell:
     import IPython
     parser.add_argument("--python-name").completer = IPython.core.completer.Completer()
 
-You can also use `argcomplete.CompletionFinder.rl_complete <https://argcomplete.readthedocs.org/en/latest/#argcomplete.CompletionFinder.rl_complete>`_
-to plug your entire argparse parser as a readline completer.
+``argcomplete.CompletionFinder.rl_complete`` can also be used to plug in an argparse parser as a readline completer.
 
 Printing warnings in completers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -313,7 +312,7 @@ Inspired and informed by the optcomplete_ module by Martin Blais.
 Links
 -----
 * `Project home page (GitHub) <https://github.com/kislyuk/argcomplete>`_
-* `Documentation (Read the Docs) <https://argcomplete.readthedocs.io/en/latest/>`_
+* `Documentation <https://kislyuk.github.io/argcomplete/>`_
 * `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 * `Change log <https://github.com/kislyuk/argcomplete/blob/master/Changes.rst>`_
 
@@ -333,5 +332,3 @@ Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.
         :target: https://pypi.python.org/pypi/argcomplete
 .. image:: https://img.shields.io/pypi/l/argcomplete.svg
         :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://readthedocs.org/projects/argcomplete/badge/?version=latest
-        :target: https://argcomplete.readthedocs.org/
