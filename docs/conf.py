@@ -1,7 +1,7 @@
 import guzzle_sphinx_theme
 
 project = "argcomplete"
-copyright = "Andrey Kislyuk"
+copyright = "Andrey Kislyuk and argcomplete contributors"
 author = "Andrey Kislyuk"
 version = ""
 release = ""
