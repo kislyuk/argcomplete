@@ -9,7 +9,7 @@ importlib_backport_requires = ["importlib-metadata >= 0.23, < 2"]
 
 setup(
     name='argcomplete',
-    version='1.10.3',
+    version='1.11.0',
     url='https://github.com/kislyuk/argcomplete',
     license='Apache Software License',
     author='Andrey Kislyuk',

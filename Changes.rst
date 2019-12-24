@@ -1,3 +1,16 @@
+Changes for v1.11.0 (2019-12-23)
+================================
+
+-  Use shell builtins where possible (#280)
+
+-  Switch from pkg_resources to importlib (#283)
+
+-  Remove .sh extension by bash-completion convention (#281)
+
+-  Catch exceptions in \_check_module (#269)
+
+-  Documentation and test improvements
+
 Changes for v1.10.3 (2019-11-26)
 ================================
 
