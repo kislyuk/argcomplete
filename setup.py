@@ -11,6 +11,11 @@ setup(
     name='argcomplete',
     version='1.11.0',
     url='https://github.com/kislyuk/argcomplete',
+    project_urls={
+        "Documentation": "https://kislyuk.github.io/argcomplete",
+        "Source Code": "https://github.com/kislyuk/argcomplete",
+        "Issue Tracker": "https://github.com/kislyuk/argcomplete/issues"
+    },
     license='Apache Software License',
     author='Andrey Kislyuk',
     author_email='kislyuk@gmail.com',
