@@ -74,7 +74,7 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
     '''
 
     if complete_arguments is None:
-        complete_options = '-o nospace -o default' if use_defaults else '-o nospace'
+        complete_options = '-o nospace -o default -o bashdefault' if use_defaults else '-o nospace -o bashdefault'
     else:
         complete_options = " ".join(complete_arguments)
 
