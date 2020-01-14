@@ -1,3 +1,9 @@
+Changes for v1.11.1 (2020-01-14)
+================================
+
+-  Add -o bashdefault to register-python-argcomplete’s output command
+   (#284)
+
 Changes for v1.11.0 (2019-12-23)
 ================================
 
