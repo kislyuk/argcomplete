@@ -371,7 +371,7 @@ class TestArgcomplete(unittest.TestCase):
              [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs ", [r"on\ a\ train", r"with\ a\ goat", r"on\ a\ boat", r"in\ the\ rain", "--help", "-h"]),
             ("prog eggs \"on a", ['on a train', 'on a boat']),
-            ("prog eggs on\\ a", [r"on\ a\ train", "on\ a\ boat"]),
+            ("prog eggs on\\ a", [r"on\ a\ train", r"on\ a\ boat"]),
             ("prog spam ", ["iberico", "ham", "--help", "-h"]),
         )
 
@@ -398,7 +398,7 @@ class TestArgcomplete(unittest.TestCase):
             ("prog ", ["--книга", "-h", "--help"]),
             ("prog --книга ",
              [r"Трудно\ быть\ богом", r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
-            ("prog --книга П", [r"Парень\ из\ преисподней", "Понедельник\ начинается\ в\ субботу"]),
+            ("prog --книга П", [r"Парень\ из\ преисподней", r"Понедельник\ начинается\ в\ субботу"]),
             ("prog --книга Пу", [""]),
         )
 
@@ -890,8 +890,8 @@ class TestSplitLine(unittest.TestCase):
         self.assertEqual(self.prefix('a b c'), 'c')
 
     def test_escaped_special(self):
-        self.assertEqual(self.prefix('a\$b'), 'a$b')
-        self.assertEqual(self.prefix('a\`b'), 'a`b')
+        self.assertEqual(self.prefix(r'a\$b'), 'a$b')
+        self.assertEqual(self.prefix(r'a\`b'), 'a`b')
 
     def test_unescaped_special(self):
         self.assertEqual(self.prefix('a$b'), 'a$b')
@@ -899,8 +899,8 @@ class TestSplitLine(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_escaped_special_in_double_quotes(self):
-        self.assertEqual(self.prefix('"a\$b'), 'a$b')
-        self.assertEqual(self.prefix('"a\`b'), 'a`b')
+        self.assertEqual(self.prefix(r'"a\$b'), 'a$b')
+        self.assertEqual(self.prefix(r'"a\`b'), 'a`b')
 
     def test_punctuation(self):
         self.assertEqual(self.prefix('a,'), 'a,')
