@@ -43,6 +43,9 @@ parser.add_argument(
     '-s', '--shell',
     choices=('bash', 'tcsh', 'fish'), default='bash',
     help='output code for the specified shell')
+parser.add_argument(
+    '-e', '--external-argcomplete-script',
+    help='external argcomplete script for auto completion of the executable')
 
 parser.add_argument(
     'executable',
@@ -59,4 +62,4 @@ args = parser.parse_args()
 
 
 sys.stdout.write(argcomplete.shellcode(
-    args.executable, args.use_defaults, args.shell, args.complete_arguments))
+    args.executable, args.use_defaults, args.shell, args.complete_arguments, args.external_argcomplete_script))
