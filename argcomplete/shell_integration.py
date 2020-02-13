@@ -91,7 +91,7 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
         code = ""
         for executable in executables:
             if not argcomplete_script:
-               argcomplete_script = executable
+                argcomplete_script = executable
             code += shell_codes.get(shell, '') % dict(executable=executable, argcomplete_script=argcomplete_script)
 
     return code
