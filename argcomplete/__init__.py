@@ -428,6 +428,9 @@ class CompletionFinder(object):
                     completer = self.default_completer
 
             if completer:
+                if isinstance(completer, SuppressCompleter) and completer.suppress():
+                    continue
+
                 if callable(completer):
                     completions_from_callable = [c for c in completer(
                         prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args)
