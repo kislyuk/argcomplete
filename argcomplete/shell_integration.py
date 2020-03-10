@@ -29,7 +29,7 @@ _python_argcomplete() {
                   _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
                   _ARGCOMPLETE=1 \
                   _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-                  __python_argcomplete_run "$1") )
+                  __python_argcomplete_run "%(argcomplete_script)s") )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
     elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
@@ -40,7 +40,7 @@ complete %(complete_opts)s -F _python_argcomplete %(executables)s
 '''
 
 tcshcode = '''\
-complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(executable)s"`@' ;
+complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(argcomplete_script)s"`@' ;
 '''
 
 fishcode = r'''
@@ -53,16 +53,18 @@ function __fish_%(executable)s_complete
     set -x COMP_POINT (string length (commandline -cp))
     set -x COMP_TYPE
     if set -q _ARC_DEBUG
-        %(executable)s 8>&1 9>&2 1>/dev/null 2>&1
+        %(argcomplete_script)s 8>&1 9>&2 1>/dev/null 2>&1
     else
-        %(executable)s 8>&1 9>&2 1>&9 2>&1
+        %(argcomplete_script)s 8>&1 9>&2 1>&9 2>&1
     end
 end
 complete -c %(executable)s -f -a '(__fish_%(executable)s_complete)'
 '''
 
+shell_codes = {'bash': bashcode, 'tcsh': tcshcode, 'fish': fishcode}
 
-def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=None):
+
+def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=None, argcomplete_script=None):
     '''
     Provide the shell code required to register a python executable for use with the argcomplete module.
 
@@ -81,14 +83,15 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
     if shell == 'bash':
         quoted_executables = [quote(i) for i in executables]
         executables_list = " ".join(quoted_executables)
-        code = bashcode % dict(complete_opts=complete_options, executables=executables_list)
-    elif shell == 'fish':
-        code = ""
-        for executable in executables:
-            code += fishcode % dict(executable=executable)
+        if not argcomplete_script:
+            argcomplete_script = '$1'
+        code = bashcode % dict(complete_opts=complete_options, executables=executables_list,
+                               argcomplete_script=argcomplete_script)
     else:
         code = ""
         for executable in executables:
-            code += tcshcode % dict(executable=executable)
+            if not argcomplete_script:
+                argcomplete_script = executable
+            code += shell_codes.get(shell, '') % dict(executable=executable, argcomplete_script=argcomplete_script)
 
     return code
