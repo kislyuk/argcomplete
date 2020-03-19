@@ -1142,6 +1142,10 @@ class TestBash(_TestSh, unittest.TestCase):
         sh.run_command('complete -r python python2 python3')
         output = sh.run_command(self.install_cmd)
         self.assertEqual(output, '')
+        # Register a dummy completion with an external argcomplete script
+        # to ensure this doesn't overwrite our previous registration.
+        output = sh.run_command('eval "$(register-python-argcomplete dummy --external-argcomplete-script dummy)"')
+        self.assertEqual(output, '')
         self.sh = sh
 
     def test_one_space_after_exact(self):
@@ -1250,6 +1254,10 @@ class TestTcsh(_TestSh, unittest.TestCase):
         # by passing 'prog' as the second argument.
         output = sh.run_command('eval `register-python-argcomplete --shell tcsh dummy prog`')
         self.assertEqual(output, '')
+        # Register a dummy completion with an external argcomplete script
+        # to ensure this doesn't overwrite our previous registration.
+        output = sh.run_command('eval `register-python-argcomplete --shell tcsh dummy --external-argcomplete-script dummy`')
+        self.assertEqual(output, '')
         self.sh = sh
 
     def tearDown(self):
@@ -1284,6 +1292,10 @@ class TestFish(_TestSh, unittest.TestCase):
         # 'dummy' argument unused; checks multi-command registration works
         # by passing 'prog' as the second argument.
         output = sh.run_command('register-python-argcomplete --shell fish dummy prog | .')
+        self.assertEqual(output, '')
+        # Register a dummy completion with an external argcomplete script
+        # to ensure this doesn't overwrite our previous registration.
+        output = sh.run_command('register-python-argcomplete --shell fish dummy --external-argcomplete-script dummy | .')
         self.assertEqual(output, '')
         self.sh = sh
 
