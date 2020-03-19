@@ -28,6 +28,8 @@ COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(['bash', '-c', 'echo $BASH_VERSION']).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split('.')[0])
+FISH_VERSION_STR = subprocess.check_output(['fish', '-c', 'echo -n $FISH_VERSION']).decode()
+FISH_VERSION_TUPLE = tuple(int(x) for x in FISH_VERSION_STR.split('.'))
 
 
 class TempDir(object):
@@ -1258,8 +1260,11 @@ class TestFish(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_parse_special_characters',
         'test_comp_point',
-        'test_special_characters_double_quoted'
     ]
+    if FISH_VERSION_TUPLE < (3, 1):
+        expected_failures.extend([
+            'test_special_characters_double_quoted'
+        ])
 
     skipped = [
         'test_single_quotes_in_single_quotes',
