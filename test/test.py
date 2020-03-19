@@ -1129,7 +1129,9 @@ class TestBash(_TestSh, unittest.TestCase):
         # This requires compopt which is not available in 3.x.
         expected_failures.append('test_quoted_exact')
 
-    install_cmd = 'eval "$(register-python-argcomplete prog)"'
+    # 'dummy' argument unused; checks multi-command registration works
+    # by passing 'prog' as the second argument.
+    install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
 
     def setUp(self):
         sh = pexpect.replwrap.bash()
@@ -1244,7 +1246,9 @@ class TestTcsh(_TestSh, unittest.TestCase):
         path = ' '.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$path'])
         sh.run_command('set path = ({0})'.format(path))
         sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
-        output = sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
+        # 'dummy' argument unused; checks multi-command registration works
+        # by passing 'prog' as the second argument.
+        output = sh.run_command('eval `register-python-argcomplete --shell tcsh dummy prog`')
         self.assertEqual(output, '')
         self.sh = sh
 
@@ -1277,7 +1281,9 @@ class TestFish(_TestSh, unittest.TestCase):
         path = ' '.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$PATH'])
         sh.run_command('set -x PATH {0}'.format(path))
         sh.run_command('set -x PYTHONPATH {0}'.format(BASE_DIR))
-        output = sh.run_command('register-python-argcomplete --shell fish prog | .')
+        # 'dummy' argument unused; checks multi-command registration works
+        # by passing 'prog' as the second argument.
+        output = sh.run_command('register-python-argcomplete --shell fish dummy prog | .')
         self.assertEqual(output, '')
         self.sh = sh
 
