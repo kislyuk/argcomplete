@@ -28,6 +28,8 @@ COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(['bash', '-c', 'echo $BASH_VERSION']).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split('.')[0])
+FISH_VERSION_STR = subprocess.check_output(['fish', '-c', 'echo -n $FISH_VERSION']).decode()
+FISH_VERSION_TUPLE = tuple(int(x) for x in FISH_VERSION_STR.split('.'))
 
 
 class TempDir(object):
@@ -1127,7 +1129,9 @@ class TestBash(_TestSh, unittest.TestCase):
         # This requires compopt which is not available in 3.x.
         expected_failures.append('test_quoted_exact')
 
-    install_cmd = 'eval "$(register-python-argcomplete prog)"'
+    # 'dummy' argument unused; checks multi-command registration works
+    # by passing 'prog' as the second argument.
+    install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
 
     def setUp(self):
         sh = pexpect.replwrap.bash()
@@ -1242,7 +1246,9 @@ class TestTcsh(_TestSh, unittest.TestCase):
         path = ' '.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$path'])
         sh.run_command('set path = ({0})'.format(path))
         sh.run_command('setenv PYTHONPATH {0}'.format(BASE_DIR))
-        output = sh.run_command('eval `register-python-argcomplete --shell tcsh prog`')
+        # 'dummy' argument unused; checks multi-command registration works
+        # by passing 'prog' as the second argument.
+        output = sh.run_command('eval `register-python-argcomplete --shell tcsh dummy prog`')
         self.assertEqual(output, '')
         self.sh = sh
 
@@ -1258,8 +1264,11 @@ class TestFish(_TestSh, unittest.TestCase):
     expected_failures = [
         'test_parse_special_characters',
         'test_comp_point',
-        'test_special_characters_double_quoted'
     ]
+    if FISH_VERSION_TUPLE < (3, 1):
+        expected_failures.extend([
+            'test_special_characters_double_quoted'
+        ])
 
     skipped = [
         'test_single_quotes_in_single_quotes',
@@ -1272,7 +1281,9 @@ class TestFish(_TestSh, unittest.TestCase):
         path = ' '.join([os.path.join(BASE_DIR, 'scripts'), TEST_DIR, '$PATH'])
         sh.run_command('set -x PATH {0}'.format(path))
         sh.run_command('set -x PYTHONPATH {0}'.format(BASE_DIR))
-        output = sh.run_command('register-python-argcomplete --shell fish prog | .')
+        # 'dummy' argument unused; checks multi-command registration works
+        # by passing 'prog' as the second argument.
+        output = sh.run_command('register-python-argcomplete --shell fish dummy prog | .')
         self.assertEqual(output, '')
         self.sh = sh
 
