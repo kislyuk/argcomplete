@@ -16,7 +16,7 @@ __python_argcomplete_run() {
     fi
 }
 
-_python_argcomplete() {
+_python_argcomplete%(function_suffix)s() {
     local IFS=$'\013'
     local SUPPRESS_SPACE=0
     if compopt +o nospace 2> /dev/null; then
@@ -36,7 +36,7 @@ _python_argcomplete() {
         compopt -o nospace
     fi
 }
-complete %(complete_opts)s -F _python_argcomplete %(executables)s
+complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
 '''
 
 tcshcode = '''\
@@ -86,10 +86,14 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
     if shell == 'bash':
         quoted_executables = [quote(i) for i in executables]
         executables_list = " ".join(quoted_executables)
-        if not argcomplete_script:
-            argcomplete_script = '$1'
+        script = argcomplete_script
+        if script:
+            function_suffix = '_' + script
+        else:
+            script = '$1'
+            function_suffix = ''
         code = bashcode % dict(complete_opts=complete_options, executables=executables_list,
-                               argcomplete_script=argcomplete_script)
+                               argcomplete_script=script, function_suffix=function_suffix)
     else:
         code = ""
         for executable in executables:
