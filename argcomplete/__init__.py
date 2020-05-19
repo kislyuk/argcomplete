@@ -185,9 +185,10 @@ class CompletionFinder(object):
 
         if output_stream is None:
             try:
-                output_stream = os.fdopen(8, "wb")
+                output_stream_fd = int(os.environ.get("_ARGCOMPLETE_OSTREAM_FD", 8))
+                output_stream = os.fdopen(output_stream_fd, "wb")
             except:
-                debug("Unable to open fd 8 for writing, quitting")
+                debug("Unable to open fd {0} for writing, quitting".format(output_stream_fd))
                 exit_method(1)
 
         # print("", stream=debug_stream)
