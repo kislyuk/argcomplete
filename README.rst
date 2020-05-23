@@ -282,6 +282,16 @@ or create new completion file, e.g::
 
     register-python-argcomplete --shell fish ~/.config/fish/completions/my-awesome-script.fish
 
+Git Bash Support
+----------------
+Due to limitations of file descriptor inheritance on Windows,
+Git Bash is only partially supported. You can opt-in to the
+Windows compatibility layer by setting the environment variable
+``ARGCOMPLETE_WINDOWS_COMPAT``.
+
+For full support, consider using Bash with the
+Windows Subsystem for Linux (WSL).
+
 External argcomplete script
 ---------------------------
 To register an argcomplete script for an arbitrary name, the ``--external-argcomplete-script`` argument of the ``register-python-argcomplete`` script can be used::
