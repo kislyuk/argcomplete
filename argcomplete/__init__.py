@@ -177,18 +177,41 @@ class CompletionFinder(object):
             # not an argument completion invocation
             return
 
+        stdout_fd = 8
+        stderr_fd = 9
+
+        def open_osfhandle(handle):
+            import msvcrt
+            return msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_TEXT)
+
+        stdout_handle = os.environ.get("_ARGCOMPLETE_STDOUT_HANDLE")
+        if stdout_handle is not None:
+            stdout_fd = open_osfhandle(int(stdout_handle))
+        stderr_handle = os.environ.get("_ARGCOMPLETE_STDERR_HANDLE")
+        if stderr_handle is not None:
+            stderr_fd = open_osfhandle(int(stderr_handle))
+
         global debug_stream
         try:
-            debug_stream = os.fdopen(9, "w")
+            debug_stream = os.fdopen(stderr_fd, "w")
         except:
             debug_stream = sys.stderr
 
         if output_stream is None:
             try:
-                output_stream = os.fdopen(8, "wb")
+                output_stream = os.fdopen(stdout_fd, "wb")
             except:
-                debug("Unable to open fd 8 for writing, quitting")
+                debug("Unable to open fd {} for writing, quitting".format(stdout_fd))
                 exit_method(1)
+
+        # Almost always in the middle of a user typing a line;
+        # move to the next line before any other debug output.
+        debug()
+
+        if stdout_handle is not None:
+            debug("Mapped stdout handle {} to fd {}".format(stdout_handle, stdout_fd))
+        if stderr_handle is not None:
+            debug("Mapped stderr handle {} to fd {}".format(stderr_handle, stderr_fd))
 
         # print("", stream=debug_stream)
         # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():

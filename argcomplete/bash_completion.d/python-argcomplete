@@ -15,7 +15,9 @@ __python_argcomplete_expand_tilde_by_ref () {
 # Run something, muting output or redirecting it to the debug stream
 # depending on the value of _ARC_DEBUG.
 __python_argcomplete_run() {
-    if [[ -z "$_ARC_DEBUG" ]]; then
+    if [[ "$OS" == "Windows_NT" ]]; then
+        __python_argcomplete_run_subprocess "$@"
+    elif [[ -z "$_ARC_DEBUG" ]]; then
         "$@" 8>&1 9>&2 1>/dev/null 2>&1
     else
         "$@" 8>&1 9>&2 1>&9 2>&1

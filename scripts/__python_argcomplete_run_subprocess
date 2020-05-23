@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+"""
+Script mimicking __python_argcomplete_run using subprocess.
+
+Used in environments where the file descriptor manipulation
+required by argcomplete is not possible from shell scripts.
+"""
+import os
+import msvcrt
+import subprocess
+import sys
+
+if '_ARC_DEBUG' in os.environ:
+    stdout = sys.stderr.buffer
+else:
+    stdout = subprocess.DEVNULL
+
+# Inform the child of stdout/stderr handles via the environment.
+# These handles are inherited by setting close_fds=False.
+# They appear to be inheritable by default;
+# alternatively we could use os.set_handle_inheritable().
+# We use handles instead of file descriptors
+# because they are more easily inherited on Windows.
+# Even if we create the file descriptors, make them inheritable
+# and use os.spawn* instead of subprocess so that the
+# file descriptors are inherited by py.exe,
+# py.exe won't pass them to the Python process it spawns anyway.
+# See also: https://www.python.org/dev/peps/pep-0446/#inheritance-of-file-descriptors-on-windows
+stdout_handle = msvcrt.get_osfhandle(1)
+stderr_handle = msvcrt.get_osfhandle(2)
+env = os.environ.copy()
+env['_ARGCOMPLETE_STDOUT_HANDLE'] = str(stdout_handle)
+env['_ARGCOMPLETE_STDERR_HANDLE'] = str(stderr_handle)
+
+code = subprocess.call(
+    # bash.exe reads the shebang line in order to execute programs.
+    # cmd.exe uses the file association for .py files
+    # to launch scripts using py.exe, which reads the shebang line.
+    # subprocess does neither of these things,
+    # so we explicitly launch via py.exe.
+    # This will only work for scripts; it won't work for
+    # pip wrappers (which are .exe files on Windows)
+    # or for completing py.exe or python.exe.
+    ['py.exe'] + sys.argv[1:],
+    stdout=stdout,
+    stderr=subprocess.STDOUT,
+    close_fds=False,
+    env=env,
+)
+sys.exit(code)
