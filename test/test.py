@@ -506,6 +506,41 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual("ttt", disp.get("--oh", ""))
         self.assertEqual("ccc", disp.get("--ch", ""))
 
+    @unittest.skipIf(USING_PYTHON2, "Subparser aliases aren't supported on Python 2")
+    def test_display_completions_with_aliases(self):
+        parser = ArgumentParser()
+        parser.add_subparsers().add_parser("a", aliases=["b", "c"], help="abc help")
+
+        # empty
+        completer = CompletionFinder(parser)
+        completer.rl_complete("", 0)
+        disp = completer.get_display_completions()
+        self.assertEqual({"a (b c)": "abc help", "-h --help": "show this help message and exit"}, disp)
+
+        # a
+        completer = CompletionFinder(parser)
+        completer.rl_complete("a", 0)
+        disp = completer.get_display_completions()
+        self.assertEqual({"a": "abc help", "": "show this help message and exit"}, disp)
+
+        # b
+        completer = CompletionFinder(parser)
+        completer.rl_complete("b", 0)
+        disp = completer.get_display_completions()
+        self.assertEqual({"": "show this help message and exit"}, disp)
+
+        # c
+        completer = CompletionFinder(parser)
+        completer.rl_complete("c", 0)
+        disp = completer.get_display_completions()
+        self.assertEqual({"c)": "abc help", "": "show this help message and exit"}, disp)
+
+        # (
+        completer = CompletionFinder(parser)
+        completer.rl_complete("(", 0)
+        disp = completer.get_display_completions()
+        self.assertEqual({"(b": "abc help", "": "show this help message and exit"}, disp)
+
     def test_nargs_one_or_more(self):
         def make_parser():
             parser = ArgumentParser()
