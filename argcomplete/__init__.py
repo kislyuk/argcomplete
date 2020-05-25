@@ -9,6 +9,7 @@ from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
 from .shell_integration import shellcode
+from ._mmap_stream_win import MappedMemoryStream
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -184,11 +185,26 @@ class CompletionFinder(object):
             debug_stream = sys.stderr
 
         if output_stream is None:
-            try:
+            output_stream_mode = os.environ.get("_ARGCOMPLETE_OSTREAM_MODE", "fd")
+
+            if output_stream_mode == "fd":
                 output_stream_fd = int(os.environ.get("_ARGCOMPLETE_OSTREAM_FD", 8))
-                output_stream = os.fdopen(output_stream_fd, "wb")
-            except:
-                debug("Unable to open fd {0} for writing, quitting".format(output_stream_fd))
+                try:
+                    output_stream = os.fdopen(output_stream_fd, "wb")
+                except:
+                    debug("Unable to open fd {} for writing, quitting.".format(output_stream_fd))
+                    exit_method(1)
+            
+            elif output_stream_mode == "mmf_win":               
+                output_stream_mmf_name = os.environ.get("_ARGCOMPLETE_OSTREAM_MMF_NAME")
+                if output_stream_mmf_name is None:
+                    debug("No _ARGCOMPLETE_OSTREAM_MMF_NAME, quitting.")
+                    exit_method(1)
+                
+                output_stream = MappedMemoryStream(output_stream_mmf_name)
+            
+            else:
+                debug("Invalid mode {}, quitting.".format(output_stream_mode))
                 exit_method(1)
 
         # print("", stream=debug_stream)
