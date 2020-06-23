@@ -276,7 +276,7 @@ Fish Support
 ------------
 To activate completions for fish use::
 
-    register-python-argcomplete --shell fish my-awesome-script | .
+    register-python-argcomplete --shell fish my-awesome-script | source
 
 or create new completion file, e.g::
 
