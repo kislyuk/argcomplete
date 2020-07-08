@@ -76,8 +76,10 @@ class TestArgcomplete(unittest.TestCase):
         with TemporaryFile() as t:
             os.environ["COMP_LINE"] = ensure_bytes(command) if USING_PYTHON2 else command
             os.environ["COMP_POINT"] = point
-            self.assertRaises(SystemExit, completer, parser, output_stream=t,
-                              exit_method=sys.exit, **kwargs)
+            with self.assertRaises(SystemExit) as cm:
+                completer(parser, output_stream=t, exit_method=sys.exit, **kwargs)
+            if cm.exception.code != 0:
+                raise Exception("Unexpected exit code %d" % cm.exception.code)
             t.seek(0)
             return t.read().decode(sys_encoding).split(IFS)
 
@@ -515,7 +517,7 @@ class TestArgcomplete(unittest.TestCase):
         completer = CompletionFinder(parser)
         completer.rl_complete("", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"a (b c)": "abc help", "-h --help": "show this help message and exit"}, disp)
+        self.assertEqual({"a b c": "abc help", "-h --help": "show this help message and exit"}, disp)
 
         # a
         completer = CompletionFinder(parser)
@@ -527,19 +529,19 @@ class TestArgcomplete(unittest.TestCase):
         completer = CompletionFinder(parser)
         completer.rl_complete("b", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"": "show this help message and exit"}, disp)
+        self.assertEqual({"b": "abc help", "": "show this help message and exit"}, disp)
 
         # c
         completer = CompletionFinder(parser)
         completer.rl_complete("c", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"c)": "abc help", "": "show this help message and exit"}, disp)
+        self.assertEqual({"c": "abc help", "": "show this help message and exit"}, disp)
 
         # (
         completer = CompletionFinder(parser)
         completer.rl_complete("(", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"(b": "abc help", "": "show this help message and exit"}, disp)
+        self.assertEqual({"": "show this help message and exit"}, disp)
 
     def test_nargs_one_or_more(self):
         def make_parser():
@@ -800,6 +802,31 @@ class TestArgcomplete(unittest.TestCase):
         sc = shellcode(["prog"], use_defaults=False, shell="woosh", complete_arguments=["-o", "nospace"])
         sc = shellcode(["prog"], shell="fish")
         sc = shellcode(["prog"], shell="fish", argcomplete_script="~/.bash_completion.d/prog.py")
+
+    def test_option_help(self):
+        os.environ["_ARGCOMPLETE_DFS"] = "\t"
+        os.environ["_ARGCOMPLETE_SUPPRESS_SPACE"] = "1"
+        os.environ["_ARGCOMPLETE_SHELL"] = "fish"
+
+        p = ArgumentParser()
+        p.add_argument("--foo", help="foo" + IFS + "help")
+        p.add_argument("--bar", "--bar2", help="bar help")
+
+        subparsers = p.add_subparsers()
+        subparsers.add_parser("subcommand", help="subcommand help")
+        subparsers.add_parser("subcommand 2", help="subcommand 2 help")
+
+        completions = self.run_completer(p, "prog --f")
+        self.assertEqual(set(completions), {"--foo\tfoo help"})
+
+        completions = self.run_completer(p, "prog --b")
+        self.assertEqual(set(completions), {"--bar\tbar help", "--bar2\tbar help"})
+
+        completions = self.run_completer(p, "prog sub")
+        self.assertEqual(set(completions), {"subcommand\tsubcommand help", "subcommand 2\tsubcommand 2 help"})
+
+        os.environ["_ARGCOMPLETE_DFS"] = "invalid"
+        self.assertRaises(Exception, self.run_completer, p, "prog --b")
 
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):

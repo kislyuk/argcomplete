@@ -206,6 +206,11 @@ class CompletionFinder(object):
             debug("Invalid value for IFS, quitting [{v}]".format(v=ifs))
             exit_method(1)
 
+        dfs = os.environ.get("_ARGCOMPLETE_DFS")
+        if dfs and len(dfs) != 1:
+            debug("Invalid value for DFS, quitting [{v}]".format(v=dfs))
+            exit_method(1)
+
         comp_line = os.environ["COMP_LINE"]
         comp_point = int(os.environ["COMP_POINT"])
 
@@ -232,6 +237,12 @@ class CompletionFinder(object):
               "\nWORDS:", comp_words)
 
         completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
+
+        if dfs:
+            display_completions = {key_part: value.replace(ifs, " ") if value else ""
+                                   for key, value in self._display_completions.items()
+                                   for key_part in key}
+            completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions).encode(sys_encoding))
@@ -328,16 +339,16 @@ class CompletionFinder(object):
         return self.active_parsers
 
     def _get_subparser_completions(self, parser, cword_prefix):
-        def filter_aliases(metavar, dest, prefix):
-            if not metavar:
-                return dest if dest and dest.startswith(prefix) else ""
+        def filter_aliases(aliases, prefix):
+            return tuple(x for x in aliases if x.startswith(prefix))
 
-            # metavar combines dest and aliases with ",".
-            a = metavar.replace(",", "").split()
-            return " ".join(x for x in a if x.startswith(prefix))
+        aliases_by_parser = {}
+        for key in parser.choices.keys():
+            p = parser.choices[key]
+            aliases_by_parser.setdefault(p, []).append(key)
 
         for action in parser._get_subactions():
-            subcmd_with_aliases = filter_aliases(action.metavar, action.dest, cword_prefix)
+            subcmd_with_aliases = filter_aliases(aliases_by_parser[parser.choices[action.dest]], cword_prefix)
             if subcmd_with_aliases:
                 self._display_completions[subcmd_with_aliases] = action.help
 
@@ -357,8 +368,8 @@ class CompletionFinder(object):
 
     def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
-            [[" ".join(ensure_str(x) for x in action.option_strings
-                       if ensure_str(x).startswith(cword_prefix)), action.help]
+            [[tuple(ensure_str(x) for x in action.option_strings
+             if ensure_str(x).startswith(cword_prefix)), action.help]
              for action in parser._actions
              if action.option_strings])
 
@@ -447,10 +458,10 @@ class CompletionFinder(object):
                         completions += completions_from_callable
                         if isinstance(completer, completers.ChoicesCompleter):
                             self._display_completions.update(
-                                [[x, active_action.help] for x in completions_from_callable])
+                                [[(x,), active_action.help] for x in completions_from_callable])
                         else:
                             self._display_completions.update(
-                                [[x, ""] for x in completions_from_callable])
+                                [[(x,), ""] for x in completions_from_callable])
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
@@ -458,7 +469,7 @@ class CompletionFinder(object):
                         if next_completion is None:
                             break
                         if self.validator(next_completion, cword_prefix):
-                            self._display_completions.update({next_completion: ""})
+                            self._display_completions.update({(next_completion,): ""})
                             completions.append(next_completion)
                 if optional_prefix:
                     completions = [optional_prefix + "=" + completion for completion in completions]
@@ -645,7 +656,7 @@ class CompletionFinder(object):
             readline.set_completion_display_matches_hook(display_completions)
 
         """
-        return self._display_completions
+        return {" ".join(k): v for k, v in self._display_completions.items()}
 
 class ExclusiveCompletionFinder(CompletionFinder):
     @staticmethod

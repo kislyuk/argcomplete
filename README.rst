@@ -282,6 +282,16 @@ or create new completion file, e.g::
 
     register-python-argcomplete --shell fish ~/.config/fish/completions/my-awesome-script.fish
 
+Completion Description For Fish
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+By default help string is added as completion description.
+
+.. image:: docs/fish_help_string.png
+
+You can disable this feature by removing ``_ARGCOMPLETE_DFS`` variable, e.g::
+
+    register-python-argcomplete --shell fish my-awesome-script | grep -v _ARGCOMPLETE_DFS | .
+
 Git Bash Support
 ----------------
 Due to limitations of file descriptor inheritance on Windows,
