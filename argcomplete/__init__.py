@@ -182,6 +182,13 @@ class CompletionFinder(object):
             debug_stream = os.fdopen(9, "w")
         except:
             debug_stream = sys.stderr
+        debug()
+
+        if output_stream is None:
+            filename = os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
+            if filename is not None:
+                debug("Using output file {}".format(filename))
+                output_stream = open(filename, "wb")
 
         if output_stream is None:
             try:

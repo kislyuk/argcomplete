@@ -1197,6 +1197,14 @@ class TestBash(_TestSh, unittest.TestCase):
         self.assertIn('PYTHON_ARGCOMPLETE_STDERR\r\n', output)
         self.assertTrue(output.endswith('foo\r\n'))
 
+    def test_temp_file(self):
+        self.sh.run_command('export ARGCOMPLETE_USE_TEMPFILES=1')
+        self.assertEqual(self.sh.run_command('prog basic f\t'), 'foo\r\n')
+        # Confirm we used a temp file by searching for the debug message.
+        self.sh.run_command('export _ARC_DEBUG=1')
+        output = self.sh.run_command('prog basic f\t')
+        self.assertIn('Using output file ', output)
+
 
 @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'complete -D not supported')
 class TestBashGlobal(TestBash):
