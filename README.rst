@@ -292,6 +292,17 @@ You can disable this feature by removing ``_ARGCOMPLETE_DFS`` variable, e.g::
 
     register-python-argcomplete --shell fish my-awesome-script | grep -v _ARGCOMPLETE_DFS | .
 
+Git Bash Support
+----------------
+Due to limitations of file descriptor inheritance on Windows,
+Git Bash not supported out of the box. You can opt in to using
+temporary files instead of file descriptors for for IPC
+by setting the environment variable ``ARGCOMPLETE_USE_TEMPFILES``,
+e.g. by adding ``export ARGCOMPLETE_USE_TEMPFILES=1`` to ``~/.bashrc``.
+
+For full support, consider using Bash with the
+Windows Subsystem for Linux (WSL).
+
 External argcomplete script
 ---------------------------
 To register an argcomplete script for an arbitrary name, the ``--external-argcomplete-script`` argument of the ``register-python-argcomplete`` script can be used::
