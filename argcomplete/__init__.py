@@ -147,6 +147,8 @@ class CompletionFinder(object):
             Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to
             perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
         :type exit_method: callable
+        :param output_stream: Stream object to write output to, or None for default behavior.
+        :type output_stream: file-like object or None
         :param exclude: List of strings representing options to be omitted from autocompletion
         :type exclude: iterable
         :param validator:
