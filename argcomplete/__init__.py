@@ -110,7 +110,8 @@ def default_validator(completion, prefix):
 class CompletionFinder(object):
     """
     Inherit from this class if you wish to override any of the stages below. Otherwise, use
-    ``argcomplete.autocomplete()`` directly (it's a convenience instance of this class). It has the same signature as
+    ``argcomplete.autocomplete()`` directly (it's a convenience instance of this class). It
+    has a subset of the arguments of
     :meth:`CompletionFinder.__call__()`.
     """
     def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
