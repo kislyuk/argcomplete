@@ -828,6 +828,25 @@ class TestArgcomplete(unittest.TestCase):
         os.environ["_ARGCOMPLETE_DFS"] = "invalid"
         self.assertRaises(Exception, self.run_completer, p, "prog --b")
 
+    def test_debug_stream(self):
+        p = ArgumentParser()
+        p.add_argument("--foo")
+        p.add_argument("--bar")
+
+        import argcomplete
+        from argcomplete.my_shlex import StringIO
+        origdebug = argcomplete._DEBUG
+        try:
+            argcomplete._DEBUG = True
+            debug_stream = StringIO()
+            completions = self.run_completer(p, "prog ",
+                    debug_stream=debug_stream)
+            self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+            self.assertTrue("lexer state" in debug_stream.getvalue())
+        finally:
+            argcomplete._DEBUG = origdebug
+
+
 class TestArgcompleteREPL(unittest.TestCase):
     def setUp(self):
         pass

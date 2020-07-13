@@ -130,7 +130,8 @@ class CompletionFinder(object):
             append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
         self.append_space = append_space
 
-    def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
+    def __call__(self, argument_parser, always_complete_options=True,
+                 exit_method=os._exit, output_stream=None, debug_stream=None,
                  exclude=None, validator=None, print_suppressed=False, append_space=None,
                  default_completer=FilesCompleter()):
         """
@@ -149,6 +150,8 @@ class CompletionFinder(object):
         :type exit_method: callable
         :param output_stream: Stream object to write output to, or None for default behavior.
         :type output_stream: file-like object or None
+        :param debug_stream: Stream object to write debug output to, or None for default behavior.
+        :type debug_stream: file-like object or None
         :param exclude: List of strings representing options to be omitted from autocompletion
         :type exclude: iterable
         :param validator:
@@ -181,10 +184,13 @@ class CompletionFinder(object):
             return
 
         global _debug_stream
-        try:
-            _debug_stream = os.fdopen(9, "w")
-        except:
-            _debug_stream = sys.stderr
+        if debug_stream:
+            _debug_stream = debug_stream
+        else:
+            try:
+                _debug_stream = os.fdopen(9, "w")
+            except:
+                _debug_stream = sys.stderr
         debug()
 
         if output_stream is None:
