@@ -12,16 +12,16 @@ from .shell_integration import shellcode
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
-debug_stream = sys.stderr
+_debug_stream = sys.stderr
 
 def debug(*args):
     if _DEBUG:
         if USING_PYTHON2:
-            # debug_stream has to be binary mode in Python 2.
+            # _debug_stream has to be binary mode in Python 2.
             # Attempting to write unicode directly uses the default ascii conversion.
             # Convert any unicode to bytes, leaving non-string input alone.
             args = [ensure_bytes(x) if isinstance(x, str) else x for x in args]
-        print(file=debug_stream, *args)
+        print(file=_debug_stream, *args)
 
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
@@ -177,11 +177,11 @@ class CompletionFinder(object):
             # not an argument completion invocation
             return
 
-        global debug_stream
+        global _debug_stream
         try:
-            debug_stream = os.fdopen(9, "w")
+            _debug_stream = os.fdopen(9, "w")
         except:
-            debug_stream = sys.stderr
+            _debug_stream = sys.stderr
         debug()
 
         if output_stream is None:
@@ -197,9 +197,9 @@ class CompletionFinder(object):
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
 
-        # print("", stream=debug_stream)
+        # print("", stream=_debug_stream)
         # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():
-        #     print(v, os.environ[v], stream=debug_stream)
+        #     print(v, os.environ[v], stream=_debug_stream)
 
         ifs = os.environ.get("_ARGCOMPLETE_IFS", "\013")
         if len(ifs) != 1:
@@ -247,7 +247,7 @@ class CompletionFinder(object):
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions).encode(sys_encoding))
         output_stream.flush()
-        debug_stream.flush()
+        _debug_stream.flush()
         exit_method(0)
 
     def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
@@ -681,4 +681,4 @@ def warn(*args):
     Prints **args** to standard error when running completions. This will interrupt the user's command line interaction;
     use it to indicate an error condition that is preventing your completer from working.
     """
-    print("\n", file=debug_stream, *args)
+    print("\n", file=_debug_stream, *args)
