@@ -1232,6 +1232,10 @@ class TestBash(_TestSh, unittest.TestCase):
         output = self.sh.run_command('prog basic f\t')
         self.assertIn('Using output file ', output)
 
+    def test_nounset(self):
+        self.sh.run_command('set -o nounset')
+        self.test_simple_completion()
+
 
 @unittest.skipIf(BASH_MAJOR_VERSION < 4, 'complete -D not supported')
 class TestBashGlobal(TestBash):

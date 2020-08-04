@@ -10,7 +10,7 @@ bashcode = r'''
 # depending on the value of _ARC_DEBUG.
 # If ARGCOMPLETE_USE_TEMPFILES is set, use tempfiles for IPC.
 __python_argcomplete_run() {
-    if [[ -z "$ARGCOMPLETE_USE_TEMPFILES" ]]; then
+    if [[ -z "${ARGCOMPLETE_USE_TEMPFILES-}" ]]; then
         __python_argcomplete_run_inner "$@"
         return
     fi
@@ -23,7 +23,7 @@ __python_argcomplete_run() {
 }
 
 __python_argcomplete_run_inner() {
-    if [[ -z "$_ARC_DEBUG" ]]; then
+    if [[ -z "${_ARC_DEBUG-}" ]]; then
         "$@" 8>&1 9>&2 1>/dev/null 2>&1
     else
         "$@" 8>&1 9>&2 1>&9 2>&1
@@ -46,7 +46,7 @@ _python_argcomplete%(function_suffix)s() {
                   __python_argcomplete_run "%(argcomplete_script)s") )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
-    elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
+    elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
         compopt -o nospace
     fi
 }
