@@ -292,6 +292,13 @@ You can disable this feature by removing ``_ARGCOMPLETE_DFS`` variable, e.g::
 
     register-python-argcomplete --shell fish my-awesome-script | grep -v _ARGCOMPLETE_DFS | .
 
+Xonsh Support
+-------------
+To activate completions for xonsh use `xontrib-argcomplete <https://github.com/anki-code/xontrib-argcomplete>`_::
+
+    xpip install xontrib-argcomplete
+    xontrib load argcomplete
+
 Git Bash Support
 ----------------
 Due to limitations of file descriptor inheritance on Windows,
