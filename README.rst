@@ -6,7 +6,7 @@ Argcomplete provides easy, extensible command line tab completion of arguments f
 
 It makes two assumptions:
 
-* You're using bash as your shell (limited support for zsh, fish, and tcsh is available)
+* You're using bash as your shell (limited support for zsh, fish, tcsh and xonsh is available)
 * You're using `argparse <http://docs.python.org/3/library/argparse.html>`_ to manage your command line arguments/options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
