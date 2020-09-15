@@ -347,6 +347,7 @@ Links
 * `Documentation <https://kislyuk.github.io/argcomplete/>`_
 * `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 * `Change log <https://github.com/kislyuk/argcomplete/blob/master/Changes.rst>`_
+* `xontrib-argcomplete <https://github.com/anki-code/xontrib-argcomplete>`_ - support argcomplete in `xonsh <https://github.com/xonsh/xonsh>`_ shell
 
 Bugs
 ~~~~
