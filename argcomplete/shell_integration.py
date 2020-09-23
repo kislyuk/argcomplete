@@ -106,7 +106,7 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
             function_suffix = '_' + script
         else:
             script = '$1'
-            function_suffix = ''
+            function_suffix = '_' + "_".join(quoted_executables)
         code = bashcode % dict(complete_opts=complete_options, executables=executables_list,
                                argcomplete_script=script, function_suffix=function_suffix)
     else:
