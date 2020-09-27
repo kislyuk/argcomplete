@@ -14,7 +14,7 @@ setup(
     project_urls={
         "Documentation": "https://kislyuk.github.io/argcomplete",
         "Source Code": "https://github.com/kislyuk/argcomplete",
-        "Issue Tracker": "https://github.com/kislyuk/argcomplete/issues"
+        "Issue Tracker": "https://github.com/kislyuk/argcomplete/issues",
         "Change Log": "https://github.com/kislyuk/argcomplete/blob/master/Changes.rst",
     },
     license='Apache Software License',
