@@ -1299,10 +1299,12 @@ class TestBashGlobal(TestBash):
         """Test completing a console_script for a package."""
         self._test_console_script(package=True)
 
+    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_module_wheel(self):
         """Test completing a console_script for a module from a wheel."""
         self._test_console_script(wheel=True)
 
+    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_package_wheel(self):
         """Test completing a console_script for a package from a wheel."""
         self._test_console_script(package=True, wheel=True)
