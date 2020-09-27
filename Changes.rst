@@ -1,3 +1,10 @@
+Changes for v1.12.1 (2020-09-26)
+================================
+
+-  Update importlib-metadata dependency version range
+
+-  Bash nounset mode fixes (#313)
+
 Changes for v1.11.1 (2020-01-14)
 ================================
 
