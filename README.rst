@@ -357,8 +357,8 @@ License
 -------
 Licensed under the terms of the `Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
-.. image:: https://travis-ci.org/kislyuk/argcomplete.png
-        :target: https://travis-ci.org/kislyuk/argcomplete
+.. image:: https://github.com/kislyuk/argcomplete/workflows/Python%20package/badge.svg
+        :target: https://github.com/kislyuk/argcomplete/actions
 .. image:: https://codecov.io/github/kislyuk/argcomplete/coverage.svg?branch=master
         :target: https://codecov.io/github/kislyuk/argcomplete?branch=master
 .. image:: https://img.shields.io/pypi/v/argcomplete.svg
