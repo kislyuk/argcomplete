@@ -9,7 +9,7 @@ importlib_backport_requires = ["importlib-metadata >= 0.23, < 4"]
 
 setup(
     name='argcomplete',
-    version='1.12.1',
+    version='1.12.2',
     url='https://github.com/kislyuk/argcomplete',
     project_urls={
         "Documentation": "https://kislyuk.github.io/argcomplete",

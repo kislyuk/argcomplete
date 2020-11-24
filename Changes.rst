@@ -1,3 +1,12 @@
+Changes for v1.12.2 (2020-11-23)
+================================
+
+-  Update importlib-metadata dependency pin (#332)
+
+-  Add change log project URL (#312)
+
+-  Replace Travis CI with GitHub Actions (#323)
+
 Changes for v1.12.1 (2020-09-26)
 ================================
 
