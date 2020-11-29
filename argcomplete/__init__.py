@@ -683,6 +683,5 @@ def warn(*args):
     """
     # Don't be tempted to use `print("\n",..., *args)`,
     # as that will indent **args** by one space character
-
     print(file=debug_stream)
     print(file=debug_stream, *args)
