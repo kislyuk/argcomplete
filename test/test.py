@@ -1409,7 +1409,7 @@ class Warn(unittest.TestCase):
             try:
                 yield
             finally:
-                argcomplete.debug_stream = debug_stream              
+                argcomplete.debug_stream = debug_stream
 
         test_stream = io.StringIO()
         with redirect_debug_stream(test_stream):
