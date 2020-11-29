@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse, subprocess, unittest, io
+import os, sys, shutil, argparse, subprocess, unittest, io, contextlib
 import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, NamedTemporaryFile, mkdtemp
 
@@ -12,13 +12,15 @@ BASE_DIR = os.path.dirname(TEST_DIR)  # noqa
 sys.path.insert(0, BASE_DIR)  # noqa
 
 from argparse import ArgumentParser, SUPPRESS
+import argcomplete
 from argcomplete import (
     autocomplete,
     CompletionFinder,
     split_line,
     ExclusiveCompletionFinder,
     _check_module,
-    shellcode
+    shellcode,
+    warn
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter, SuppressCompleter
 from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
@@ -1396,6 +1398,24 @@ class Shell(object):
         finally:
             # Send Ctrl+C in case we get stuck.
             self.child.sendline('\x03')
+
+
+class Warn(unittest.TestCase):
+    def test_warn(self):
+        @contextlib.contextmanager
+        def redirect_debug_stream(stream):
+            debug_stream = argcomplete.debug_stream
+            argcomplete.debug_stream = stream
+            try:
+                yield
+            finally:
+                argcomplete.debug_stream = debug_stream              
+
+        test_stream = io.StringIO()
+        with redirect_debug_stream(test_stream):
+            warn("My hands are tied")
+
+        self.assertEqual("\nMy hands are tied\n", test_stream.getvalue())
 
 
 if __name__ == "__main__":
