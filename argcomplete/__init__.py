@@ -681,4 +681,7 @@ def warn(*args):
     Prints **args** to standard error when running completions. This will interrupt the user's command line interaction;
     use it to indicate an error condition that is preventing your completer from working.
     """
-    print("\n", file=debug_stream, *args)
+    # Don't be tempted to use `print("\n",..., *args)`,
+    # as that will indent **args** by one space character
+    print(file=debug_stream)
+    print(file=debug_stream, *args)
