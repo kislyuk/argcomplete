@@ -20,12 +20,6 @@ jobs:
       run: |
         [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish
         [[ $(uname) == Darwin ]] && brew install bash rpm tcsh fish
-        # OSX tests require https://github.com/pypa/pip/pull/6008 (added in 19.2)
-        # in order to address https://stackoverflow.com/questions/24257803
-        # (the fix recommended there does not appear to work without it).
-        # However it no longer works after https://github.com/pypa/pip/issues/7309
-        # (added in 20.2), so we must specifically install a version between these.
-        if [[ $(uname) == Darwin ]]; then python -m pip install 'pip>=19.2,<20.2'; fi
         python -m pip install --quiet --upgrade codecov
     - name: Test
       run: |
