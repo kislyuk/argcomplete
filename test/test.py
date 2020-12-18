@@ -1293,10 +1293,12 @@ class TestBashGlobal(TestBash):
             command += ' a\t'
             self.assertEqual(self.sh.run_command(command), 'arg\r\n')
 
+    @unittest.skipIf(USING_PYTHON2, "Skip test where pip install fails on Python 2")
     def test_console_script_module(self):
         """Test completing a console_script for a module."""
         self._test_console_script()
 
+    @unittest.skipIf(USING_PYTHON2, "Skip test where pip install fails on Python 2")
     def test_console_script_package(self):
         """Test completing a console_script for a package."""
         self._test_console_script(package=True)
