@@ -3,9 +3,16 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse, subprocess, unittest, io, contextlib
+import os, sys, shutil, argparse, subprocess, unittest, contextlib
 import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, NamedTemporaryFile, mkdtemp
+
+try:
+    # Python 2
+    from cStringIO import StringIO
+except ImportError:
+    # Python 3
+    from io import StringIO
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))  # noqa
 BASE_DIR = os.path.dirname(TEST_DIR)  # noqa
@@ -1413,7 +1420,7 @@ class Warn(unittest.TestCase):
             finally:
                 argcomplete.debug_stream = debug_stream
 
-        test_stream = io.StringIO()
+        test_stream = StringIO()
         with redirect_debug_stream(test_stream):
             warn("My hands are tied")
 
