@@ -280,7 +280,7 @@ To activate completions for fish use::
 
 or create new completion file, e.g::
 
-    register-python-argcomplete --shell fish ~/.config/fish/completions/my-awesome-script.fish
+    register-python-argcomplete --shell fish my-awesome-script > ~/.config/fish/completions/my-awesome-script.fish
 
 Completion Description For Fish
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
