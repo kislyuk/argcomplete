@@ -68,9 +68,9 @@ function __fish_%(executable)s_complete
     set -x COMP_POINT (string length (commandline -cp))
     set -x COMP_TYPE
     if set -q _ARC_DEBUG
-        %(argcomplete_script)s 8>&1 9>&2 1>/dev/null 2>&1
-    else
         %(argcomplete_script)s 8>&1 9>&2 1>&9 2>&1
+    else
+        %(argcomplete_script)s 8>&1 9>&2 1>/dev/null 2>&1
     end
 end
 complete -c %(executable)s -f -a '(__fish_%(executable)s_complete)'
