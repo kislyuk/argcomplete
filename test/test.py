@@ -1190,6 +1190,10 @@ class _TestSh(object):
         self.assertEqual(self.sh.run_command('prog point 你好嘚瑟\t'), '15\r\n')
         self.assertEqual(self.sh.run_command('prog point 你好嘚瑟 \t'), '16\r\n')
 
+    def test_exception(self):
+        # Shell wrapper should suppress any exceptions from the completer
+        self.assertEqual(self.sh.run_command('prog raise \tdummy'), 'dummy\r\n')
+
 
 class TestBash(_TestSh, unittest.TestCase):
     expected_failures = [

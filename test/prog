@@ -29,6 +29,10 @@ def get_comp_point(*args, **kwargs):
     return [os.environ['COMP_POINT']]
 
 
+def raise_exception(*args, **kwargs):
+    raise Exception('deliberate exception to verify traceback suppression')
+
+
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
 subparsers.add_parser('basic', help='basic help\nnext line of help').add_argument('arg', choices=['foo', 'bar', 'baz'])
@@ -40,6 +44,7 @@ subparsers.add_parser('break', help="break help").add_argument('arg', choices=['
 subparsers.add_parser('env').add_argument('arg').completer = check_environ
 subparsers.add_parser('debug').add_argument('arg').completer = print_output
 subparsers.add_parser('point', add_help=False).add_argument('arg', nargs='*').completer = get_comp_point
+subparsers.add_parser('raise').add_argument('arg').completer = raise_exception
 
 
 if 'POINT' in os.environ:
