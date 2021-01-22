@@ -37,7 +37,7 @@ COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(['bash', '-c', 'echo $BASH_VERSION']).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split('.')[0])
-FISH_VERSION_STR = subprocess.check_output(['fish', '-c', 'echo -n $FISH_VERSION']).decode()
+FISH_VERSION_STR = subprocess.check_output(['fish', '-c', 'echo -n $version']).decode()
 FISH_VERSION_TUPLE = tuple(int(x) for x in FISH_VERSION_STR.split('.'))
 
 
