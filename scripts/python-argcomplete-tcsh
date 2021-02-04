@@ -20,4 +20,8 @@ export _ARGCOMPLETE
 _ARGCOMPLETE_SHELL=tcsh
 export _ARGCOMPLETE_SHELL
 
-"$1" 8>&1 9>&2 1>/dev/null 2>/dev/null
+if [ -z "${_ARC_DEBUG-}" ]; then
+    "$1" 8>&1 9>&2 1>/dev/null 2>/dev/null
+else
+    "$1" 8>&1 9>&2 1>&2
+fi
