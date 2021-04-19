@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 install_requires = []
 tests_require = ["coverage", "flake8", "pexpect", "wheel"]
-importlib_backport_requires = ["importlib-metadata >= 0.23, < 4"]
+importlib_backport_requires = ["importlib-metadata >= 0.23, < 5"]
 
 setup(
     name='argcomplete',
