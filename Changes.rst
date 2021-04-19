@@ -1,3 +1,16 @@
+Changes for v1.12.3 (2021-04-19)
+================================
+
+-  Update importlib-metadata version pin (#345)
+
+-  Display script debug output in tcsh (#342)
+
+-  Fish support improvements (#338, #339)
+
+-  Print ``warn()`` message from beginning of line (#335)
+
+-  Test infrastructure improvements
+
 Changes for v1.12.2 (2020-11-23)
 ================================
 
