@@ -59,6 +59,7 @@ class ArgcompleteException(Exception):
 def split_line(line, point=None):
     if point is None:
         point = len(line)
+    line = line[:point]
     lexer = shlex.shlex(line, posix=True)
     lexer.whitespace_split = True
     lexer.wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
