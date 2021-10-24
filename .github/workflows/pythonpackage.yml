@@ -8,12 +8,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-10.15]
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
+        python-version: ["2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{matrix.python-version}}
     - name: Install
@@ -24,4 +24,4 @@ jobs:
     - name: Test
       run: |
         make test
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v2
