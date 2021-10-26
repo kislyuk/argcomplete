@@ -1047,7 +1047,7 @@ class TestCheckModule(unittest.TestCase):
 
     def test_not_package(self):
         self._mkfile('module.py')
-        with self.assertRaisesRegexp(Exception, 'module is not a package'):
+        with self.assertRaisesRegex(Exception, 'module is not a package'):
             _check_module.find('module.bad')
         self.assertNotIn('module', sys.modules)
 
