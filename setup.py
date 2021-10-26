@@ -4,7 +4,7 @@ import glob
 from setuptools import setup, find_packages
 
 install_requires = []
-tests_require = ["coverage", "flake8", "pexpect", "wheel"]
+tests_require = ["coverage", "flake8<4", "pexpect", "wheel"]
 importlib_backport_requires = ["importlib-metadata >= 0.23, < 5"]
 
 setup(
@@ -52,6 +52,8 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 5 - Production/Stable',
