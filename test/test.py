@@ -1365,13 +1365,37 @@ class TestFish(_TestSh, unittest.TestCase):
         sh.run_command('set -x PYTHONPATH {0}'.format(BASE_DIR))
         # 'dummy' argument unused; checks multi-command registration works
         # by passing 'prog' as the second argument.
-        output = sh.run_command('register-python-argcomplete --shell fish dummy prog | .')
+        output = sh.run_command('register-python-argcomplete --shell fish dummy prog | source')
         self.assertEqual(output, '')
         # Register a dummy completion with an external argcomplete script
         # to ensure this doesn't overwrite our previous registration.
-        output = sh.run_command('register-python-argcomplete --shell fish dummy --external-argcomplete-script dummy | .')
+        output = sh.run_command('register-python-argcomplete --shell fish dummy --external-argcomplete-script dummy | source')
         self.assertEqual(output, '')
         self.sh = sh
+
+    def tearDown(self):
+        # The shell wrapper is fragile; exactly which exception is raised
+        # differs depending on environment.
+        with self.assertRaises((pexpect.EOF, OSError)):
+            self.sh.run_command('exit')
+            self.sh.run_command('')
+
+
+@unittest.skipIf(FISH_VERSION_TUPLE < (3, 3), "Path completion is fixed in fish 3.3")
+class TestFishPathCompletion(unittest.TestCase):
+    def setUp(self):
+        sh = Shell('fish')
+        path = ' '.join([os.path.join(BASE_DIR, 'scripts'), '$PATH'])
+        sh.run_command('set -x PATH {0}'.format(path))
+        sh.run_command('set -x PYTHONPATH {0}'.format(BASE_DIR))
+        self.assertEqual(sh.run_command('register-python-argcomplete --shell fish {0}/prog | source'.format(TEST_DIR)), '')
+
+        self.sh = sh
+
+    def test_path_completion(self):
+        self.assertEqual(self.sh.run_command('{}/prog basic f\t'.format(TEST_DIR)), 'foo\r\n')
+        self.sh.run_command('cd {}'.format(TEST_DIR))
+        self.assertEqual(self.sh.run_command('./prog basic f\t'), 'foo\r\n')
 
     def tearDown(self):
         # The shell wrapper is fragile; exactly which exception is raised
