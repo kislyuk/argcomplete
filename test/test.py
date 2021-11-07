@@ -10,6 +10,7 @@ from tempfile import TemporaryFile, NamedTemporaryFile, mkdtemp
 try:
     # Python 2
     from cStringIO import StringIO
+    unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 except ImportError:
     # Python 3
     from io import StringIO
