@@ -316,7 +316,7 @@ This option can also be used in combination with the other supported shells.
 
 Python Support
 --------------
-Argcomplete requires Python 2.7 or 3.5+.
+Argcomplete requires Python 3.6+.
 
 Common Problems
 ---------------

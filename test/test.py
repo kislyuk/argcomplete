@@ -6,13 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os, sys, shutil, argparse, subprocess, unittest, contextlib
 import pexpect, pexpect.replwrap
 from tempfile import TemporaryFile, NamedTemporaryFile, mkdtemp
-
-try:
-    # Python 2
-    from cStringIO import StringIO
-except ImportError:
-    # Python 3
-    from io import StringIO
+from io import StringIO
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))  # noqa
 BASE_DIR = os.path.dirname(TEST_DIR)  # noqa
@@ -30,7 +24,6 @@ from argcomplete import (
     warn
 )
 from argcomplete.completers import FilesCompleter, DirectoriesCompleter, SuppressCompleter
-from argcomplete.compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
@@ -78,19 +71,17 @@ class TestArgcomplete(unittest.TestCase):
         os.environ = self._os_environ
 
     def run_completer(self, parser, command, point=None, completer=autocomplete, **kwargs):
-        command = ensure_str(command)
-
         if point is None:
             point = str(len(command))
         with TemporaryFile() as t:
-            os.environ["COMP_LINE"] = ensure_bytes(command) if USING_PYTHON2 else command
+            os.environ["COMP_LINE"] = command
             os.environ["COMP_POINT"] = point
             with self.assertRaises(SystemExit) as cm:
                 completer(parser, output_stream=t, exit_method=sys.exit, **kwargs)
             if cm.exception.code != 0:
                 raise Exception("Unexpected exit code %d" % cm.exception.code)
             t.seek(0)
-            return t.read().decode(sys_encoding).split(IFS)
+            return t.read().decode().split(IFS)
 
     def test_basic_completion(self):
         p = ArgumentParser()
@@ -396,14 +387,11 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_non_ascii(self):
         def make_parser():
-            _str = ensure_bytes if USING_PYTHON2 else str
             parser = ArgumentParser()
-            # Python 2 argparse only works with byte strings or ascii unicode strings.
-            # Python 3 argparse only works with unicode strings.
-            parser.add_argument(_str("--книга"), choices=[
-                _str("Трудно быть богом"),
-                _str("Парень из преисподней"),
-                _str("Понедельник начинается в субботу"),
+            parser.add_argument("--книга", choices=[
+                "Трудно быть богом",
+                "Парень из преисподней",
+                "Понедельник начинается в субботу",
             ])
             return parser
 
@@ -517,7 +505,6 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual("ttt", disp.get("--oh", ""))
         self.assertEqual("ccc", disp.get("--ch", ""))
 
-    @unittest.skipIf(USING_PYTHON2, "Subparser aliases aren't supported on Python 2")
     def test_display_completions_with_aliases(self):
         parser = ArgumentParser()
         parser.add_subparsers().add_parser("a", aliases=["b", "c"], help="abc help")
@@ -1252,11 +1239,11 @@ class TestBashGlobal(TestBash):
 
     def test_python_completion(self):
         self.sh.run_command('cd ' + TEST_DIR)
-        self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('python3 ./prog basic f\t'), 'foo\r\n')
 
     def test_python_filename_completion(self):
         self.sh.run_command('cd ' + TEST_DIR)
-        self.assertEqual(self.sh.run_command('python ./pro\tbasic f\t'), 'foo\r\n')
+        self.assertEqual(self.sh.run_command('python3 ./pro\tbasic f\t'), 'foo\r\n')
 
     def test_python_not_executable(self):
         """Test completing a script that cannot be run directly."""
@@ -1268,7 +1255,7 @@ class TestBashGlobal(TestBash):
             # Ensure prog is no longer able to be run as "./prog".
             self.assertIn('<<126>>', self.sh.run_command('./prog; echo "<<$?>>"'))
             # Ensure completion still functions when run via python.
-            self.assertEqual(self.sh.run_command('python ./prog basic f\t'), 'foo\r\n')
+            self.assertEqual(self.sh.run_command('python3 ./prog basic f\t'), 'foo\r\n')
 
     def test_python_module(self):
         """Test completing a module run with python -m."""
@@ -1278,7 +1265,7 @@ class TestBashGlobal(TestBash):
             open('package/__init__.py', 'w').close()
             shutil.copy(prog, 'package/prog.py')
             self.sh.run_command('cd ' + os.getcwd())
-            self.assertEqual(self.sh.run_command('python -m package.prog basic f\t'), 'foo\r\n')
+            self.assertEqual(self.sh.run_command('python3 -m package.prog basic f\t'), 'foo\r\n')
 
     def _test_console_script(self, package=False, wheel=False):
         with TempDir(prefix='test_dir_py', dir='.'):

@@ -1,4 +1,4 @@
-# Copyright 2012-2019, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 # Copy of __expand_tilde_by_ref from bash-completion

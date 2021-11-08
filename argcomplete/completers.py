@@ -1,15 +1,12 @@
-# Copyright 2012-2019, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import subprocess
-from .compat import str, sys_encoding
 
 def _call(*args, **kwargs):
     try:
-        return subprocess.check_output(*args, **kwargs).decode(sys_encoding).splitlines()
+        return subprocess.check_output(*args, **kwargs).decode().splitlines()
     except subprocess.CalledProcessError:
         return []
 
@@ -19,7 +16,7 @@ class ChoicesCompleter(object):
 
     def _convert(self, choice):
         if isinstance(choice, bytes):
-            choice = choice.decode(sys_encoding)
+            choice = choice.decode()
         if not isinstance(choice, str):
             choice = str(choice)
         return choice

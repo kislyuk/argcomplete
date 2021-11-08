@@ -2,7 +2,7 @@ test_deps:
 	python -m pip install .[test]
 
 lint: test_deps
-	./setup.py flake8
+	flake8 $$(python setup.py --name)
 	for script in scripts/*; do if grep -q python $$script; then flake8 $$script; fi; done
 
 test: lint test_deps

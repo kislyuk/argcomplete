@@ -16,7 +16,6 @@ import os
 import sys
 from collections import deque
 
-# Modified by argcomplete: 2/3 compatibility
 # Note: cStringIO is not compatible with Unicode
 try:
     from StringIO import StringIO
