@@ -49,9 +49,10 @@ def replaceCompleteCall(line):
     else:
         return line
 
+
 if args.dest == '-':
-    for l in open(activator):
-        sys.stdout.write(replaceCompleteCall(l))
+    for line in open(activator):
+        sys.stdout.write(replaceCompleteCall(line))
 else:
     dest = os.path.join(args.dest, "python-argcomplete")
 
@@ -65,9 +66,9 @@ else:
     try:
         shutil.copy(activator, dest)
         if args.complete_arguments or not args.use_defaults:
-            for l in fileinput.input(dest, inplace=True):
+            for line in fileinput.input(dest, inplace=True):
                 # fileinput with inplace=True redirects stdout to the edited file
-                sys.stdout.write(replaceCompleteCall(l))
+                sys.stdout.write(replaceCompleteCall(line))
     except Exception as e:
         err = str(e)
         if args.dest == dest_opt.default:

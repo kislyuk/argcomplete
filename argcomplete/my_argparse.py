@@ -134,7 +134,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     or isinstance(action, _SubParsersAction):
                 try:
                     action(self, namespace, argument_values, option_string)
-                except:
+                except BaseException:
                     # Begin added by argcomplete
                     # When a subparser action is taken and fails due to incomplete arguments, it does not merge the
                     # contents of its parsed namespace into the parent namespace. Do that here to allow completers to

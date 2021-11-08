@@ -5,7 +5,7 @@ import os, sys, argparse, contextlib
 from . import completers, my_shlex as shlex
 from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
-from .shell_integration import shellcode
+from .shell_integration import shellcode  # noqa
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -14,6 +14,7 @@ debug_stream = sys.stderr
 def debug(*args):
     if _DEBUG:
         print(file=debug_stream, *args)
+
 
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
@@ -172,7 +173,7 @@ class CompletionFinder(object):
         global debug_stream
         try:
             debug_stream = os.fdopen(9, "w")
-        except:
+        except Exception:
             debug_stream = sys.stderr
         debug()
 
@@ -185,7 +186,7 @@ class CompletionFinder(object):
         if output_stream is None:
             try:
                 output_stream = os.fdopen(8, "wb")
-            except:
+            except Exception:
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
 
@@ -651,6 +652,7 @@ class ExclusiveCompletionFinder(CompletionFinder):
             return True
 
         return False
+
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """

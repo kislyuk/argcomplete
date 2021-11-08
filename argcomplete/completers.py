@@ -24,6 +24,7 @@ class ChoicesCompleter(object):
     def __call__(self, **kwargs):
         return (self._convert(c) for c in self.choices)
 
+
 EnvironCompleter = ChoicesCompleter(os.environ)
 
 class FilesCompleter(object):
@@ -74,7 +75,7 @@ class _FilteredFilesCompleter(object):
         target_dir = os.path.dirname(prefix)
         try:
             names = os.listdir(target_dir or ".")
-        except:
+        except Exception:
             return  # empty iterator
         incomplete_part = os.path.basename(prefix)
         # Iterate on target_dir entries and filter on given predicate
