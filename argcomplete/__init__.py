@@ -1,14 +1,11 @@
-# Copyright 2012-2019, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os, sys, argparse, contextlib
 from . import completers, my_shlex as shlex
-from .compat import USING_PYTHON2, str, sys_encoding, ensure_str, ensure_bytes
 from .completers import FilesCompleter, SuppressCompleter
 from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
-from .shell_integration import shellcode
+from .shell_integration import shellcode  # noqa
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -16,12 +13,8 @@ debug_stream = sys.stderr
 
 def debug(*args):
     if _DEBUG:
-        if USING_PYTHON2:
-            # debug_stream has to be binary mode in Python 2.
-            # Attempting to write unicode directly uses the default ascii conversion.
-            # Convert any unicode to bytes, leaving non-string input alone.
-            args = [ensure_bytes(x) if isinstance(x, str) else x for x in args]
         print(file=debug_stream, *args)
+
 
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
@@ -181,7 +174,7 @@ class CompletionFinder(object):
         global debug_stream
         try:
             debug_stream = os.fdopen(9, "w")
-        except:
+        except Exception:
             debug_stream = sys.stderr
         debug()
 
@@ -189,12 +182,12 @@ class CompletionFinder(object):
             filename = os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
             if filename is not None:
                 debug("Using output file {}".format(filename))
-                output_stream = open(filename, "wb")
+                output_stream = open(filename, "w")
 
         if output_stream is None:
             try:
-                output_stream = os.fdopen(8, "wb")
-            except:
+                output_stream = os.fdopen(8, "w")
+            except Exception:
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
 
@@ -215,7 +208,6 @@ class CompletionFinder(object):
         comp_line = os.environ["COMP_LINE"]
         comp_point = int(os.environ["COMP_POINT"])
 
-        comp_line = ensure_str(comp_line)
         cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
         # _ARGCOMPLETE is set by the shell script to tell us where comp_words
@@ -246,7 +238,7 @@ class CompletionFinder(object):
             completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
 
         debug("\nReturning completions:", completions)
-        output_stream.write(ifs.join(completions).encode(sys_encoding))
+        output_stream.write(ifs.join(completions))
         output_stream.flush()
         debug_stream.flush()
         exit_method(0)
@@ -256,10 +248,6 @@ class CompletionFinder(object):
 
         parsed_args = argparse.Namespace()
         self.completing = True
-
-        if USING_PYTHON2:
-            # Python 2 argparse only properly works with byte strings.
-            comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
             debug("invoking parser with", comp_words[1:])
@@ -299,8 +287,7 @@ class CompletionFinder(object):
                 return
 
             classname = "MonkeyPatchedIntrospectiveArgumentParser"
-            if USING_PYTHON2:
-                classname = bytes(classname)
+
             parser.__class__ = type(classname, (IntrospectiveArgumentParser, parser.__class__), {})
 
             for action in parser._actions:
@@ -358,9 +345,9 @@ class CompletionFinder(object):
 
     def _include_options(self, action, cword_prefix):
         if len(cword_prefix) > 0 or self.always_complete_options is True:
-            return [ensure_str(opt) for opt in action.option_strings if ensure_str(opt).startswith(cword_prefix)]
-        long_opts = [ensure_str(opt) for opt in action.option_strings if len(opt) > 2]
-        short_opts = [ensure_str(opt) for opt in action.option_strings if len(opt) <= 2]
+            return [opt for opt in action.option_strings if opt.startswith(cword_prefix)]
+        long_opts = [opt for opt in action.option_strings if len(opt) > 2]
+        short_opts = [opt for opt in action.option_strings if len(opt) <= 2]
         if self.always_complete_options == "long":
             return long_opts if long_opts else short_opts
         elif self.always_complete_options == "short":
@@ -369,8 +356,8 @@ class CompletionFinder(object):
 
     def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
-            [[tuple(ensure_str(x) for x in action.option_strings
-             if ensure_str(x).startswith(cword_prefix)), action.help]
+            [[tuple(x for x in action.option_strings
+             if x.startswith(cword_prefix)), action.help]
              for action in parser._actions
              if action.option_strings])
 
@@ -537,11 +524,6 @@ class CompletionFinder(object):
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        # On Python 2, we have to make sure all completions are unicode objects before we continue and output them.
-        # Otherwise, because python disobeys the system locale encoding and uses ascii as the default encoding, it will
-        # try to implicitly decode string objects using ascii, and fail.
-        completions = [ensure_str(c) for c in completions]
-
         # De-duplicate completions and remove excluded ones
         if self.exclude is None:
             self.exclude = set()
@@ -599,7 +581,7 @@ class CompletionFinder(object):
     def rl_complete(self, text, state):
         """
         Alternate entry point for using the argcomplete completer in a readline-based REPL. See also
-        `rlcompleter <https://docs.python.org/2/library/rlcompleter.html#completer-objects>`_.
+        `rlcompleter <https://docs.python.org/3/library/rlcompleter.html#completer-objects>`_.
         Usage:
 
         .. code-block:: python
@@ -612,8 +594,6 @@ class CompletionFinder(object):
             readline.set_completer(completer.rl_complete)
             readline.parse_and_bind("tab: complete")
             result = input("prompt> ")
-
-        (Use ``raw_input`` instead of ``input`` on Python 2, or use `eight <https://github.com/kislyuk/eight>`_).
         """
         if state == 0:
             cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
@@ -673,6 +653,7 @@ class ExclusiveCompletionFinder(CompletionFinder):
             return True
 
         return False
+
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """

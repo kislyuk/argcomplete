@@ -1,15 +1,14 @@
-# Copyright 2012-2019, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import subprocess
-from .compat import str, sys_encoding
 
 def _call(*args, **kwargs):
+    # TODO: replace "universal_newlines" with "text" once 3.6 support is dropped
+    kwargs["universal_newlines"] = True
     try:
-        return subprocess.check_output(*args, **kwargs).decode(sys_encoding).splitlines()
+        return subprocess.check_output(*args, **kwargs).splitlines()
     except subprocess.CalledProcessError:
         return []
 
@@ -18,14 +17,13 @@ class ChoicesCompleter(object):
         self.choices = choices
 
     def _convert(self, choice):
-        if isinstance(choice, bytes):
-            choice = choice.decode(sys_encoding)
         if not isinstance(choice, str):
             choice = str(choice)
         return choice
 
     def __call__(self, **kwargs):
         return (self._convert(c) for c in self.choices)
+
 
 EnvironCompleter = ChoicesCompleter(os.environ)
 
@@ -77,7 +75,7 @@ class _FilteredFilesCompleter(object):
         target_dir = os.path.dirname(prefix)
         try:
             names = os.listdir(target_dir or ".")
-        except:
+        except Exception:
             return  # empty iterator
         incomplete_part = os.path.basename(prefix)
         # Iterate on target_dir entries and filter on given predicate

@@ -4,7 +4,7 @@ import glob
 from setuptools import setup, find_packages
 
 install_requires = []
-tests_require = ["coverage", "flake8<4", "pexpect", "wheel"]
+tests_require = ["coverage", "flake8", "pexpect", "wheel"]
 importlib_backport_requires = ["importlib-metadata >= 0.23, < 5"]
 
 setup(
@@ -22,12 +22,11 @@ setup(
     author_email='kislyuk@gmail.com',
     description='Bash tab completion for argparse',
     long_description=open('README.rst').read(),
+    python_requires='>=3.6',
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require={
         "test": tests_require,
-        ':python_version == "2.7"': importlib_backport_requires,
-        ':python_version == "3.5"': importlib_backport_requires,
         ':python_version == "3.6"': importlib_backport_requires,
         ':python_version == "3.7"': importlib_backport_requires
     },
@@ -45,10 +44,7 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
