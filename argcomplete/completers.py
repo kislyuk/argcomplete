@@ -5,8 +5,10 @@ import os
 import subprocess
 
 def _call(*args, **kwargs):
+    # TODO: replace "universal_newlines" with "text" once 3.6 support is dropped
+    kwargs["universal_newlines"] = True
     try:
-        return subprocess.check_output(*args, **kwargs).decode().splitlines()
+        return subprocess.check_output(*args, **kwargs).splitlines()
     except subprocess.CalledProcessError:
         return []
 
@@ -15,8 +17,6 @@ class ChoicesCompleter(object):
         self.choices = choices
 
     def _convert(self, choice):
-        if isinstance(choice, bytes):
-            choice = choice.decode()
         if not isinstance(choice, str):
             choice = str(choice)
         return choice

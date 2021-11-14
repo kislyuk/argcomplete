@@ -181,11 +181,11 @@ class CompletionFinder(object):
             filename = os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
             if filename is not None:
                 debug("Using output file {}".format(filename))
-                output_stream = open(filename, "wb")
+                output_stream = open(filename, "w")
 
         if output_stream is None:
             try:
-                output_stream = os.fdopen(8, "wb")
+                output_stream = os.fdopen(8, "w")
             except Exception:
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
@@ -237,7 +237,7 @@ class CompletionFinder(object):
             completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
 
         debug("\nReturning completions:", completions)
-        output_stream.write(ifs.join(completions).encode())
+        output_stream.write(ifs.join(completions))
         output_stream.flush()
         debug_stream.flush()
         exit_method(0)

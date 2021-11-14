@@ -73,7 +73,7 @@ class TestArgcomplete(unittest.TestCase):
     def run_completer(self, parser, command, point=None, completer=autocomplete, **kwargs):
         if point is None:
             point = str(len(command))
-        with TemporaryFile() as t:
+        with TemporaryFile(mode="w+") as t:
             os.environ["COMP_LINE"] = command
             os.environ["COMP_POINT"] = point
             with self.assertRaises(SystemExit) as cm:
@@ -81,7 +81,7 @@ class TestArgcomplete(unittest.TestCase):
             if cm.exception.code != 0:
                 raise Exception("Unexpected exit code %d" % cm.exception.code)
             t.seek(0)
-            return t.read().decode().split(IFS)
+            return t.read().split(IFS)
 
     def test_basic_completion(self):
         p = ArgumentParser()
@@ -103,7 +103,7 @@ class TestArgcomplete(unittest.TestCase):
     def test_choices(self):
         def make_parser():
             parser = ArgumentParser()
-            parser.add_argument("--ship", choices=["submarine", b"speedboat"])
+            parser.add_argument("--ship", choices=["submarine", "speedboat"])
             return parser
 
         expected_outputs = (
