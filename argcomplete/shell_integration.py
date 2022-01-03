@@ -58,7 +58,7 @@ complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(argcomplete_script)s"
 '''
 
 fishcode = r'''
-function __fish_%(executable)s_complete
+function __fish_%(function_name)s_complete
     set -x _ARGCOMPLETE 1
     set -x _ARGCOMPLETE_DFS \t
     set -x _ARGCOMPLETE_IFS \n
@@ -73,7 +73,7 @@ function __fish_%(executable)s_complete
         %(argcomplete_script)s 8>&1 9>&2 1>/dev/null 2>&1
     end
 end
-complete -c %(executable)s -f -a '(__fish_%(executable)s_complete)'
+complete %(completion_arg)s %(executable)s -f -a '(__fish_%(function_name)s_complete)'
 '''
 
 shell_codes = {'bash': bashcode, 'tcsh': tcshcode, 'fish': fishcode}
@@ -109,6 +109,15 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
             function_suffix = ''
         code = bashcode % dict(complete_opts=complete_options, executables=executables_list,
                                argcomplete_script=script, function_suffix=function_suffix)
+    elif shell == 'fish':
+        code = ""
+        for executable in executables:
+            script = argcomplete_script or executable
+            completion_arg = '--path' if '/' in executable else '--command'  # use path for absolute paths
+            function_name = executable.replace("/", "_")  # / not allowed in function name
+
+            code += fishcode % dict(executable=executable, argcomplete_script=script,
+                                    completion_arg=completion_arg, function_name=function_name)
     else:
         code = ""
         for executable in executables:
