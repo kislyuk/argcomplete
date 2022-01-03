@@ -1,3 +1,16 @@
+Changes for v2.0.0 (2022-01-03)
+===============================
+
+-  Truncate input after cursor. Fixes #351 (#352)
+
+-  Support of path completion in fish #327 (#359)
+
+-  Drop support for Python 2.7 and 3.5 (#361)
+
+-  Add support for Python 3.10 (#356)
+
+-  Test, documentation, and release infrastructure improvements
+
 Changes for v1.12.3 (2021-04-19)
 ================================
 
