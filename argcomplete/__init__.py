@@ -1,10 +1,15 @@
 # Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-import os, sys, argparse, contextlib
-from . import completers, my_shlex as shlex
+import argparse
+import contextlib
+import os
+import sys
+
+from . import completers
+from . import my_shlex as shlex
 from .completers import FilesCompleter, SuppressCompleter
-from .my_argparse import IntrospectiveArgumentParser, action_is_satisfied, action_is_open, action_is_greedy
+from .my_argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
 from .shell_integration import shellcode  # noqa
 
 _DEBUG = "_ARC_DEBUG" in os.environ

@@ -3,27 +3,36 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, sys, shutil, argparse, subprocess, unittest, contextlib
-import pexpect, pexpect.replwrap
-from tempfile import TemporaryFile, NamedTemporaryFile, mkdtemp
+import argparse
+import contextlib
+import os
+import shutil
+import subprocess
+import sys
+import unittest
 from io import StringIO
+from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
+
+import pexpect
+import pexpect.replwrap
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))  # noqa
 BASE_DIR = os.path.dirname(TEST_DIR)  # noqa
 sys.path.insert(0, BASE_DIR)  # noqa
 
-from argparse import ArgumentParser, SUPPRESS
+from argparse import SUPPRESS, ArgumentParser
+
 import argcomplete
 from argcomplete import (
-    autocomplete,
     CompletionFinder,
-    split_line,
     ExclusiveCompletionFinder,
     _check_module,
+    autocomplete,
     shellcode,
-    warn
+    split_line,
+    warn,
 )
-from argcomplete.completers import FilesCompleter, DirectoriesCompleter, SuppressCompleter
+from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"

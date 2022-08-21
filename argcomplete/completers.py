@@ -4,6 +4,7 @@
 import os
 import subprocess
 
+
 def _call(*args, **kwargs):
     # TODO: replace "universal_newlines" with "text" once 3.6 support is dropped
     kwargs["universal_newlines"] = True

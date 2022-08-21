@@ -1,9 +1,19 @@
 # Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
-from argparse import ArgumentParser, ArgumentError, SUPPRESS, _SubParsersAction
-from argparse import OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
-from argparse import _get_action_name, _
+from argparse import (
+    ONE_OR_MORE,
+    OPTIONAL,
+    PARSER,
+    REMAINDER,
+    SUPPRESS,
+    ZERO_OR_MORE,
+    ArgumentError,
+    ArgumentParser,
+    _,
+    _get_action_name,
+    _SubParsersAction,
+)
 
 _num_consumed_args = {}
 
