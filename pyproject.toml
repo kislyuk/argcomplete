@@ -3,3 +3,4 @@ line-length = 120
 exclude = ".*/version.py"
 [tool.isort]
 profile = "black"
+skip = "my_argparse.py"
