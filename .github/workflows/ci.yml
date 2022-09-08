@@ -26,3 +26,5 @@ jobs:
       run: |
         make test
     - uses: codecov/codecov-action@v2
+    - uses: isort/isort-action@v1.0.0
+    - uses: psf/black@stable
