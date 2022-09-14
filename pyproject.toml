@@ -1,6 +1,7 @@
 [tool.black]
 line-length = 120
-exclude = ".*/version.py"
+exclude = ".*/(version.py|my_argparse.py|my_shlex.py)"
 [tool.isort]
 profile = "black"
-skip = "my_argparse.py"
+line_length = 120
+skip = ".*/(version.py|my_argparse.py|my_shlex.py)"

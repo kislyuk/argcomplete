@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import contextlib
@@ -32,11 +29,7 @@ from argcomplete import (
     split_line,
     warn,
 )
-from argcomplete.completers import (
-    DirectoriesCompleter,
-    FilesCompleter,
-    SuppressCompleter,
-)
+from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
