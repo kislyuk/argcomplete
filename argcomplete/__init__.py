@@ -16,6 +16,7 @@ _DEBUG = "_ARC_DEBUG" in os.environ
 
 debug_stream = sys.stderr
 
+
 def debug(*args):
     if _DEBUG:
         print(file=debug_stream, *args)
@@ -24,13 +25,16 @@ def debug(*args):
 BASH_FILE_COMPLETION_FALLBACK = 79
 BASH_DIR_COMPLETION_FALLBACK = 80
 
-safe_actions = (argparse._StoreAction,
-                argparse._StoreConstAction,
-                argparse._StoreTrueAction,
-                argparse._StoreFalseAction,
-                argparse._AppendAction,
-                argparse._AppendConstAction,
-                argparse._CountAction)
+safe_actions = (
+    argparse._StoreAction,
+    argparse._StoreConstAction,
+    argparse._StoreTrueAction,
+    argparse._StoreFalseAction,
+    argparse._AppendAction,
+    argparse._AppendConstAction,
+    argparse._CountAction,
+)
+
 
 @contextlib.contextmanager
 def mute_stdout():
@@ -40,6 +44,7 @@ def mute_stdout():
         yield
     finally:
         sys.stdout = stdout
+
 
 @contextlib.contextmanager
 def mute_stderr():
@@ -51,8 +56,10 @@ def mute_stderr():
         sys.stderr.close()
         sys.stderr = stderr
 
+
 class ArgcompleteException(Exception):
     pass
+
 
 def split_line(line, point=None):
     if point is None:
@@ -99,12 +106,16 @@ def split_line(line, point=None):
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:
-                msg = ("Unexpected internal state. "
-                       "Please report this bug at https://github.com/kislyuk/argcomplete/issues.")
+                msg = (
+                    "Unexpected internal state. "
+                    "Please report this bug at https://github.com/kislyuk/argcomplete/issues."
+                )
                 raise ArgcompleteException(msg)
+
 
 def default_validator(completion, prefix):
     return completion.startswith(prefix)
+
 
 class CompletionFinder(object):
     """
@@ -112,8 +123,17 @@ class CompletionFinder(object):
     ``argcomplete.autocomplete()`` directly (it's a convenience instance of this class). It has the same signature as
     :meth:`CompletionFinder.__call__()`.
     """
-    def __init__(self, argument_parser=None, always_complete_options=True, exclude=None, validator=None,
-                 print_suppressed=False, default_completer=FilesCompleter(), append_space=None):
+
+    def __init__(
+        self,
+        argument_parser=None,
+        always_complete_options=True,
+        exclude=None,
+        validator=None,
+        print_suppressed=False,
+        default_completer=FilesCompleter(),
+        append_space=None,
+    ):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
         self.exclude = exclude
@@ -128,9 +148,18 @@ class CompletionFinder(object):
             append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
         self.append_space = append_space
 
-    def __call__(self, argument_parser, always_complete_options=True, exit_method=os._exit, output_stream=None,
-                 exclude=None, validator=None, print_suppressed=False, append_space=None,
-                 default_completer=FilesCompleter()):
+    def __call__(
+        self,
+        argument_parser,
+        always_complete_options=True,
+        exit_method=os._exit,
+        output_stream=None,
+        exclude=None,
+        validator=None,
+        print_suppressed=False,
+        append_space=None,
+        default_completer=FilesCompleter(),
+    ):
         """
         :param argument_parser: The argument parser to autocomplete on
         :type argument_parser: :class:`argparse.ArgumentParser`
@@ -168,9 +197,15 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or
         their execution is otherwise desirable.
         """
-        self.__init__(argument_parser, always_complete_options=always_complete_options, exclude=exclude,
-                      validator=validator, print_suppressed=print_suppressed, append_space=append_space,
-                      default_completer=default_completer)
+        self.__init__(
+            argument_parser,
+            always_complete_options=always_complete_options,
+            exclude=exclude,
+            validator=validator,
+            print_suppressed=print_suppressed,
+            append_space=append_space,
+            default_completer=default_completer,
+        )
 
         if "_ARGCOMPLETE" not in os.environ:
             # not an argument completion invocation
@@ -227,19 +262,24 @@ class CompletionFinder(object):
             # Special case for when the current word is "--optional=PARTIAL_VALUE". Give the optional to the parser.
             comp_words.append(cword_prefix.split("=", 1)[0])
 
-        debug("\nLINE: {!r}".format(comp_line),
-              "\nPOINT: {!r}".format(comp_point),
-              "\nPREQUOTE: {!r}".format(cword_prequote),
-              "\nPREFIX: {!r}".format(cword_prefix),
-              "\nSUFFIX: {!r}".format(cword_suffix),
-              "\nWORDS:", comp_words)
+        debug(
+            "\nLINE: {!r}".format(comp_line),
+            "\nPOINT: {!r}".format(comp_point),
+            "\nPREQUOTE: {!r}".format(cword_prequote),
+            "\nPREFIX: {!r}".format(cword_prefix),
+            "\nSUFFIX: {!r}".format(cword_suffix),
+            "\nWORDS:",
+            comp_words,
+        )
 
         completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
 
         if dfs:
-            display_completions = {key_part: value.replace(ifs, " ") if value else ""
-                                   for key, value in self._display_completions.items()
-                                   for key_part in key}
+            display_completions = {
+                key_part: value.replace(ifs, " ") if value else ""
+                for key, value in self._display_completions.items()
+                for key_part in key
+            }
             completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
 
         debug("\nReturning completions:", completions)
@@ -361,10 +401,12 @@ class CompletionFinder(object):
 
     def _get_option_completions(self, parser, cword_prefix):
         self._display_completions.update(
-            [[tuple(x for x in action.option_strings
-             if x.startswith(cword_prefix)), action.help]
-             for action in parser._actions
-             if action.option_strings])
+            [
+                [tuple(x for x in action.option_strings if x.startswith(cword_prefix)), action.help]
+                for action in parser._actions
+                if action.option_strings
+            ]
+        )
 
         option_completions = []
         for action in parser._actions:
@@ -443,18 +485,22 @@ class CompletionFinder(object):
                     continue
 
                 if callable(completer):
-                    completions_from_callable = [c for c in completer(
-                        prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args)
-                        if self.validator(c, cword_prefix)]
+                    completions_from_callable = [
+                        c
+                        for c in completer(
+                            prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args
+                        )
+                        if self.validator(c, cword_prefix)
+                    ]
 
                     if completions_from_callable:
                         completions += completions_from_callable
                         if isinstance(completer, completers.ChoicesCompleter):
                             self._display_completions.update(
-                                [[(x,), active_action.help] for x in completions_from_callable])
+                                [[(x,), active_action.help] for x in completions_from_callable]
+                            )
                         else:
-                            self._display_completions.update(
-                                [[(x,), ""] for x in completions_from_callable])
+                            self._display_completions.update([[(x,), ""] for x in completions_from_callable])
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
@@ -491,8 +537,9 @@ class CompletionFinder(object):
         if isinstance(next_positional, argparse._SubParsersAction):
             completions += self._get_subparser_completions(next_positional, cword_prefix)
 
-        completions = self._complete_active_option(active_parser, next_positional, cword_prefix, parsed_args,
-                                                   completions)
+        completions = self._complete_active_option(
+            active_parser, next_positional, cword_prefix, parsed_args, completions
+        )
         debug("active options:", completions)
         debug("display completions:", self._display_completions)
 
@@ -555,7 +602,7 @@ class CompletionFinder(object):
             # This workaround has the same effect as __ltrim_colon_completions in bash_completion
             # (extended to characters other than the colon).
             if last_wordbreak_pos:
-                completions = [c[last_wordbreak_pos + 1:] for c in completions]
+                completions = [c[last_wordbreak_pos + 1 :] for c in completions]
             special_chars += "();<>|&!`$* \t\n\"'"
         elif cword_prequote == '"':
             special_chars += '"`$!'
@@ -604,7 +651,7 @@ class CompletionFinder(object):
             cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
             comp_words.insert(0, sys.argv[0])
             matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
-            self._rl_matches = [text + match[len(cword_prefix):] for match in matches]
+            self._rl_matches = [text + match[len(cword_prefix) :] for match in matches]
 
         if state < len(self._rl_matches):
             return self._rl_matches[state]
@@ -644,6 +691,7 @@ class CompletionFinder(object):
         """
         return {" ".join(k): v for k, v in self._display_completions.items()}
 
+
 class ExclusiveCompletionFinder(CompletionFinder):
     @staticmethod
     def _action_allowed(action, parser):
@@ -662,6 +710,7 @@ class ExclusiveCompletionFinder(CompletionFinder):
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
+
 
 def warn(*args):
     """

@@ -13,6 +13,7 @@ def _call(*args, **kwargs):
     except subprocess.CalledProcessError:
         return []
 
+
 class ChoicesCompleter(object):
     def __init__(self, choices):
         self.choices = choices
@@ -27,6 +28,7 @@ class ChoicesCompleter(object):
 
 
 EnvironCompleter = ChoicesCompleter(os.environ)
+
 
 class FilesCompleter(object):
     """
@@ -58,6 +60,7 @@ class FilesCompleter(object):
                 completion += [f + "/" for f in anticomp]
         return completion
 
+
 class _FilteredFilesCompleter(object):
     def __init__(self, predicate):
         """
@@ -88,9 +91,11 @@ class _FilteredFilesCompleter(object):
                 continue
             yield candidate + "/" if os.path.isdir(candidate) else candidate
 
+
 class DirectoriesCompleter(_FilteredFilesCompleter):
     def __init__(self):
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
+
 
 class SuppressCompleter(object):
     """

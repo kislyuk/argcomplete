@@ -5,7 +5,7 @@ try:
 except ImportError:
     from pipes import quote
 
-bashcode = r'''
+bashcode = r"""
 # Run something, muting output or redirecting it to the debug stream
 # depending on the value of _ARC_DEBUG.
 # If ARGCOMPLETE_USE_TEMPFILES is set, use tempfiles for IPC.
@@ -51,13 +51,13 @@ _python_argcomplete%(function_suffix)s() {
     fi
 }
 complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
-'''
+"""
 
-tcshcode = '''\
+tcshcode = """\
 complete "%(executable)s" 'p@*@`python-argcomplete-tcsh "%(argcomplete_script)s"`@' ;
-'''
+"""
 
-fishcode = r'''
+fishcode = r"""
 function __fish_%(function_name)s_complete
     set -x _ARGCOMPLETE 1
     set -x _ARGCOMPLETE_DFS \t
@@ -74,13 +74,13 @@ function __fish_%(function_name)s_complete
     end
 end
 complete %(completion_arg)s %(executable)s -f -a '(__fish_%(function_name)s_complete)'
-'''
+"""
 
-shell_codes = {'bash': bashcode, 'tcsh': tcshcode, 'fish': fishcode}
+shell_codes = {"bash": bashcode, "tcsh": tcshcode, "fish": fishcode}
 
 
-def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=None, argcomplete_script=None):
-    '''
+def shellcode(executables, use_defaults=True, shell="bash", complete_arguments=None, argcomplete_script=None):
+    """
     Provide the shell code required to register a python executable for use with the argcomplete module.
 
     :param list(str) executables: Executables to be completed (when invoked exactly with this name)
@@ -91,33 +91,41 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
     :param argcomplete_script: Script to call complete with, if not the executable to complete.
         If supplied, will be used to complete *all* passed executables.
     :type argcomplete_script: str or None
-    '''
+    """
 
     if complete_arguments is None:
-        complete_options = '-o nospace -o default -o bashdefault' if use_defaults else '-o nospace -o bashdefault'
+        complete_options = "-o nospace -o default -o bashdefault" if use_defaults else "-o nospace -o bashdefault"
     else:
         complete_options = " ".join(complete_arguments)
 
-    if shell == 'bash':
+    if shell == "bash":
         quoted_executables = [quote(i) for i in executables]
         executables_list = " ".join(quoted_executables)
         script = argcomplete_script
         if script:
-            function_suffix = '_' + script
+            function_suffix = "_" + script
         else:
-            script = '$1'
-            function_suffix = ''
-        code = bashcode % dict(complete_opts=complete_options, executables=executables_list,
-                               argcomplete_script=script, function_suffix=function_suffix)
-    elif shell == 'fish':
+            script = "$1"
+            function_suffix = ""
+        code = bashcode % dict(
+            complete_opts=complete_options,
+            executables=executables_list,
+            argcomplete_script=script,
+            function_suffix=function_suffix,
+        )
+    elif shell == "fish":
         code = ""
         for executable in executables:
             script = argcomplete_script or executable
-            completion_arg = '--path' if '/' in executable else '--command'  # use path for absolute paths
+            completion_arg = "--path" if "/" in executable else "--command"  # use path for absolute paths
             function_name = executable.replace("/", "_")  # / not allowed in function name
 
-            code += fishcode % dict(executable=executable, argcomplete_script=script,
-                                    completion_arg=completion_arg, function_name=function_name)
+            code += fishcode % dict(
+                executable=executable,
+                argcomplete_script=script,
+                completion_arg=completion_arg,
+                function_name=function_name,
+            )
     else:
         code = ""
         for executable in executables:
@@ -125,6 +133,6 @@ def shellcode(executables, use_defaults=True, shell='bash', complete_arguments=N
             # If no script was specified, default to the executable being completed.
             if not script:
                 script = executable
-            code += shell_codes.get(shell, '') % dict(executable=executable, argcomplete_script=script)
+            code += shell_codes.get(shell, "") % dict(executable=executable, argcomplete_script=script)
 
     return code
