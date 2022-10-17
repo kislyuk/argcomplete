@@ -5,7 +5,7 @@ import glob
 from setuptools import find_packages, setup
 
 install_requires = []
-tests_require = ["coverage", "flake8", "pexpect", "wheel"]
+tests_require = ["coverage", "flake8", "pexpect", "wheel", "mypy"]
 importlib_backport_requires = ["importlib-metadata >= 0.23, < 6"]
 
 setup(
