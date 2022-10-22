@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# flake8: NOQA E302
 import argparse
 import contextlib
 import os
