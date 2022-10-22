@@ -7,3 +7,15 @@ skip-string-normalization = true
 profile = "black"
 line_length = 120
 skip = ".*/(version.py|my_argparse.py|my_shlex.py)"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".",
+  "test",
+]
+testpaths = [
+  "test/test.py"
+]
+addopts = [
+  "--capture=no"
+]
