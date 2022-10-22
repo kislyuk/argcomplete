@@ -29,3 +29,6 @@ npm-debug.log
 
 # OS X metadata files
 .DS_Store
+
+# test
+test/test_package/build
