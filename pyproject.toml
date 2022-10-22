@@ -1,6 +1,7 @@
 [tool.black]
 line-length = 120
 exclude = ".*/(version.py|my_argparse.py|my_shlex.py)"
+
 [tool.isort]
 profile = "black"
 line_length = 120
