@@ -11,6 +11,7 @@ __pycache__/
 /dist/
 /.eggs/
 .coverage
+.venv
 
 # IDE project files
 /.pydevproject
