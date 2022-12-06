@@ -195,9 +195,9 @@ can override this validation check by supplying the ``validator`` keyword to ``a
 
 .. code-block:: python
 
-    def my_validator(current_input, keyword_to_check_against):
-        # Pass through ALL options even if they don't all start with 'current_input'
-        return True
+    def my_validator(completion_candidate, current_input):
+        """Complete non-prefix substring matches."""
+        return current_input in completion_candidate
 
     argcomplete.autocomplete(parser, validator=my_validator)
 
