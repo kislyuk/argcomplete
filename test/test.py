@@ -89,7 +89,7 @@ class TestArgcomplete(unittest.TestCase):
             os.environ["COMP_LINE"] = command
             os.environ["COMP_POINT"] = point
             with self.assertRaises(SystemExit) as cm:
-                completer(parser, output_stream=t, exit_method=sys.exit, **kwargs)
+                completer(parser, output_stream=t, debug_stream=sys.stderr, exit_method=sys.exit, **kwargs)
             if cm.exception.code != 0:
                 raise Exception("Unexpected exit code %d" % cm.exception.code)
             t.seek(0)

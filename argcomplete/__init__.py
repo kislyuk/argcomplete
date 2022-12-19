@@ -154,6 +154,7 @@ class CompletionFinder(object):
         always_complete_options=True,
         exit_method=os._exit,
         output_stream=None,
+        debug_stream=None,
         exclude=None,
         validator=None,
         print_suppressed=False,
@@ -174,6 +175,8 @@ class CompletionFinder(object):
             Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to
             perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
         :type exit_method: callable
+        :type output_stream: TextIOBase
+        :type debug_stream: TextIOBase
         :param exclude: List of strings representing options to be omitted from autocompletion
         :type exclude: iterable
         :param validator:
@@ -211,12 +214,7 @@ class CompletionFinder(object):
             # not an argument completion invocation
             return
 
-        global debug_stream
-        try:
-            debug_stream = os.fdopen(9, "w")
-        except Exception:
-            debug_stream = sys.stderr
-        debug()
+        debug_stream = self._set_debug_stream(stream=debug_stream)
 
         if output_stream is None:
             filename = os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
@@ -287,6 +285,18 @@ class CompletionFinder(object):
         output_stream.flush()
         debug_stream.flush()
         exit_method(0)
+
+    def _set_debug_stream(self, stream=None):
+        global debug_stream
+        if stream is None:
+            try:
+                debug_stream = os.fdopen(9, "w")
+            except Exception:
+                debug_stream = sys.stderr
+        else:
+            debug_stream = stream
+        debug()
+        return debug_stream
 
     def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
         active_parsers = self._patch_argument_parser()
