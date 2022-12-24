@@ -19,3 +19,8 @@ testpaths = [
 addopts = [
   "--capture=no"
 ]
+
+[tool.mypy]
+files = [
+  "argcomplete"
+]
