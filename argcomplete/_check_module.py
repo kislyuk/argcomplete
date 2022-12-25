@@ -13,12 +13,16 @@ import tokenize
 try:
     from importlib.util import find_spec  # type:ignore
 except ImportError:
+    import typing as t
     from collections import namedtuple
     from imp import find_module
 
     ModuleSpec = namedtuple("ModuleSpec", ["origin", "has_location", "submodule_search_locations"])
 
-    def find_spec(name):
+    def find_spec(  # type:ignore
+        name: str,
+        package: t.Optional[str] = None,
+    ) -> t.Optional[ModuleSpec]:
         """Minimal implementation as required by `find`."""
         try:
             f, path, _ = find_module(name)
