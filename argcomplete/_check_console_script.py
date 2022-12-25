@@ -17,7 +17,7 @@ import sys
 try:
     from importlib.metadata import entry_points as importlib_entry_points
 except ImportError:
-    from importlib_metadata import entry_points as importlib_entry_points
+    from importlib_metadata import entry_points as importlib_entry_points  # type:ignore
 
 from ._check_module import ArgcompleteMarkerNotFound, find
 
@@ -54,4 +54,4 @@ if __name__ == "__main__":
     try:
         main()
     except ArgcompleteMarkerNotFound as e:
-        sys.exit(e)
+        sys.exit(str(e))
