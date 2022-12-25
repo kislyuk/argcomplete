@@ -19,13 +19,13 @@ from collections import deque
 # Modified by argcomplete: 2/3 compatibility
 # Note: cStringIO is not compatible with Unicode
 try:
-    from StringIO import StringIO
+    from StringIO import StringIO  # type:ignore
 except ImportError:
     from io import StringIO
 
 # Modified by argcomplete: 2/3 compatibility
 try:
-    basestring
+    basestring  # type:ignore
 except NameError:
     basestring = str
 

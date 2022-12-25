@@ -1,6 +1,7 @@
 # Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+from argparse import _  # type:ignore
 from argparse import (
     ONE_OR_MORE,
     OPTIONAL,
@@ -10,7 +11,6 @@ from argparse import (
     ZERO_OR_MORE,
     ArgumentError,
     ArgumentParser,
-    _,
     _get_action_name,
     _SubParsersAction,
 )
