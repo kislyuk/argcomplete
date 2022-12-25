@@ -90,4 +90,4 @@ if __name__ == "__main__":
     try:
         main()
     except ArgcompleteMarkerNotFound as e:
-        sys.exit(e)
+        sys.exit(str(e))
