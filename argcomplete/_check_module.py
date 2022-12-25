@@ -11,7 +11,7 @@ import sys
 import tokenize
 
 try:
-    from importlib.util import find_spec
+    from importlib.util import find_spec  # type:ignore
 except ImportError:
     from collections import namedtuple
     from imp import find_module
