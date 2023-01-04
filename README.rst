@@ -298,13 +298,7 @@ If script is not in path you still can register it's completion by specifying ab
 
     register-python-argcomplete --shell fish /home/awesome-user/my-awesome-script | source
 
-then you can complete it by using ``/home/awesome-user/my-awesome-script`` or ``./my-awesome-script``.
-
-Unfortunately ``~/my-awesome-script`` would not work, to fix it you can run::
-
-    register-python-argcomplete --shell fish my-awesome-script -e /home/awesome-user/my-awesome-script | source
-
-This would enable completion for any ``my-awesome-script`` in any location.
+then you can complete it by using ``/home/awesome-user/my-awesome-script`` or ``./my-awesome-script`` or ``~/my-awesome-script``.
 
 Git Bash Support
 ----------------

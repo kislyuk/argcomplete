@@ -1391,13 +1391,14 @@ class TestFish(_TestSh, unittest.TestCase):
             self.sh.run_command("")
 
 
-@unittest.skipIf(FISH_VERSION_TUPLE < (3, 3), "Path completion is fixed in fish 3.3")
+@unittest.skipIf(FISH_VERSION_TUPLE < (3, 4), "Path completion is fixed in fish 3.4")
 class TestFishPathCompletion(unittest.TestCase):
     def setUp(self):
         sh = Shell("fish")
         path = " ".join([os.path.join(BASE_DIR, "scripts"), "$PATH"])
         sh.run_command("set -x PATH {0}".format(path))
         sh.run_command("set -x PYTHONPATH {0}".format(BASE_DIR))
+        sh.run_command("set -x TEST_DIR {0}".format(TEST_DIR))
         self.assertEqual(
             sh.run_command("register-python-argcomplete --shell fish {0}/prog | source".format(TEST_DIR)), ""
         )
@@ -1406,6 +1407,7 @@ class TestFishPathCompletion(unittest.TestCase):
 
     def test_path_completion(self):
         self.assertEqual(self.sh.run_command("{}/prog basic f\t".format(TEST_DIR)), "foo\r\n")
+        self.assertEqual(self.sh.run_command("$TEST_DIR/prog basic f\t".format(TEST_DIR)), "foo\r\n")
         self.sh.run_command("cd {}".format(TEST_DIR))
         self.assertEqual(self.sh.run_command("./prog basic f\t"), "foo\r\n")
 
