@@ -322,6 +322,17 @@ The command line interface of this program must be additionally implemented in a
 
 This option can also be used in combination with the other supported shells.
 
+PowerShell Support
+------------
+To create new completion file, e.g::
+
+    register-python-argcomplete --shell powershell my-awesome-script > ~/my-awesome-script.psm1
+
+To activate completions for PowerShell, add the below line in ``$PROFILE``. For more information, see `How to create your profile <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#how-to-create-a-profile>`_ and `Profiles and execution policy <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#profiles-and-execution-policy>`_. ::
+
+    Import-Module  "~/my-awesome-script.psm1"
+
+
 Python Support
 --------------
 Argcomplete requires Python 3.6+.

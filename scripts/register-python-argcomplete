@@ -43,7 +43,8 @@ parser.add_argument(
     help="arguments to call complete with; use of this option discards default options",
 )
 parser.add_argument(
-    "-s", "--shell", choices=("bash", "tcsh", "fish"), default="bash", help="output code for the specified shell"
+    "-s", "--shell", choices=("bash", "tcsh", "fish", "powershell"), default="bash",
+    help="output code for the specified shell"
 )
 parser.add_argument(
     "-e", "--external-argcomplete-script", help="external argcomplete script for auto completion of the executable"
