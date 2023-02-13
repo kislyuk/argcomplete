@@ -1,6 +1,8 @@
 # Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+import typing as t
+from argparse import _  # type:ignore
 from argparse import (
     ONE_OR_MORE,
     OPTIONAL,
@@ -10,12 +12,11 @@ from argparse import (
     ZERO_OR_MORE,
     ArgumentError,
     ArgumentParser,
-    _,
     _get_action_name,
     _SubParsersAction,
 )
 
-_num_consumed_args = {}
+_num_consumed_args: t.Dict[str, int] = {}
 
 
 def action_is_satisfied(action):
