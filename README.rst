@@ -332,7 +332,7 @@ or create new completion file, e.g::
 
     register-python-argcomplete --shell powershell my-awesome-script > ~/my-awesome-script.psm1
 
-To activate this completions file, add the below line in ``$PROFILE``. The simplest way is to run `notepad $PROFILE` in PowerShell. For more information, see `How to create your profile <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#how-to-create-a-profile>`_ and `Profiles and execution policy <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#profiles-and-execution-policy>`_. ::
+To activate this completions file, add the below line in ``$PROFILE``. The simplest way is to run ``notepad $PROFILE`` in PowerShell. For more information, see `How to create your profile <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#how-to-create-a-profile>`_ and `Profiles and execution policy <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#profiles-and-execution-policy>`_. ::
 
     Import-Module  "~/my-awesome-script.psm1"
 
