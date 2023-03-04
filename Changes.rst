@@ -1,3 +1,12 @@
+Changes for v2.0.1 (2023-03-04)
+===============================
+
+-  Support powershell (#392)
+
+-  Update importlib-metadata dependency to include versions 5.x (#389)
+
+-  Test and documentation improvements
+
 Changes for v2.0.0 (2022-01-03)
 ===============================
 
