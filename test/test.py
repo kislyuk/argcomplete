@@ -1366,7 +1366,6 @@ class TestFish(_TestSh, unittest.TestCase):
     skipped = ["test_single_quotes_in_single_quotes", "test_parse_special_characters_dollar"]
 
     def setUp(self):
-
         sh = Shell("fish")
         path = " ".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
         sh.run_command("set -x PATH {0}".format(path))

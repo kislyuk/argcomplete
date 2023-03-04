@@ -336,7 +336,6 @@ class CompletionFinder(object):
             parser.__class__ = type(classname, (IntrospectiveArgumentParser, parser.__class__), {})
 
             for action in parser._actions:
-
                 if hasattr(action, "_orig_class"):
                     continue
 

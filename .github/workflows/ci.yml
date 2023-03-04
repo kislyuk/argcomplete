@@ -22,7 +22,7 @@ jobs:
     - name: Install
       run: |
         [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish
-        [[ $(uname) == Darwin ]] && brew install bash rpm tcsh fish
+        [[ $(uname) == Darwin ]] && brew install bash tcsh fish
         python -m pip install --quiet --upgrade codecov
     - name: Test
       run: |
