@@ -33,7 +33,7 @@ setup(
         ':python_version == "3.6"': importlib_backport_requires,
         ':python_version == "3.7"': importlib_backport_requires,
     },
-    packages=find_packages(exclude=["test"]),
+    packages=find_packages(exclude=["test", "test.*"]),
     scripts=glob.glob("scripts/*"),
     package_data={"argcomplete": ["bash_completion.d/python-argcomplete"]},
     zip_safe=False,
