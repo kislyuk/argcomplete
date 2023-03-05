@@ -24,3 +24,4 @@ addopts = [
 files = [
   "argcomplete"
 ]
+strict = true
