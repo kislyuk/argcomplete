@@ -76,7 +76,7 @@ end
 complete %(completion_arg)s %(executable)s -f -a '(__fish_%(function_name)s_complete)'
 """
 
-powershell_code="""
+powershell_code = r"""
 Register-ArgumentCompleter -Native -CommandName %(executable)s -ScriptBlock {
     param($commandName, $wordToComplete, $cursorPosition)
     $completion_file = New-TemporaryFile
