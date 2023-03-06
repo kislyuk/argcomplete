@@ -1,12 +1,12 @@
-argcomplete - Bash tab completion for argparse
-==============================================
+argcomplete - Bash/zsh tab completion for argparse
+==================================================
 *Tab complete all the things!*
 
 Argcomplete provides easy, extensible command line tab completion of arguments for your Python script.
 
 It makes two assumptions:
 
-* You're using bash as your shell (limited support for zsh, fish, and tcsh is available)
+* You're using bash or zsh as your shell
 * You're using `argparse <http://docs.python.org/3/library/argparse.html>`_ to manage your command line arguments/options
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
@@ -231,7 +231,6 @@ completed when invoked exactly as it was registered. In the above example, ``my-
 and the user must be attempting to complete it by that name. The above line alone would **not** allow you to complete
 ``./my-awesome-script``, or ``/path/to/my-awesome-script``.
 
-
 Activating global completion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The script ``activate-global-python-argcomplete`` will try to install the file
@@ -260,57 +259,6 @@ Afterwards you can enable completion for your scripts with ``register-python-arg
 
     eval "$(register-python-argcomplete my-awesome-script)"
 
-Tcsh Support
-------------
-To activate completions for tcsh use::
-
-    eval `register-python-argcomplete --shell tcsh my-awesome-script`
-
-The ``python-argcomplete-tcsh`` script provides completions for tcsh.
-The following is an example of the tcsh completion syntax for
-``my-awesome-script`` emitted by ``register-python-argcomplete``::
-
-    complete my-awesome-script 'p@*@`python-argcomplete-tcsh my-awesome-script`@'
-
-Fish Support
-------------
-To activate completions for fish use::
-
-    register-python-argcomplete --shell fish my-awesome-script | source
-
-or create new completion file, e.g::
-
-    register-python-argcomplete --shell fish my-awesome-script > ~/.config/fish/completions/my-awesome-script.fish
-
-Completion Description For Fish
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-By default help string is added as completion description.
-
-.. image:: docs/fish_help_string.png
-
-You can disable this feature by removing ``_ARGCOMPLETE_DFS`` variable, e.g::
-
-    register-python-argcomplete --shell fish my-awesome-script | grep -v _ARGCOMPLETE_DFS | source
-
-Absolute Path Completion
-~~~~~~~~~~~~~~~~~~~~~~~~
-If script is not in path you still can register it's completion by specifying absolute path::
-
-    register-python-argcomplete --shell fish /home/awesome-user/my-awesome-script | source
-
-then you can complete it by using ``/home/awesome-user/my-awesome-script`` or ``./my-awesome-script`` or ``~/my-awesome-script``.
-
-Git Bash Support
-----------------
-Due to limitations of file descriptor inheritance on Windows,
-Git Bash not supported out of the box. You can opt in to using
-temporary files instead of file descriptors for for IPC
-by setting the environment variable ``ARGCOMPLETE_USE_TEMPFILES``,
-e.g. by adding ``export ARGCOMPLETE_USE_TEMPFILES=1`` to ``~/.bashrc``.
-
-For full support, consider using Bash with the
-Windows Subsystem for Linux (WSL).
-
 External argcomplete script
 ---------------------------
 To register an argcomplete script for an arbitrary name, the ``--external-argcomplete-script`` argument of the ``register-python-argcomplete`` script can be used::
@@ -322,20 +270,14 @@ The command line interface of this program must be additionally implemented in a
 
 This option can also be used in combination with the other supported shells.
 
-PowerShell Support
-------------------
-To create new completion file, e.g::
-
-    register-python-argcomplete --shell powershell my-awesome-script > ~/my-awesome-script.psm1
-
-To activate completions for PowerShell, add the below line in ``$PROFILE``. For more information, see `How to create your profile <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#how-to-create-a-profile>`_ and `Profiles and execution policy <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#profiles-and-execution-policy>`_. ::
-
-    Import-Module  "~/my-awesome-script.psm1"
-
-
 Python Support
 --------------
-Argcomplete requires Python 3.6+.
+Argcomplete requires Python 3.7+.
+
+Support for other shells
+------------------------
+Argcomplete authors provide support only for the bash and zsh shells on Linux and MacOS. For resources related to other
+shells and platforms, please see the `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>` directory.
 
 Common Problems
 ---------------
