@@ -3,7 +3,7 @@ test_deps:
 
 lint: test_deps
 	flake8 $$(python setup.py --name)
-	for script in scripts/*; do if grep -q python $$script; then flake8 $$script; fi; done
+	for script in scripts/*[^cmd]; do if grep -q python $$script; then flake8 $$script; fi; done
 
 test: lint test_deps
 	coverage run --source=argcomplete --omit=argcomplete/my_shlex.py ./test/test.py -v

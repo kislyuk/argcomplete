@@ -323,7 +323,7 @@ The command line interface of this program must be additionally implemented in a
 This option can also be used in combination with the other supported shells.
 
 PowerShell Support
-------------
+------------------
 To activate completions for PowerShell use::
 
     register-python-argcomplete --shell powershell my-awesome-script | Out-String | Invoke-Expression
