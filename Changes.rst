@@ -1,3 +1,8 @@
+Changes for v2.1.1 (2023-03-06)
+===============================
+
+-  Documentation and test improvements
+
 Changes for v2.1.0 (2023-03-06)
 ===============================
 
