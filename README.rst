@@ -277,7 +277,7 @@ Argcomplete requires Python 3.7+.
 Support for other shells
 ------------------------
 Argcomplete authors provide support only for the bash and zsh shells on Linux and MacOS. For resources related to other
-shells and platforms, please see the `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>` directory.
+shells and platforms, please see the `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_ directory.
 
 Common Problems
 ---------------
