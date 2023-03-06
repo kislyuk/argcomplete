@@ -5,7 +5,6 @@
 # Python files
 *.pyc
 __pycache__/
-.tox/
 *.egg-info/
 /build/
 /dist/
