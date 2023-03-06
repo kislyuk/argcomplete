@@ -1,0 +1,783 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>argcomplete &#8212; argcomplete  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/guzzle.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">argcomplete  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">argcomplete</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar"><a href="
+    ../index.html" class="text-logo">argcomplete</a>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="index.html">Module code</a></li>
+              
+              <li>argcomplete</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <h1>Source code for argcomplete</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.</span>
+<span class="c1"># Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">argparse</span><span class="o">,</span> <span class="nn">contextlib</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">completers</span><span class="p">,</span> <span class="n">my_shlex</span> <span class="k">as</span> <span class="n">shlex</span>
+<span class="kn">from</span> <span class="nn">.completers</span> <span class="kn">import</span> <span class="n">FilesCompleter</span><span class="p">,</span> <span class="n">SuppressCompleter</span>
+<span class="kn">from</span> <span class="nn">.my_argparse</span> <span class="kn">import</span> <span class="n">IntrospectiveArgumentParser</span><span class="p">,</span> <span class="n">action_is_satisfied</span><span class="p">,</span> <span class="n">action_is_open</span><span class="p">,</span> <span class="n">action_is_greedy</span>
+<span class="kn">from</span> <span class="nn">.shell_integration</span> <span class="kn">import</span> <span class="n">shellcode</span>  <span class="c1"># noqa</span>
+
+<span class="n">_DEBUG</span> <span class="o">=</span> <span class="s2">&quot;_ARC_DEBUG&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span>
+
+<span class="n">debug_stream</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+
+<span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">_DEBUG</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">debug_stream</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="n">BASH_FILE_COMPLETION_FALLBACK</span> <span class="o">=</span> <span class="mi">79</span>
+<span class="n">BASH_DIR_COMPLETION_FALLBACK</span> <span class="o">=</span> <span class="mi">80</span>
+
+<span class="n">safe_actions</span> <span class="o">=</span> <span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">_StoreAction</span><span class="p">,</span>
+                <span class="n">argparse</span><span class="o">.</span><span class="n">_StoreConstAction</span><span class="p">,</span>
+                <span class="n">argparse</span><span class="o">.</span><span class="n">_StoreTrueAction</span><span class="p">,</span>
+                <span class="n">argparse</span><span class="o">.</span><span class="n">_StoreFalseAction</span><span class="p">,</span>
+                <span class="n">argparse</span><span class="o">.</span><span class="n">_AppendAction</span><span class="p">,</span>
+                <span class="n">argparse</span><span class="o">.</span><span class="n">_AppendConstAction</span><span class="p">,</span>
+                <span class="n">argparse</span><span class="o">.</span><span class="n">_CountAction</span><span class="p">)</span>
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">mute_stdout</span><span class="p">():</span>
+    <span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">mute_stderr</span><span class="p">():</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span>
+
+<div class="viewcode-block" id="ArgcompleteException"><a class="viewcode-back" href="../index.html#argcomplete.ArgcompleteException">[docs]</a><span class="k">class</span> <span class="nc">ArgcompleteException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<span class="k">def</span> <span class="nf">split_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">point</span><span class="p">]</span>
+    <span class="n">lexer</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">shlex</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">posix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">lexer</span><span class="o">.</span><span class="n">whitespace_split</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">lexer</span><span class="o">.</span><span class="n">wordbreaks</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_ARGCOMPLETE_COMP_WORDBREAKS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">split_word</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+        <span class="c1"># TODO: make this less ugly</span>
+        <span class="n">point_in_word</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">+</span> <span class="n">point</span> <span class="o">-</span> <span class="n">lexer</span><span class="o">.</span><span class="n">instream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lexer</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">))</span> <span class="ow">and</span> <span class="n">lexer</span><span class="o">.</span><span class="n">state</span> <span class="ow">in</span> <span class="n">lexer</span><span class="o">.</span><span class="n">whitespace</span><span class="p">:</span>
+            <span class="n">point_in_word</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">point_in_word</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;In trailing whitespace&quot;</span><span class="p">)</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">prefix</span><span class="p">,</span> <span class="n">suffix</span> <span class="o">=</span> <span class="n">word</span><span class="p">[:</span><span class="n">point_in_word</span><span class="p">],</span> <span class="n">word</span><span class="p">[</span><span class="n">point_in_word</span><span class="p">:]</span>
+        <span class="n">prequote</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># posix</span>
+        <span class="k">if</span> <span class="n">lexer</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lexer</span><span class="o">.</span><span class="n">state</span> <span class="ow">in</span> <span class="n">lexer</span><span class="o">.</span><span class="n">quotes</span><span class="p">:</span>
+            <span class="n">prequote</span> <span class="o">=</span> <span class="n">lexer</span><span class="o">.</span><span class="n">state</span>
+        <span class="c1"># non-posix</span>
+        <span class="c1"># if len(prefix) &gt; 0 and prefix[0] in lexer.quotes:</span>
+        <span class="c1">#    prequote, prefix = prefix[0], prefix[1:]</span>
+
+        <span class="k">return</span> <span class="n">prequote</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="n">lexer</span><span class="o">.</span><span class="n">last_wordbreak_pos</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">lexer</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">word</span> <span class="o">==</span> <span class="n">lexer</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>
+                <span class="c1"># TODO: check if this is ever unsafe</span>
+                <span class="c1"># raise ArgcompleteException(&quot;Unexpected end of input&quot;)</span>
+                <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">lexer</span><span class="o">.</span><span class="n">instream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">point</span><span class="p">:</span>
+                <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="s2">&quot;split, lexer state: &#39;</span><span class="si">{s}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">lexer</span><span class="o">.</span><span class="n">state</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">split_word</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">lexer</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="s2">&quot;split (lexer stopped, state: &#39;</span><span class="si">{s}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">lexer</span><span class="o">.</span><span class="n">state</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">lexer</span><span class="o">.</span><span class="n">instream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">point</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">split_word</span><span class="p">(</span><span class="n">lexer</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Unexpected internal state. &quot;</span>
+                       <span class="s2">&quot;Please report this bug at https://github.com/kislyuk/argcomplete/issues.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ArgcompleteException</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">default_validator</span><span class="p">(</span><span class="n">completion</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">completion</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompletionFinder"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder">[docs]</a><span class="k">class</span> <span class="nc">CompletionFinder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inherit from this class if you wish to override any of the stages below. Otherwise, use</span>
+<span class="sd">    ``argcomplete.autocomplete()`` directly (it&#39;s a convenience instance of this class). It has the same signature as</span>
+<span class="sd">    :meth:`CompletionFinder.__call__()`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CompletionFinder.__init__"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argument_parser</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">always_complete_options</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">print_suppressed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_completer</span><span class="o">=</span><span class="n">FilesCompleter</span><span class="p">(),</span> <span class="n">append_space</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span> <span class="o">=</span> <span class="n">argument_parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">always_complete_options</span> <span class="o">=</span> <span class="n">always_complete_options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span>
+        <span class="k">if</span> <span class="n">validator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">validator</span> <span class="o">=</span> <span class="n">default_validator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_suppressed</span> <span class="o">=</span> <span class="n">print_suppressed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">completing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_completer</span> <span class="o">=</span> <span class="n">default_completer</span>
+        <span class="k">if</span> <span class="n">append_space</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">append_space</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_ARGCOMPLETE_SUPPRESS_SPACE&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;1&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append_space</span> <span class="o">=</span> <span class="n">append_space</span></div>
+
+<div class="viewcode-block" id="CompletionFinder.__call__"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argument_parser</span><span class="p">,</span> <span class="n">always_complete_options</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exit_method</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">,</span> <span class="n">output_stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">print_suppressed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">append_space</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">default_completer</span><span class="o">=</span><span class="n">FilesCompleter</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param argument_parser: The argument parser to autocomplete on</span>
+<span class="sd">        :type argument_parser: :class:`argparse.ArgumentParser`</span>
+<span class="sd">        :param always_complete_options:</span>
+<span class="sd">            Controls the autocompletion of option strings if an option string opening character (normally ``-``) has not</span>
+<span class="sd">            been entered. If ``True`` (default), both short (``-x``) and long (``--x``) option strings will be</span>
+<span class="sd">            suggested. If ``False``, no option strings will be suggested. If ``long``, long options and short options</span>
+<span class="sd">            with no long variant will be suggested. If ``short``, short options and long options with no short variant</span>
+<span class="sd">            will be suggested.</span>
+<span class="sd">        :type always_complete_options: boolean or string</span>
+<span class="sd">        :param exit_method:</span>
+<span class="sd">            Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to</span>
+<span class="sd">            perform a normal exit that calls exit handlers, use :meth:`sys.exit`.</span>
+<span class="sd">        :type exit_method: callable</span>
+<span class="sd">        :param exclude: List of strings representing options to be omitted from autocompletion</span>
+<span class="sd">        :type exclude: iterable</span>
+<span class="sd">        :param validator:</span>
+<span class="sd">            Function to filter all completions through before returning (called with two string arguments, completion</span>
+<span class="sd">            and prefix; return value is evaluated as a boolean)</span>
+<span class="sd">        :type validator: callable</span>
+<span class="sd">        :param print_suppressed:</span>
+<span class="sd">            Whether or not to autocomplete options that have the ``help=argparse.SUPPRESS`` keyword argument set.</span>
+<span class="sd">        :type print_suppressed: boolean</span>
+<span class="sd">        :param append_space:</span>
+<span class="sd">            Whether to append a space to unique matches. The default is ``True``.</span>
+<span class="sd">        :type append_space: boolean</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            If you are not subclassing CompletionFinder to override its behaviors,</span>
+<span class="sd">            use ``argcomplete.autocomplete()`` directly. It has the same signature as this method.</span>
+
+<span class="sd">        Produces tab completions for ``argument_parser``. See module docs for more info.</span>
+
+<span class="sd">        Argcomplete only executes actions if their class is known not to have side effects. Custom action classes can be</span>
+<span class="sd">        added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or</span>
+<span class="sd">        their execution is otherwise desirable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">argument_parser</span><span class="p">,</span> <span class="n">always_complete_options</span><span class="o">=</span><span class="n">always_complete_options</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+                      <span class="n">validator</span><span class="o">=</span><span class="n">validator</span><span class="p">,</span> <span class="n">print_suppressed</span><span class="o">=</span><span class="n">print_suppressed</span><span class="p">,</span> <span class="n">append_space</span><span class="o">=</span><span class="n">append_space</span><span class="p">,</span>
+                      <span class="n">default_completer</span><span class="o">=</span><span class="n">default_completer</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;_ARGCOMPLETE&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="c1"># not an argument completion invocation</span>
+            <span class="k">return</span>
+
+        <span class="k">global</span> <span class="n">debug_stream</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">debug_stream</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fdopen</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">debug_stream</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="n">debug</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">output_stream</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_ARGCOMPLETE_STDOUT_FILENAME&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using output file </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+                <span class="n">output_stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">output_stream</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">output_stream</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fdopen</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Unable to open fd 8 for writing, quitting&quot;</span><span class="p">)</span>
+                <span class="n">exit_method</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># print(&quot;&quot;, stream=debug_stream)</span>
+        <span class="c1"># for v in &quot;COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS&quot;.split():</span>
+        <span class="c1">#     print(v, os.environ[v], stream=debug_stream)</span>
+
+        <span class="n">ifs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_ARGCOMPLETE_IFS&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\013</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ifs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Invalid value for IFS, quitting [</span><span class="si">{v}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">ifs</span><span class="p">))</span>
+            <span class="n">exit_method</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">dfs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_ARGCOMPLETE_DFS&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dfs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Invalid value for DFS, quitting [</span><span class="si">{v}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">dfs</span><span class="p">))</span>
+            <span class="n">exit_method</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">comp_line</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;COMP_LINE&quot;</span><span class="p">]</span>
+        <span class="n">comp_point</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;COMP_POINT&quot;</span><span class="p">])</span>
+
+        <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">cword_suffix</span><span class="p">,</span> <span class="n">comp_words</span><span class="p">,</span> <span class="n">last_wordbreak_pos</span> <span class="o">=</span> <span class="n">split_line</span><span class="p">(</span><span class="n">comp_line</span><span class="p">,</span> <span class="n">comp_point</span><span class="p">)</span>
+
+        <span class="c1"># _ARGCOMPLETE is set by the shell script to tell us where comp_words</span>
+        <span class="c1"># should start, based on what we&#39;re completing.</span>
+        <span class="c1"># 1: &lt;script&gt; [args]</span>
+        <span class="c1"># 2: python &lt;script&gt; [args]</span>
+        <span class="c1"># 3: python -m &lt;module&gt; [args]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;_ARGCOMPLETE&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">comp_words</span> <span class="o">=</span> <span class="n">comp_words</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">cword_prefix</span> <span class="ow">and</span> <span class="n">cword_prefix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">prefix_chars</span> <span class="ow">and</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">cword_prefix</span><span class="p">:</span>
+            <span class="c1"># Special case for when the current word is &quot;--optional=PARTIAL_VALUE&quot;. Give the optional to the parser.</span>
+            <span class="n">comp_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cword_prefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">LINE: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">comp_line</span><span class="p">),</span>
+              <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">POINT: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">comp_point</span><span class="p">),</span>
+              <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PREQUOTE: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cword_prequote</span><span class="p">),</span>
+              <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PREFIX: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">),</span>
+              <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">SUFFIX: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cword_suffix</span><span class="p">),</span>
+              <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WORDS:&quot;</span><span class="p">,</span> <span class="n">comp_words</span><span class="p">)</span>
+
+        <span class="n">completions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_completions</span><span class="p">(</span><span class="n">comp_words</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">last_wordbreak_pos</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dfs</span><span class="p">:</span>
+            <span class="n">display_completions</span> <span class="o">=</span> <span class="p">{</span><span class="n">key_part</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">ifs</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                                   <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                   <span class="k">for</span> <span class="n">key_part</span> <span class="ow">in</span> <span class="n">key</span><span class="p">}</span>
+            <span class="n">completions</span> <span class="o">=</span> <span class="p">[</span><span class="n">dfs</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">display_completions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
+
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Returning completions:&quot;</span><span class="p">,</span> <span class="n">completions</span><span class="p">)</span>
+        <span class="n">output_stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ifs</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">completions</span><span class="p">))</span>
+        <span class="n">output_stream</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">debug_stream</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">exit_method</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp_words</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">last_wordbreak_pos</span><span class="p">):</span>
+        <span class="n">active_parsers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patch_argument_parser</span><span class="p">()</span>
+
+        <span class="n">parsed_args</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">completing</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;invoking parser with&quot;</span><span class="p">,</span> <span class="n">comp_words</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="k">with</span> <span class="n">mute_stderr</span><span class="p">():</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">comp_words</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">namespace</span><span class="o">=</span><span class="n">parsed_args</span><span class="p">)</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;parsed args:&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">exception&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;while parsing args&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">completing</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="s2">&quot;--&quot;</span> <span class="ow">in</span> <span class="n">comp_words</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">always_complete_options</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">completions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collect_completions</span><span class="p">(</span><span class="n">active_parsers</span><span class="p">,</span> <span class="n">parsed_args</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+        <span class="n">completions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_completions</span><span class="p">(</span><span class="n">completions</span><span class="p">)</span>
+        <span class="n">completions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quote_completions</span><span class="p">(</span><span class="n">completions</span><span class="p">,</span> <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">last_wordbreak_pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">completions</span>
+
+    <span class="k">def</span> <span class="nf">_patch_argument_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Since argparse doesn&#39;t support much introspection, we monkey-patch it to replace the parse_known_args method and</span>
+<span class="sd">        all actions with hooks that tell us which action was last taken or about to be taken, and let us have the parser</span>
+<span class="sd">        figure out which subparsers need to be activated (then recursively monkey-patch those).</span>
+<span class="sd">        We save all active ArgumentParsers to extract all their possible option names later.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_parsers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visited_positionals</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">completer</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="k">def</span> <span class="nf">patch</span><span class="p">(</span><span class="n">parser</span><span class="p">):</span>
+            <span class="n">completer</span><span class="o">.</span><span class="n">visited_positionals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+            <span class="n">completer</span><span class="o">.</span><span class="n">active_parsers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">IntrospectiveArgumentParser</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="n">classname</span> <span class="o">=</span> <span class="s2">&quot;MonkeyPatchedIntrospectiveArgumentParser&quot;</span>
+
+            <span class="n">parser</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="p">(</span><span class="n">IntrospectiveArgumentParser</span><span class="p">,</span> <span class="n">parser</span><span class="o">.</span><span class="vm">__class__</span><span class="p">),</span> <span class="p">{})</span>
+
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_actions</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s2">&quot;_orig_class&quot;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># TODO: accomplish this with super</span>
+                <span class="k">class</span> <span class="nc">IntrospectAction</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+                    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Action stub called on&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">args:&quot;</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="p">)</span>
+                        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">orig class:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_class</span><span class="p">)</span>
+                        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">orig callable:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_callable</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">completer</span><span class="o">.</span><span class="n">completing</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_orig_callable</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="n">option_string</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orig_class</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">):</span>
+                            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;orig class is a subparsers action: patching and running it&quot;</span><span class="p">)</span>
+                            <span class="n">patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name_parser_map</span><span class="p">[</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_orig_callable</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="n">option_string</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_class</span> <span class="ow">in</span> <span class="n">safe_actions</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+                                <span class="n">completer</span><span class="o">.</span><span class="n">visited_positionals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_orig_callable</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="n">option_string</span><span class="p">)</span>
+
+                <span class="n">action</span><span class="o">.</span><span class="n">_orig_class</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="vm">__class__</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">_orig_callable</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="fm">__call__</span>
+                <span class="n">action</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">IntrospectAction</span>
+
+        <span class="n">patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="p">)</span>
+
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Active parsers:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_parsers</span><span class="p">)</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Visited positionals:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">visited_positionals</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_parsers</span>
+
+    <span class="k">def</span> <span class="nf">_get_subparser_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">filter_aliases</span><span class="p">(</span><span class="n">aliases</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">aliases</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+
+        <span class="n">aliases_by_parser</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">choices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">aliases_by_parser</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_get_subactions</span><span class="p">():</span>
+            <span class="n">subcmd_with_aliases</span> <span class="o">=</span> <span class="n">filter_aliases</span><span class="p">(</span><span class="n">aliases_by_parser</span><span class="p">[</span><span class="n">parser</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="n">action</span><span class="o">.</span><span class="n">dest</span><span class="p">]],</span> <span class="n">cword_prefix</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">subcmd_with_aliases</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="p">[</span><span class="n">subcmd_with_aliases</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span>
+
+        <span class="n">completions</span> <span class="o">=</span> <span class="p">[</span><span class="n">subcmd</span> <span class="k">for</span> <span class="n">subcmd</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">choices</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">subcmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">completions</span>
+
+    <span class="k">def</span> <span class="nf">_include_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">always_complete_options</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span> <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">)]</span>
+        <span class="n">long_opts</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">short_opts</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">always_complete_options</span> <span class="o">==</span> <span class="s2">&quot;long&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">long_opts</span> <span class="k">if</span> <span class="n">long_opts</span> <span class="k">else</span> <span class="n">short_opts</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">always_complete_options</span> <span class="o">==</span> <span class="s2">&quot;short&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">short_opts</span> <span class="k">if</span> <span class="n">short_opts</span> <span class="k">else</span> <span class="n">long_opts</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_get_option_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">[[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span>
+             <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">)),</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">]</span>
+             <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_actions</span>
+             <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">])</span>
+
+        <span class="n">option_completions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_suppressed</span><span class="p">:</span>
+                <span class="n">completer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s2">&quot;completer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">completer</span><span class="p">,</span> <span class="n">SuppressCompleter</span><span class="p">)</span> <span class="ow">and</span> <span class="n">completer</span><span class="o">.</span><span class="n">suppress</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">==</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_allowed</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">):</span>
+                <span class="n">option_completions</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_options</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">option_completions</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_action_allowed</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="c1"># Logic adapted from take_action in ArgumentParser._parse_known_args</span>
+        <span class="c1"># (members are saved by my_argparse.IntrospectiveArgumentParser)</span>
+        <span class="k">for</span> <span class="n">conflict_action</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_conflicts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="n">conflict_action</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_seen_non_default_actions</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_complete_active_option</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">next_positional</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">parsed_args</span><span class="p">,</span> <span class="n">completions</span><span class="p">):</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Active actions (L=</span><span class="si">{l}</span><span class="s2">): </span><span class="si">{a}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">active_actions</span><span class="p">),</span> <span class="n">a</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">active_actions</span><span class="p">))</span>
+
+        <span class="n">isoptional</span> <span class="o">=</span> <span class="n">cword_prefix</span> <span class="ow">and</span> <span class="n">cword_prefix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">prefix_chars</span>
+        <span class="n">optional_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">greedy_actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">active_actions</span> <span class="k">if</span> <span class="n">action_is_greedy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">isoptional</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">greedy_actions</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">greedy_actions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;expect at most 1 greedy action&quot;</span>
+            <span class="c1"># This means the action will fail to parse if the word under the cursor is not given</span>
+            <span class="c1"># to it, so give it exclusive control over completions (flush previous completions)</span>
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Resetting completions because&quot;</span><span class="p">,</span> <span class="n">greedy_actions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;must consume the next argument&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">completions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="n">isoptional</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">cword_prefix</span><span class="p">:</span>
+                <span class="c1"># Special case for when the current word is &quot;--optional=PARTIAL_VALUE&quot;.</span>
+                <span class="c1"># The completer runs on PARTIAL_VALUE. The prefix is added back to the completions</span>
+                <span class="c1"># (and chopped back off later in quote_completions() by the COMP_WORDBREAKS logic).</span>
+                <span class="n">optional_prefix</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">cword_prefix</span> <span class="o">=</span> <span class="n">cword_prefix</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Only run completers if current word does not start with - (is not an optional)</span>
+                <span class="k">return</span> <span class="n">completions</span>
+
+        <span class="n">complete_remaining_positionals</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Use the single greedy action (if there is one) or all active actions.</span>
+        <span class="k">for</span> <span class="n">active_action</span> <span class="ow">in</span> <span class="n">greedy_actions</span> <span class="ow">or</span> <span class="n">parser</span><span class="o">.</span><span class="n">active_actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">active_action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>  <span class="c1"># action is a positional</span>
+                <span class="k">if</span> <span class="n">action_is_open</span><span class="p">(</span><span class="n">active_action</span><span class="p">):</span>
+                    <span class="c1"># Any positional arguments after this may slide down into this action</span>
+                    <span class="c1"># if more arguments are added (since the user may not be done yet),</span>
+                    <span class="c1"># so it is extremely difficult to tell which completers to run.</span>
+                    <span class="c1"># Running all remaining completers will probably show more than the user wants</span>
+                    <span class="c1"># but it also guarantees we won&#39;t miss anything.</span>
+                    <span class="n">complete_remaining_positionals</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">complete_remaining_positionals</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">action_is_satisfied</span><span class="p">(</span><span class="n">active_action</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">action_is_open</span><span class="p">(</span><span class="n">active_action</span><span class="p">):</span>
+                        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skipping&quot;</span><span class="p">,</span> <span class="n">active_action</span><span class="p">)</span>
+                        <span class="k">continue</span>
+
+            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Activating completion for&quot;</span><span class="p">,</span> <span class="n">active_action</span><span class="p">,</span> <span class="n">active_action</span><span class="o">.</span><span class="n">_orig_class</span><span class="p">)</span>
+            <span class="c1"># completer = getattr(active_action, &quot;completer&quot;, DefaultCompleter())</span>
+            <span class="n">completer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">active_action</span><span class="p">,</span> <span class="s2">&quot;completer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">completer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">active_action</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_action</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">):</span>
+                    <span class="n">completer</span> <span class="o">=</span> <span class="n">completers</span><span class="o">.</span><span class="n">ChoicesCompleter</span><span class="p">(</span><span class="n">active_action</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_action</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">):</span>
+                    <span class="n">completer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_completer</span>
+
+            <span class="k">if</span> <span class="n">completer</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">completer</span><span class="p">,</span> <span class="n">SuppressCompleter</span><span class="p">)</span> <span class="ow">and</span> <span class="n">completer</span><span class="o">.</span><span class="n">suppress</span><span class="p">():</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">completer</span><span class="p">):</span>
+                    <span class="n">completions_from_callable</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">completer</span><span class="p">(</span>
+                        <span class="n">prefix</span><span class="o">=</span><span class="n">cword_prefix</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">active_action</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span> <span class="n">parsed_args</span><span class="o">=</span><span class="n">parsed_args</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">)]</span>
+
+                    <span class="k">if</span> <span class="n">completions_from_callable</span><span class="p">:</span>
+                        <span class="n">completions</span> <span class="o">+=</span> <span class="n">completions_from_callable</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">completer</span><span class="p">,</span> <span class="n">completers</span><span class="o">.</span><span class="n">ChoicesCompleter</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                <span class="p">[[(</span><span class="n">x</span><span class="p">,),</span> <span class="n">active_action</span><span class="o">.</span><span class="n">help</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">completions_from_callable</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                <span class="p">[[(</span><span class="n">x</span><span class="p">,),</span> <span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">completions_from_callable</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Completer is not callable, trying the readline completer protocol instead&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9999</span><span class="p">):</span>
+                        <span class="n">next_completion</span> <span class="o">=</span> <span class="n">completer</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">next_completion</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">break</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="p">(</span><span class="n">next_completion</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">update</span><span class="p">({(</span><span class="n">next_completion</span><span class="p">,):</span> <span class="s2">&quot;&quot;</span><span class="p">})</span>
+                            <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_completion</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">optional_prefix</span><span class="p">:</span>
+                    <span class="n">completions</span> <span class="o">=</span> <span class="p">[</span><span class="n">optional_prefix</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">completion</span> <span class="k">for</span> <span class="n">completion</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
+                <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Completions:&quot;</span><span class="p">,</span> <span class="n">completions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">completions</span>
+
+<div class="viewcode-block" id="CompletionFinder.collect_completions"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.collect_completions">[docs]</a>    <span class="k">def</span> <span class="nf">collect_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_parsers</span><span class="p">,</span> <span class="n">parsed_args</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">debug</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Visits the active parsers and their actions, executes their completers or introspects them to collect their</span>
+<span class="sd">        option strings. Returns the resulting completions as a list of strings.</span>
+
+<span class="sd">        This method is exposed for overriding in subclasses; there is no need to use it directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">completions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;all active parsers:&quot;</span><span class="p">,</span> <span class="n">active_parsers</span><span class="p">)</span>
+        <span class="n">active_parser</span> <span class="o">=</span> <span class="n">active_parsers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;active_parser:&quot;</span><span class="p">,</span> <span class="n">active_parser</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">always_complete_options</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">cword_prefix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">active_parser</span><span class="o">.</span><span class="n">prefix_chars</span><span class="p">):</span>
+            <span class="n">completions</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_option_completions</span><span class="p">(</span><span class="n">active_parser</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">)</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;optional options:&quot;</span><span class="p">,</span> <span class="n">completions</span><span class="p">)</span>
+
+        <span class="n">next_positional</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_positional</span><span class="p">()</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;next_positional:&quot;</span><span class="p">,</span> <span class="n">next_positional</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_positional</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">):</span>
+            <span class="n">completions</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_subparser_completions</span><span class="p">(</span><span class="n">next_positional</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">)</span>
+
+        <span class="n">completions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_complete_active_option</span><span class="p">(</span><span class="n">active_parser</span><span class="p">,</span> <span class="n">next_positional</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">parsed_args</span><span class="p">,</span>
+                                                   <span class="n">completions</span><span class="p">)</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;active options:&quot;</span><span class="p">,</span> <span class="n">completions</span><span class="p">)</span>
+        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;display completions:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">completions</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_next_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the next positional action if it exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">active_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_parsers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">last_positional</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visited_positionals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">all_positionals</span> <span class="o">=</span> <span class="n">active_parser</span><span class="o">.</span><span class="n">_get_positional_actions</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_positionals</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">active_parser</span> <span class="o">==</span> <span class="n">last_positional</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">all_positionals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_positionals</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">all_positionals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_positional</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_positionals</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">all_positionals</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CompletionFinder.filter_completions"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.filter_completions">[docs]</a>    <span class="k">def</span> <span class="nf">filter_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensures collected completions are Unicode text, de-duplicates them, and excludes those specified by ``exclude``.</span>
+<span class="sd">        Returns the filtered completions as an iterable.</span>
+
+<span class="sd">        This method is exposed for overriding in subclasses; there is no need to use it directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># De-duplicate completions and remove excluded ones</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">completions</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="CompletionFinder.quote_completions"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.quote_completions">[docs]</a>    <span class="k">def</span> <span class="nf">quote_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completions</span><span class="p">,</span> <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">last_wordbreak_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If the word under the cursor started with a quote (as indicated by a nonempty ``cword_prequote``), escapes</span>
+<span class="sd">        occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.</span>
+<span class="sd">        Otherwise, escapes all characters that bash splits words on (``COMP_WORDBREAKS``), and removes portions of</span>
+<span class="sd">        completions before the first colon if (``COMP_WORDBREAKS``) contains a colon.</span>
+
+<span class="sd">        If there is only one completion, and it doesn&#39;t end with a **continuation character** (``/``, ``:``, or ``=``),</span>
+<span class="sd">        adds a space after the completion.</span>
+
+<span class="sd">        This method is exposed for overriding in subclasses; there is no need to use it directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">special_chars</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span>
+        <span class="c1"># If the word under the cursor was quoted, escape the quote char.</span>
+        <span class="c1"># Otherwise, escape all special characters and specially handle all COMP_WORDBREAKS chars.</span>
+        <span class="k">if</span> <span class="n">cword_prequote</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="c1"># Bash mangles completions which contain characters in COMP_WORDBREAKS.</span>
+            <span class="c1"># This workaround has the same effect as __ltrim_colon_completions in bash_completion</span>
+            <span class="c1"># (extended to characters other than the colon).</span>
+            <span class="k">if</span> <span class="n">last_wordbreak_pos</span><span class="p">:</span>
+                <span class="n">completions</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">last_wordbreak_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
+            <span class="n">special_chars</span> <span class="o">+=</span> <span class="s2">&quot;();&lt;&gt;|&amp;!`$* </span><span class="se">\t\n\&quot;</span><span class="s2">&#39;&quot;</span>
+        <span class="k">elif</span> <span class="n">cword_prequote</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">:</span>
+            <span class="n">special_chars</span> <span class="o">+=</span> <span class="s1">&#39;&quot;`$!&#39;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_ARGCOMPLETE_SHELL&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;tcsh&quot;</span><span class="p">,</span> <span class="s2">&quot;fish&quot;</span><span class="p">):</span>
+            <span class="c1"># tcsh and fish escapes special characters itself.</span>
+            <span class="n">special_chars</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">elif</span> <span class="n">cword_prequote</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">:</span>
+            <span class="c1"># Nothing can be escaped in single quotes, so we need to close</span>
+            <span class="c1"># the string, escape the single quote, then open a new string.</span>
+            <span class="n">special_chars</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">completions</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;&#39;\&#39;&#39;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">special_chars</span><span class="p">:</span>
+            <span class="n">completions</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">append_space</span><span class="p">:</span>
+            <span class="c1"># Similar functionality in bash was previously turned off by supplying the &quot;-o nospace&quot; option to complete.</span>
+            <span class="c1"># Now it is conditionally disabled using &quot;compopt -o nospace&quot; if the match ends in a continuation character.</span>
+            <span class="c1"># This code is retained for environments where this isn&#39;t done natively.</span>
+            <span class="n">continuation_chars</span> <span class="o">=</span> <span class="s2">&quot;=/:&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">completions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">completions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">continuation_chars</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cword_prequote</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="n">completions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span>
+
+        <span class="k">return</span> <span class="n">completions</span></div>
+
+<div class="viewcode-block" id="CompletionFinder.rl_complete"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.rl_complete">[docs]</a>    <span class="k">def</span> <span class="nf">rl_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alternate entry point for using the argcomplete completer in a readline-based REPL. See also</span>
+<span class="sd">        `rlcompleter &lt;https://docs.python.org/3/library/rlcompleter.html#completer-objects&gt;`_.</span>
+<span class="sd">        Usage:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            import argcomplete, argparse, readline</span>
+<span class="sd">            parser = argparse.ArgumentParser()</span>
+<span class="sd">            ...</span>
+<span class="sd">            completer = argcomplete.CompletionFinder(parser)</span>
+<span class="sd">            readline.set_completer_delims(&quot;&quot;)</span>
+<span class="sd">            readline.set_completer(completer.rl_complete)</span>
+<span class="sd">            readline.parse_and_bind(&quot;tab: complete&quot;)</span>
+<span class="sd">            result = input(&quot;prompt&gt; &quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">cword_suffix</span><span class="p">,</span> <span class="n">comp_words</span><span class="p">,</span> <span class="n">first_colon_pos</span> <span class="o">=</span> <span class="n">split_line</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">comp_words</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_completions</span><span class="p">(</span><span class="n">comp_words</span><span class="p">,</span> <span class="n">cword_prefix</span><span class="p">,</span> <span class="n">cword_prequote</span><span class="p">,</span> <span class="n">first_colon_pos</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rl_matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">text</span> <span class="o">+</span> <span class="n">match</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">cword_prefix</span><span class="p">):]</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">state</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rl_matches</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rl_matches</span><span class="p">[</span><span class="n">state</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CompletionFinder.get_display_completions"><a class="viewcode-back" href="../index.html#argcomplete.CompletionFinder.get_display_completions">[docs]</a>    <span class="k">def</span> <span class="nf">get_display_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a mapping of option names to their help strings for displaying to the user</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            def display_completions(substitution, matches, longest_match_length):</span>
+<span class="sd">                _display_completions = argcomplete.autocomplete.get_display_completions()</span>
+<span class="sd">                print(&quot;&quot;)</span>
+<span class="sd">                if _display_completions:</span>
+<span class="sd">                    help_len = [len(x) for x in _display_completions.values() if x]</span>
+
+<span class="sd">                    if help_len:</span>
+<span class="sd">                        maxlen = max([len(x) for x in _display_completions])</span>
+<span class="sd">                        print(&quot;\\n&quot;.join(&quot;{0:{2}} -- {1}&quot;.format(k, v, maxlen)</span>
+<span class="sd">                                        for k, v in sorted(_display_completions.items())))</span>
+<span class="sd">                    else:</span>
+<span class="sd">                        print(&quot;    &quot;.join(k for k in sorted(_display_completions)))</span>
+<span class="sd">                else:</span>
+<span class="sd">                    print(&quot; &quot;.join(x for x in sorted(matches)))</span>
+
+<span class="sd">                import readline</span>
+<span class="sd">                print(&quot;cli /&gt; {0}&quot;.format(readline.get_line_buffer()), end=&quot;&quot;)</span>
+<span class="sd">                readline.redisplay()</span>
+
+<span class="sd">            ...</span>
+<span class="sd">            readline.set_completion_display_matches_hook(display_completions)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div></div>
+
+<div class="viewcode-block" id="ExclusiveCompletionFinder"><a class="viewcode-back" href="../index.html#argcomplete.ExclusiveCompletionFinder">[docs]</a><span class="k">class</span> <span class="nc">ExclusiveCompletionFinder</span><span class="p">(</span><span class="n">CompletionFinder</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_action_allowed</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">CompletionFinder</span><span class="o">.</span><span class="n">_action_allowed</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">append_classes</span> <span class="o">=</span> <span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">_AppendAction</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_AppendConstAction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">_orig_class</span> <span class="ow">in</span> <span class="n">append_classes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_seen_non_default_actions</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="n">autocomplete</span> <span class="o">=</span> <span class="n">CompletionFinder</span><span class="p">()</span>
+<span class="n">autocomplete</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../index.html#argcomplete.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prints **args** to standard error when running completions. This will interrupt the user&#39;s command line interaction;</span>
+<span class="sd">    use it to indicate an error condition that is preventing your completer from working.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Don&#39;t be tempted to use `print(&quot;\n&quot;,..., *args)`,</span>
+    <span class="c1"># as that will indent **args** by one space character</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">debug_stream</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">debug_stream</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">argcomplete  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">argcomplete</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright Andrey Kislyuk and argcomplete contributors. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

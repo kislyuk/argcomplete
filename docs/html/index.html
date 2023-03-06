@@ -1,0 +1,658 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>argcomplete - Bash tab completion for argparse &#8212; argcomplete  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/guzzle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">argcomplete  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">argcomplete - Bash tab completion for argparse</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar"><a href="
+    #" class="text-logo">argcomplete</a>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Contents</h2>
+    <div class="sidebar-localtoc">
+      <ul>
+<li><a class="reference internal" href="#">argcomplete - Bash tab completion for argparse</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#synopsis">Synopsis</a><ul>
+<li><a class="reference internal" href="#argcomplete-autocomplete-parser">argcomplete.autocomplete(<em>parser</em>)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#specifying-completers">Specifying completers</a><ul>
+<li><a class="reference internal" href="#readline-style-completers">Readline-style completers</a></li>
+<li><a class="reference internal" href="#printing-warnings-in-completers">Printing warnings in completers</a></li>
+<li><a class="reference internal" href="#using-a-custom-completion-validator">Using a custom completion validator</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#global-completion">Global completion</a><ul>
+<li><a class="reference internal" href="#activating-global-completion">Activating global completion</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#zsh-support">Zsh Support</a></li>
+<li><a class="reference internal" href="#tcsh-support">Tcsh Support</a></li>
+<li><a class="reference internal" href="#fish-support">Fish Support</a><ul>
+<li><a class="reference internal" href="#completion-description-for-fish">Completion Description For Fish</a></li>
+<li><a class="reference internal" href="#absolute-path-completion">Absolute Path Completion</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#git-bash-support">Git Bash Support</a></li>
+<li><a class="reference internal" href="#external-argcomplete-script">External argcomplete script</a></li>
+<li><a class="reference internal" href="#powershell-support">PowerShell Support</a></li>
+<li><a class="reference internal" href="#python-support">Python Support</a></li>
+<li><a class="reference internal" href="#common-problems">Common Problems</a></li>
+<li><a class="reference internal" href="#debugging">Debugging</a></li>
+<li><a class="reference internal" href="#acknowledgments">Acknowledgments</a></li>
+<li><a class="reference internal" href="#links">Links</a><ul>
+<li><a class="reference internal" href="#bugs">Bugs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#api-documentation">API documentation</a></li>
+</ul>
+
+    </div>
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="#">Docs</a></li>
+              
+              <li>argcomplete - Bash tab completion for argparse</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="argcomplete-bash-tab-completion-for-argparse">
+<h1>argcomplete - Bash tab completion for argparse<a class="headerlink" href="#argcomplete-bash-tab-completion-for-argparse" title="Permalink to this headline">¶</a></h1>
+<p><em>Tab complete all the things!</em></p>
+<p>Argcomplete provides easy, extensible command line tab completion of arguments for your Python script.</p>
+<p>It makes two assumptions:</p>
+<ul class="simple">
+<li><p>You’re using bash as your shell (limited support for zsh, fish, and tcsh is available)</p></li>
+<li><p>You’re using <a class="reference external" href="http://docs.python.org/3/library/argparse.html">argparse</a> to manage your command line arguments/options</p></li>
+</ul>
+<p>Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
+dynamically suggest completions for your argument/option values (for example, if the user is browsing resources over
+the network).</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">argcomplete</span>
+<span class="n">activate</span><span class="o">-</span><span class="k">global</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="#activating-global-completion">Activating global completion</a> below for details about the second step (or if it reports an error).</p>
+<p>Refresh your bash environment (start a new shell or <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">/etc/profile</span></code>).</p>
+</div>
+<div class="section" id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<p>Python code (e.g. <code class="docutils literal notranslate"><span class="pre">my-awesome-script</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PYTHON_ARGCOMPLETE_OK</span>
+<span class="kn">import</span> <span class="nn">argcomplete</span><span class="o">,</span> <span class="nn">argparse</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="o">...</span>
+<span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Shellcode (only necessary if global completion is not activated - see <a class="reference internal" href="#global-completion">Global completion</a> below), to be put in e.g. <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="s2">&quot;$(register-python-argcomplete my-awesome-script)&quot;</span>
+</pre></div>
+</div>
+<div class="section" id="argcomplete-autocomplete-parser">
+<h3>argcomplete.autocomplete(<em>parser</em>)<a class="headerlink" href="#argcomplete-autocomplete-parser" title="Permalink to this headline">¶</a></h3>
+<p>This method is the entry point to the module. It must be called <strong>after</strong> ArgumentParser construction is complete, but
+<strong>before</strong> the <code class="docutils literal notranslate"><span class="pre">ArgumentParser.parse_args()</span></code> method is called. The method looks for an environment variable that the
+completion hook shellcode sets, and if it’s there, collects completions, prints them to the output stream (fd 8 by
+default), and exits. Otherwise, it returns to the caller immediately.</p>
+<div class="admonition-side-effects admonition">
+<p class="admonition-title">Side effects</p>
+<p>Argcomplete gets completions by running your program. It intercepts the execution flow at the moment
+<code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete()</span></code> is called. After sending completions, it exits using <code class="docutils literal notranslate"><span class="pre">exit_method</span></code> (<code class="docutils literal notranslate"><span class="pre">os._exit</span></code>
+by default). This means if your program has any side effects that happen before <code class="docutils literal notranslate"><span class="pre">argcomplete</span></code> is called, those
+side effects will happen every time the user presses <code class="docutils literal notranslate"><span class="pre">&lt;TAB&gt;</span></code> (although anything your program prints to stdout or
+stderr will be suppressed). For this reason it’s best to construct the argument parser and call
+<code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete()</span></code> as early as possible in your execution flow.</p>
+</div>
+<div class="admonition-performance admonition">
+<p class="admonition-title">Performance</p>
+<p>If the program takes a long time to get to the point where <code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete()</span></code> is called, the tab completion
+process will feel sluggish, and the user may lose confidence in it. So it’s also important to minimize the startup time
+of the program up to that point (for example, by deferring initialization or importing of large modules until after
+parsing options).</p>
+</div>
+</div>
+</div>
+<div class="section" id="specifying-completers">
+<h2>Specifying completers<a class="headerlink" href="#specifying-completers" title="Permalink to this headline">¶</a></h2>
+<p>You can specify custom completion functions for your options and arguments. Two styles are supported: callable and
+readline-style. Callable completers are simpler. They are called with the following keyword arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">prefix</span></code>: The prefix text of the last word before the cursor on the command line.
+For dynamic completers, this can be used to reduce the work required to generate possible completions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code>: The <code class="docutils literal notranslate"><span class="pre">argparse.Action</span></code> instance that this completer was called for.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parser</span></code>: The <code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code> instance that the action was taken by.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parsed_args</span></code>: The result of argument parsing so far (the <code class="docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> args object normally returned by
+<code class="docutils literal notranslate"><span class="pre">ArgumentParser.parse_args()</span></code>).</p></li>
+</ul>
+<p>Completers should return their completions as a list of strings. An example completer for names of environment
+variables might look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">EnvironCompleter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span>
+</pre></div>
+</div>
+<p>To specify a completer for an argument or option, set the <code class="docutils literal notranslate"><span class="pre">completer</span></code> attribute of its associated action. An easy
+way to do this at definition time is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">argcomplete.completers</span> <span class="kn">import</span> <span class="n">EnvironCompleter</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--env-var1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="n">EnvironCompleter</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--env-var2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="n">EnvironCompleter</span>
+<span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you specify the <code class="docutils literal notranslate"><span class="pre">choices</span></code> keyword for an argparse option or argument (and don’t specify a completer), it will be
+used for completions.</p>
+<p>A completer that is initialized with a set of all possible choices of values for its action might look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChoicesCompleter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span>
+</pre></div>
+</div>
+<p>The following two ways to specify a static set of choices are equivalent for completion purposes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">argcomplete.completers</span> <span class="kn">import</span> <span class="n">ChoicesCompleter</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--protocol&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">,</span> <span class="s1">&#39;ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;rsync&#39;</span><span class="p">,</span> <span class="s1">&#39;wss&#39;</span><span class="p">))</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--proto&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">completer</span><span class="o">=</span><span class="n">ChoicesCompleter</span><span class="p">((</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">,</span> <span class="s1">&#39;ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;rsync&#39;</span><span class="p">,</span> <span class="s1">&#39;wss&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Note that if you use the <code class="docutils literal notranslate"><span class="pre">choices=&lt;completions&gt;</span></code> option, argparse will show
+all these choices in the <code class="docutils literal notranslate"><span class="pre">--help</span></code> output by default. To prevent this, set
+<code class="docutils literal notranslate"><span class="pre">metavar</span></code> (like <code class="docutils literal notranslate"><span class="pre">parser.add_argument(&quot;--protocol&quot;,</span> <span class="pre">metavar=&quot;PROTOCOL&quot;,</span>
+<span class="pre">choices=('http',</span> <span class="pre">'https',</span> <span class="pre">'ssh',</span> <span class="pre">'rsync',</span> <span class="pre">'wss'))</span></code>).</p>
+<p>The following <a class="reference external" href="https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py">script</a> uses
+<code class="docutils literal notranslate"><span class="pre">parsed_args</span></code> and <a class="reference external" href="http://python-requests.org/">Requests</a> to query GitHub for publicly known members of an
+organization and complete their names, then prints the member description:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PYTHON_ARGCOMPLETE_OK</span>
+<span class="kn">import</span> <span class="nn">argcomplete</span><span class="o">,</span> <span class="nn">argparse</span><span class="o">,</span> <span class="nn">requests</span><span class="o">,</span> <span class="nn">pprint</span>
+
+<span class="k">def</span> <span class="nf">github_org_members</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">parsed_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="s2">&quot;https://api.github.com/orgs/</span><span class="si">{org}</span><span class="s2">/members&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">organization</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">member</span><span class="p">[</span><span class="s1">&#39;login&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span> <span class="k">if</span> <span class="n">member</span><span class="p">[</span><span class="s1">&#39;login&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--organization&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;GitHub organization&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--member&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;GitHub member&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="n">github_org_members</span>
+
+<span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+<span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://api.github.com/users/</span><span class="si">{m}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">member</span><span class="p">))</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://raw.github.com/kislyuk/argcomplete/master/docs/examples/describe_github_user.py">Try it</a> like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">describe_github_user</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">organization</span> <span class="n">heroku</span> <span class="o">--</span><span class="n">member</span> <span class="o">&lt;</span><span class="n">TAB</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>If you have a useful completer to add to the <a class="reference external" href="https://github.com/kislyuk/argcomplete/blob/master/argcomplete/completers.py">completer library</a>, send a pull request!</p>
+<div class="section" id="readline-style-completers">
+<h3>Readline-style completers<a class="headerlink" href="#readline-style-completers" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference external" href="http://docs.python.org/3/library/readline.html">readline</a> module defines a completer protocol in <a href="#id2"><span class="problematic" id="id3">rlcompleter_</span></a>. Readline-style completers are also supported by
+argcomplete, so you can use the same completer object both in an interactive readline-powered shell and on the bash
+command line. For example, you can use the readline-style completer provided by <a class="reference external" href="http://ipython.org/">IPython</a> to get introspective
+completions like you would get in the IPython shell:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">IPython</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--python-name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="n">IPython</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">completer</span><span class="o">.</span><span class="n">Completer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">argcomplete.CompletionFinder.rl_complete</span></code> can also be used to plug in an argparse parser as a readline completer.</p>
+</div>
+<div class="section" id="printing-warnings-in-completers">
+<h3>Printing warnings in completers<a class="headerlink" href="#printing-warnings-in-completers" title="Permalink to this headline">¶</a></h3>
+<p>Normal stdout/stderr output is suspended when argcomplete runs. Sometimes, though, when the user presses <code class="docutils literal notranslate"><span class="pre">&lt;TAB&gt;</span></code>, it’s
+appropriate to print information about why completions generation failed. To do this, use <code class="docutils literal notranslate"><span class="pre">warn</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">argcomplete</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="k">def</span> <span class="nf">AwesomeWebServiceCompleter</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">login_failed</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Please log in to Awesome Web Service to use autocompletion&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">completions</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-a-custom-completion-validator">
+<h3>Using a custom completion validator<a class="headerlink" href="#using-a-custom-completion-validator" title="Permalink to this headline">¶</a></h3>
+<p>By default, argcomplete validates your completions by checking if they start with the prefix given to the completer. You
+can override this validation check by supplying the <code class="docutils literal notranslate"><span class="pre">validator</span></code> keyword to <code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_validator</span><span class="p">(</span><span class="n">completion_candidate</span><span class="p">,</span> <span class="n">current_input</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Complete non-prefix substring matches.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">current_input</span> <span class="ow">in</span> <span class="n">completion_candidate</span>
+
+<span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">my_validator</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="global-completion">
+<h2>Global completion<a class="headerlink" href="#global-completion" title="Permalink to this headline">¶</a></h2>
+<p>In global completion mode, you don’t have to register each argcomplete-capable executable separately. Instead, bash
+will look for the string <strong>PYTHON_ARGCOMPLETE_OK</strong> in the first 1024 bytes of any executable that it’s running
+completion for, and if it’s found, follow the rest of the argcomplete protocol as described above.</p>
+<p>Additionally, completion is activated for scripts run as <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">&lt;script&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">&lt;module&gt;</span></code>.
+This also works for alternate Python versions (e.g. <code class="docutils literal notranslate"><span class="pre">python3</span></code> and <code class="docutils literal notranslate"><span class="pre">pypy</span></code>), as long as that version of Python has
+argcomplete installed.</p>
+<div class="admonition-bash-version-compatibility admonition">
+<p class="admonition-title">Bash version compatibility</p>
+<p>Global completion requires bash support for <code class="docutils literal notranslate"><span class="pre">complete</span> <span class="pre">-D</span></code>, which was introduced in bash 4.2. On OS X or older Linux
+systems, you will need to update bash to use this feature. Check the version of the running copy of bash with
+<code class="docutils literal notranslate"><span class="pre">echo</span> <span class="pre">$BASH_VERSION</span></code>. On OS X, install bash via <a class="reference external" href="http://brew.sh/">Homebrew</a> (<code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">bash</span></code>), add
+<code class="docutils literal notranslate"><span class="pre">/usr/local/bin/bash</span></code> to <code class="docutils literal notranslate"><span class="pre">/etc/shells</span></code>, and run <code class="docutils literal notranslate"><span class="pre">chsh</span></code> to change your shell.</p>
+<p>Global completion is not currently compatible with zsh.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you use setuptools/distribute <code class="docutils literal notranslate"><span class="pre">scripts</span></code> or <code class="docutils literal notranslate"><span class="pre">entry_points</span></code> directives to package your module,
+argcomplete will follow the wrapper scripts to their destination and look for <code class="docutils literal notranslate"><span class="pre">PYTHON_ARGCOMPLETE_OK</span></code> in the
+destination code.</p>
+</div>
+<p>If you choose not to use global completion, or ship a bash completion module that depends on argcomplete, you must
+register your script explicitly using <code class="docutils literal notranslate"><span class="pre">eval</span> <span class="pre">&quot;$(register-python-argcomplete</span> <span class="pre">my-awesome-script)&quot;</span></code>. Standard bash
+completion registration roules apply: namely, the script name is passed directly to <code class="docutils literal notranslate"><span class="pre">complete</span></code>, meaning it is only tab
+completed when invoked exactly as it was registered. In the above example, <code class="docutils literal notranslate"><span class="pre">my-awesome-script</span></code> must be on the path,
+and the user must be attempting to complete it by that name. The above line alone would <strong>not</strong> allow you to complete
+<code class="docutils literal notranslate"><span class="pre">./my-awesome-script</span></code>, or <code class="docutils literal notranslate"><span class="pre">/path/to/my-awesome-script</span></code>.</p>
+<div class="section" id="activating-global-completion">
+<h3>Activating global completion<a class="headerlink" href="#activating-global-completion" title="Permalink to this headline">¶</a></h3>
+<p>The script <code class="docutils literal notranslate"><span class="pre">activate-global-python-argcomplete</span></code> will try to install the file
+<code class="docutils literal notranslate"><span class="pre">bash_completion.d/python-argcomplete</span></code> (<a class="reference external" href="https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete">see on GitHub</a>) into an appropriate location on your system
+(<code class="docutils literal notranslate"><span class="pre">/etc/bash_completion.d/</span></code> or <code class="docutils literal notranslate"><span class="pre">~/.bash_completion.d/</span></code>). If it
+fails, but you know the correct location of your bash completion scripts directory, you can specify it with <code class="docutils literal notranslate"><span class="pre">--dest</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">activate</span><span class="o">-</span><span class="k">global</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">dest</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">bash_completion</span><span class="o">.</span><span class="n">d</span>
+</pre></div>
+</div>
+<p>Otherwise, you can redirect its shellcode output into a file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">activate</span><span class="o">-</span><span class="k">global</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">dest</span><span class="o">=-</span> <span class="o">&gt;</span> <span class="n">file</span>
+</pre></div>
+</div>
+<p>The file’s contents should then be sourced in e.g. <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code>.</p>
+</div>
+</div>
+<div class="section" id="zsh-support">
+<h2>Zsh Support<a class="headerlink" href="#zsh-support" title="Permalink to this headline">¶</a></h2>
+<p>To activate completions for zsh you need to have <code class="docutils literal notranslate"><span class="pre">bashcompinit</span></code> enabled in zsh:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">autoload</span> <span class="o">-</span><span class="n">U</span> <span class="n">bashcompinit</span>
+<span class="n">bashcompinit</span>
+</pre></div>
+</div>
+<p>Afterwards you can enable completion for your scripts with <code class="docutils literal notranslate"><span class="pre">register-python-argcomplete</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="s2">&quot;$(register-python-argcomplete my-awesome-script)&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tcsh-support">
+<h2>Tcsh Support<a class="headerlink" href="#tcsh-support" title="Permalink to this headline">¶</a></h2>
+<p>To activate completions for tcsh use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>eval `register-python-argcomplete --shell tcsh my-awesome-script`
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">python-argcomplete-tcsh</span></code> script provides completions for tcsh.
+The following is an example of the tcsh completion syntax for
+<code class="docutils literal notranslate"><span class="pre">my-awesome-script</span></code> emitted by <code class="docutils literal notranslate"><span class="pre">register-python-argcomplete</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">complete</span> <span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span> <span class="s1">&#39;p@*@`python-argcomplete-tcsh my-awesome-script`@&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fish-support">
+<h2>Fish Support<a class="headerlink" href="#fish-support" title="Permalink to this headline">¶</a></h2>
+<p>To activate completions for fish use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">shell</span> <span class="n">fish</span> <span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span> <span class="o">|</span> <span class="n">source</span>
+</pre></div>
+</div>
+<p>or create new completion file, e.g:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">shell</span> <span class="n">fish</span> <span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span> <span class="o">&gt;</span> <span class="o">~/.</span><span class="n">config</span><span class="o">/</span><span class="n">fish</span><span class="o">/</span><span class="n">completions</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span><span class="o">.</span><span class="n">fish</span>
+</pre></div>
+</div>
+<div class="section" id="completion-description-for-fish">
+<h3>Completion Description For Fish<a class="headerlink" href="#completion-description-for-fish" title="Permalink to this headline">¶</a></h3>
+<p>By default help string is added as completion description.</p>
+<img alt="docs/fish_help_string.png" src="docs/fish_help_string.png" />
+<p>You can disable this feature by removing <code class="docutils literal notranslate"><span class="pre">_ARGCOMPLETE_DFS</span></code> variable, e.g:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">shell</span> <span class="n">fish</span> <span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="n">_ARGCOMPLETE_DFS</span> <span class="o">|</span> <span class="n">source</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="absolute-path-completion">
+<h3>Absolute Path Completion<a class="headerlink" href="#absolute-path-completion" title="Permalink to this headline">¶</a></h3>
+<p>If script is not in path you still can register it’s completion by specifying absolute path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">shell</span> <span class="n">fish</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">awesome</span><span class="o">-</span><span class="n">user</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span> <span class="o">|</span> <span class="n">source</span>
+</pre></div>
+</div>
+<p>then you can complete it by using <code class="docutils literal notranslate"><span class="pre">/home/awesome-user/my-awesome-script</span></code> or <code class="docutils literal notranslate"><span class="pre">./my-awesome-script</span></code> or <code class="docutils literal notranslate"><span class="pre">~/my-awesome-script</span></code>.</p>
+</div>
+</div>
+<div class="section" id="git-bash-support">
+<h2>Git Bash Support<a class="headerlink" href="#git-bash-support" title="Permalink to this headline">¶</a></h2>
+<p>Due to limitations of file descriptor inheritance on Windows,
+Git Bash not supported out of the box. You can opt in to using
+temporary files instead of file descriptors for for IPC
+by setting the environment variable <code class="docutils literal notranslate"><span class="pre">ARGCOMPLETE_USE_TEMPFILES</span></code>,
+e.g. by adding <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">ARGCOMPLETE_USE_TEMPFILES=1</span></code> to <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code>.</p>
+<p>For full support, consider using Bash with the
+Windows Subsystem for Linux (WSL).</p>
+</div>
+<div class="section" id="external-argcomplete-script">
+<h2>External argcomplete script<a class="headerlink" href="#external-argcomplete-script" title="Permalink to this headline">¶</a></h2>
+<p>To register an argcomplete script for an arbitrary name, the <code class="docutils literal notranslate"><span class="pre">--external-argcomplete-script</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">register-python-argcomplete</span></code> script can be used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="s2">&quot;$(register-python-argcomplete --external-argcomplete-script /path/to/script arbitrary-name)&quot;</span>
+</pre></div>
+</div>
+<p>This allows, for example, to use the auto completion functionality of argcomplete for an application not written in Python.
+The command line interface of this program must be additionally implemented in a Python script with argparse and argcomplete and whenever the application is called the registered external argcomplete script is used for auto completion.</p>
+<p>This option can also be used in combination with the other supported shells.</p>
+</div>
+<div class="section" id="powershell-support">
+<h2>PowerShell Support<a class="headerlink" href="#powershell-support" title="Permalink to this headline">¶</a></h2>
+<p>To create new completion file, e.g:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">argcomplete</span> <span class="o">--</span><span class="n">shell</span> <span class="n">powershell</span> <span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span> <span class="o">&gt;</span> <span class="o">~/</span><span class="n">my</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">script</span><span class="o">.</span><span class="n">psm1</span>
+</pre></div>
+</div>
+<p>To activate completions for PowerShell, add the below line in <code class="docutils literal notranslate"><span class="pre">$PROFILE</span></code>. For more information, see <a class="reference external" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#how-to-create-a-profile">How to create your profile</a> and <a class="reference external" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.3#profiles-and-execution-policy">Profiles and execution policy</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Import</span><span class="o">-</span><span class="n">Module</span>  <span class="s2">&quot;~/my-awesome-script.psm1&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="python-support">
+<h2>Python Support<a class="headerlink" href="#python-support" title="Permalink to this headline">¶</a></h2>
+<p>Argcomplete requires Python 3.6+.</p>
+</div>
+<div class="section" id="common-problems">
+<h2>Common Problems<a class="headerlink" href="#common-problems" title="Permalink to this headline">¶</a></h2>
+<p>If global completion is not completing your script, bash may have registered a
+default completion function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ complete | grep my-awesome-script
+complete -F _minimal my-awesome-script
+</pre></div>
+</div>
+<p>You can fix this by restarting your shell, or by running
+<code class="docutils literal notranslate"><span class="pre">complete</span> <span class="pre">-r</span> <span class="pre">my-awesome-script</span></code>.</p>
+</div>
+<div class="section" id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<p>Set the <code class="docutils literal notranslate"><span class="pre">_ARC_DEBUG</span></code> variable in your shell to enable verbose debug output every time argcomplete runs. This will
+disrupt the command line composition state of your terminal, but make it possible to see the internal state of the
+completer if it encounters problems.</p>
+</div>
+<div class="section" id="acknowledgments">
+<h2>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline">¶</a></h2>
+<p>Inspired and informed by the <a class="reference external" href="http://pypi.python.org/pypi/optcomplete">optcomplete</a> module by Martin Blais.</p>
+</div>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/kislyuk/argcomplete">Project home page (GitHub)</a></p></li>
+<li><p><a class="reference external" href="https://kislyuk.github.io/argcomplete/">Documentation</a></p></li>
+<li><p><a class="reference external" href="https://pypi.python.org/pypi/argcomplete">Package distribution (PyPI)</a></p></li>
+<li><p><a class="reference external" href="https://github.com/kislyuk/argcomplete/blob/master/Changes.rst">Change log</a></p></li>
+<li><p><a class="reference external" href="https://github.com/anki-code/xontrib-argcomplete">xontrib-argcomplete</a> - support argcomplete in <a class="reference external" href="https://github.com/xonsh/xonsh">xonsh</a> shell</p></li>
+</ul>
+<div class="section" id="bugs">
+<h3>Bugs<a class="headerlink" href="#bugs" title="Permalink to this headline">¶</a></h3>
+<p>Please report bugs, issues, feature requests, etc. on <a class="reference external" href="https://github.com/kislyuk/argcomplete/issues">GitHub</a>.</p>
+</div>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>Licensed under the terms of the <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.</p>
+<a class="reference external image-reference" href="https://github.com/kislyuk/argcomplete/actions"><img alt="https://github.com/kislyuk/argcomplete/workflows/Python%20package/badge.svg" src="https://github.com/kislyuk/argcomplete/workflows/Python%20package/badge.svg" /></a>
+<a class="reference external image-reference" href="https://codecov.io/github/kislyuk/argcomplete?branch=master"><img alt="https://codecov.io/github/kislyuk/argcomplete/coverage.svg?branch=master" src="https://codecov.io/github/kislyuk/argcomplete/coverage.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/argcomplete"><img alt="https://img.shields.io/pypi/v/argcomplete.svg" src="https://img.shields.io/pypi/v/argcomplete.svg" /></a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/argcomplete"><img alt="https://img.shields.io/pypi/l/argcomplete.svg" src="https://img.shields.io/pypi/l/argcomplete.svg" /></a>
+</div>
+</div>
+<div class="section" id="api-documentation">
+<h1>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="argcomplete.autocomplete">
+<span class="sig-prename descclassname"><span class="pre">argcomplete.</span></span><span class="sig-name descname"><span class="pre">autocomplete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">argument_parser</span></em>, <em class="sig-param"><span class="pre">always_complete_options=True</span></em>, <em class="sig-param"><span class="pre">exit_method=&lt;built-in</span> <span class="pre">function</span> <span class="pre">_exit&gt;</span></em>, <em class="sig-param"><span class="pre">output_stream=None</span></em>, <em class="sig-param"><span class="pre">exclude=None</span></em>, <em class="sig-param"><span class="pre">validator=None</span></em>, <em class="sig-param"><span class="pre">print_suppressed=False</span></em>, <em class="sig-param"><span class="pre">append_space=None</span></em>, <em class="sig-param"><span class="pre">default_completer=&lt;argcomplete.completers.FilesCompleter</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#argcomplete.autocomplete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use this to access argcomplete. See <a class="reference internal" href="#argcomplete.CompletionFinder.__call__" title="argcomplete.CompletionFinder.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">argcomplete.CompletionFinder.__call__()</span></code></a>.</p>
+</dd></dl>
+
+<span class="target" id="module-argcomplete"></span><dl class="py exception">
+<dt class="sig sig-object py" id="argcomplete.ArgcompleteException">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">argcomplete.</span></span><span class="sig-name descname"><span class="pre">ArgcompleteException</span></span><a class="reference internal" href="_modules/argcomplete.html#ArgcompleteException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.ArgcompleteException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">argcomplete.</span></span><span class="sig-name descname"><span class="pre">CompletionFinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">argument_parser=None</span></em>, <em class="sig-param"><span class="pre">always_complete_options=True</span></em>, <em class="sig-param"><span class="pre">exclude=None</span></em>, <em class="sig-param"><span class="pre">validator=None</span></em>, <em class="sig-param"><span class="pre">print_suppressed=False</span></em>, <em class="sig-param"><span class="pre">default_completer=&lt;argcomplete.completers.FilesCompleter</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">append_space=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inherit from this class if you wish to override any of the stages below. Otherwise, use
+<code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete()</span></code> directly (it’s a convenience instance of this class). It has the same signature as
+<a class="reference internal" href="#argcomplete.CompletionFinder.__call__" title="argcomplete.CompletionFinder.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CompletionFinder.__call__()</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">argument_parser</span></em>, <em class="sig-param"><span class="pre">always_complete_options=True</span></em>, <em class="sig-param"><span class="pre">exit_method=&lt;built-in</span> <span class="pre">function</span> <span class="pre">_exit&gt;</span></em>, <em class="sig-param"><span class="pre">output_stream=None</span></em>, <em class="sig-param"><span class="pre">exclude=None</span></em>, <em class="sig-param"><span class="pre">validator=None</span></em>, <em class="sig-param"><span class="pre">print_suppressed=False</span></em>, <em class="sig-param"><span class="pre">append_space=None</span></em>, <em class="sig-param"><span class="pre">default_completer=&lt;argcomplete.completers.FilesCompleter</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argument_parser</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code>) – The argument parser to autocomplete on</p></li>
+<li><p><strong>always_complete_options</strong> (<em>boolean</em><em> or </em><em>string</em>) – Controls the autocompletion of option strings if an option string opening character (normally <code class="docutils literal notranslate"><span class="pre">-</span></code>) has not
+been entered. If <code class="docutils literal notranslate"><span class="pre">True</span></code> (default), both short (<code class="docutils literal notranslate"><span class="pre">-x</span></code>) and long (<code class="docutils literal notranslate"><span class="pre">--x</span></code>) option strings will be
+suggested. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, no option strings will be suggested. If <code class="docutils literal notranslate"><span class="pre">long</span></code>, long options and short options
+with no long variant will be suggested. If <code class="docutils literal notranslate"><span class="pre">short</span></code>, short options and long options with no short variant
+will be suggested.</p></li>
+<li><p><strong>exit_method</strong> (<em>callable</em>) – Method used to stop the program after printing completions. Defaults to <code class="xref py py-meth docutils literal notranslate"><span class="pre">os._exit()</span></code>. If you want to
+perform a normal exit that calls exit handlers, use <code class="xref py py-meth docutils literal notranslate"><span class="pre">sys.exit()</span></code>.</p></li>
+<li><p><strong>exclude</strong> (<em>iterable</em>) – List of strings representing options to be omitted from autocompletion</p></li>
+<li><p><strong>validator</strong> (<em>callable</em>) – Function to filter all completions through before returning (called with two string arguments, completion
+and prefix; return value is evaluated as a boolean)</p></li>
+<li><p><strong>print_suppressed</strong> (<em>boolean</em>) – Whether or not to autocomplete options that have the <code class="docutils literal notranslate"><span class="pre">help=argparse.SUPPRESS</span></code> keyword argument set.</p></li>
+<li><p><strong>append_space</strong> (<em>boolean</em>) – Whether to append a space to unique matches. The default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are not subclassing CompletionFinder to override its behaviors,
+use <code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete()</span></code> directly. It has the same signature as this method.</p>
+</div>
+<p>Produces tab completions for <code class="docutils literal notranslate"><span class="pre">argument_parser</span></code>. See module docs for more info.</p>
+<p>Argcomplete only executes actions if their class is known not to have side effects. Custom action classes can be
+added to argcomplete.safe_actions, if their values are wanted in the <code class="docutils literal notranslate"><span class="pre">parsed_args</span></code> completer argument, or
+their execution is otherwise desirable.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">argument_parser=None</span></em>, <em class="sig-param"><span class="pre">always_complete_options=True</span></em>, <em class="sig-param"><span class="pre">exclude=None</span></em>, <em class="sig-param"><span class="pre">validator=None</span></em>, <em class="sig-param"><span class="pre">print_suppressed=False</span></em>, <em class="sig-param"><span class="pre">default_completer=&lt;argcomplete.completers.FilesCompleter</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">append_space=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.collect_completions">
+<span class="sig-name descname"><span class="pre">collect_completions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_parsers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsed_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cword_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.collect_completions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.collect_completions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visits the active parsers and their actions, executes their completers or introspects them to collect their
+option strings. Returns the resulting completions as a list of strings.</p>
+<p>This method is exposed for overriding in subclasses; there is no need to use it directly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.filter_completions">
+<span class="sig-name descname"><span class="pre">filter_completions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">completions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.filter_completions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.filter_completions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensures collected completions are Unicode text, de-duplicates them, and excludes those specified by <code class="docutils literal notranslate"><span class="pre">exclude</span></code>.
+Returns the filtered completions as an iterable.</p>
+<p>This method is exposed for overriding in subclasses; there is no need to use it directly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.get_display_completions">
+<span class="sig-name descname"><span class="pre">get_display_completions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.get_display_completions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.get_display_completions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a mapping of option names to their help strings for displaying to the user</p>
+<p>Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">display_completions</span><span class="p">(</span><span class="n">substitution</span><span class="p">,</span> <span class="n">matches</span><span class="p">,</span> <span class="n">longest_match_length</span><span class="p">):</span>
+    <span class="n">_display_completions</span> <span class="o">=</span> <span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="o">.</span><span class="n">get_display_completions</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_display_completions</span><span class="p">:</span>
+        <span class="n">help_len</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_display_completions</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">help_len</span><span class="p">:</span>
+            <span class="n">maxlen</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_display_completions</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;{0:</span><span class="si">{2}</span><span class="s2">} -- </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">maxlen</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_display_completions</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_display_completions</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">)))</span>
+
+    <span class="kn">import</span> <span class="nn">readline</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cli /&gt; </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">readline</span><span class="o">.</span><span class="n">get_line_buffer</span><span class="p">()),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">readline</span><span class="o">.</span><span class="n">redisplay</span><span class="p">()</span>
+
+<span class="o">...</span>
+<span class="n">readline</span><span class="o">.</span><span class="n">set_completion_display_matches_hook</span><span class="p">(</span><span class="n">display_completions</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.quote_completions">
+<span class="sig-name descname"><span class="pre">quote_completions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">completions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cword_prequote</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_wordbreak_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.quote_completions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.quote_completions" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the word under the cursor started with a quote (as indicated by a nonempty <code class="docutils literal notranslate"><span class="pre">cword_prequote</span></code>), escapes
+occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.
+Otherwise, escapes all characters that bash splits words on (<code class="docutils literal notranslate"><span class="pre">COMP_WORDBREAKS</span></code>), and removes portions of
+completions before the first colon if (<code class="docutils literal notranslate"><span class="pre">COMP_WORDBREAKS</span></code>) contains a colon.</p>
+<p>If there is only one completion, and it doesn’t end with a <strong>continuation character</strong> (<code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">:</span></code>, or <code class="docutils literal notranslate"><span class="pre">=</span></code>),
+adds a space after the completion.</p>
+<p>This method is exposed for overriding in subclasses; there is no need to use it directly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="argcomplete.CompletionFinder.rl_complete">
+<span class="sig-name descname"><span class="pre">rl_complete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#CompletionFinder.rl_complete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.CompletionFinder.rl_complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternate entry point for using the argcomplete completer in a readline-based REPL. See also
+<a class="reference external" href="https://docs.python.org/3/library/rlcompleter.html#completer-objects">rlcompleter</a>.
+Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">argcomplete</span><span class="o">,</span> <span class="nn">argparse</span><span class="o">,</span> <span class="nn">readline</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="o">...</span>
+<span class="n">completer</span> <span class="o">=</span> <span class="n">argcomplete</span><span class="o">.</span><span class="n">CompletionFinder</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+<span class="n">readline</span><span class="o">.</span><span class="n">set_completer_delims</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">readline</span><span class="o">.</span><span class="n">set_completer</span><span class="p">(</span><span class="n">completer</span><span class="o">.</span><span class="n">rl_complete</span><span class="p">)</span>
+<span class="n">readline</span><span class="o">.</span><span class="n">parse_and_bind</span><span class="p">(</span><span class="s2">&quot;tab: complete&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;prompt&gt; &quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="argcomplete.ExclusiveCompletionFinder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">argcomplete.</span></span><span class="sig-name descname"><span class="pre">ExclusiveCompletionFinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">argument_parser=None</span></em>, <em class="sig-param"><span class="pre">always_complete_options=True</span></em>, <em class="sig-param"><span class="pre">exclude=None</span></em>, <em class="sig-param"><span class="pre">validator=None</span></em>, <em class="sig-param"><span class="pre">print_suppressed=False</span></em>, <em class="sig-param"><span class="pre">default_completer=&lt;argcomplete.completers.FilesCompleter</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">append_space=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#ExclusiveCompletionFinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.ExclusiveCompletionFinder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="argcomplete.warn">
+<span class="sig-prename descclassname"><span class="pre">argcomplete.</span></span><span class="sig-name descname"><span class="pre">warn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/argcomplete.html#warn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#argcomplete.warn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints <strong>args</strong> to standard error when running completions. This will interrupt the user’s command line interaction;
+use it to indicate an error condition that is preventing your completer from working.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">argcomplete  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">argcomplete - Bash tab completion for argparse</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright Andrey Kislyuk and argcomplete contributors. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>
