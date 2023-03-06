@@ -1,3 +1,12 @@
+Changes for v2.0.6 (2023-03-06)
+===============================
+
+-  setup.py: exclude test.\* subpackages from find_packages (#406)
+
+-  Support PowerShell (#405)
+
+-  CI updates
+
 Changes for v2.0.5 (2023-03-04)
 ===============================
 
