@@ -1,3 +1,8 @@
+Changes for v2.1.0 (2023-03-06)
+===============================
+
+-  Remove scripts for contrib-supported shells from global namespace
+
 Changes for v2.0.6 (2023-03-06)
 ===============================
 
