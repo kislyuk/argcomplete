@@ -1,3 +1,22 @@
+Changes for v2.1.1 (2023-03-06)
+===============================
+
+-  Documentation and test improvements
+
+Changes for v2.1.0 (2023-03-06)
+===============================
+
+-  Remove scripts for contrib-supported shells from global namespace
+
+Changes for v2.0.6 (2023-03-06)
+===============================
+
+-  setup.py: exclude test.\* subpackages from find_packages (#406)
+
+-  Support PowerShell (#405)
+
+-  CI updates
+
 Changes for v2.0.5 (2023-03-04)
 ===============================
 

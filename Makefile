@@ -16,7 +16,7 @@ docs:
 
 install: clean
 	pip install wheel
-	python setup.py bdist_wheel
+	python -m build
 	pip install --upgrade dist/*.whl
 
 clean:
