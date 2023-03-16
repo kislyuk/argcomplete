@@ -37,7 +37,10 @@ COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(["bash", "-c", "echo $BASH_VERSION"]).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split(".")[0])
-FISH_VERSION_STR = subprocess.check_output(["fish", "-c", "echo -n $version"]).decode()
+try:
+    FISH_VERSION_STR = subprocess.check_output(['fish', '-c', 'echo -n $version']).decode()
+except FileNotFoundError:
+    FISH_VERSION_STR = "0.0.0"
 FISH_VERSION_TUPLE = tuple(int(x) for x in FISH_VERSION_STR.split("."))
 
 
@@ -1355,6 +1358,7 @@ class TestTcsh(_TestSh, unittest.TestCase):
             self.sh.run_command("")
 
 
+@unittest.skipIf(FISH_VERSION_TUPLE == (0, 0, 0), "Fish is not available")
 class TestFish(_TestSh, unittest.TestCase):
     expected_failures = [
         "test_parse_special_characters",
