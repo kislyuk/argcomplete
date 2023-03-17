@@ -17,7 +17,7 @@ Installation
 ------------
 ::
 
-    pip3 install argcomplete
+    pip install argcomplete
     activate-global-python-argcomplete
 
 See `Activating global completion`_ below for details about the second step (or if it reports an error).
