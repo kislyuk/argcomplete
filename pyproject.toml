@@ -1,15 +1,18 @@
 [tool.black]
 line-length = 120
-exclude = ".*/(version.py|my_argparse.py|my_shlex.py)"
+exclude = ".*/version.py"
 skip-string-normalization = true
 
 [tool.isort]
 profile = "black"
 line_length = 120
-skip = ".*/(version.py|my_argparse.py|my_shlex.py)"
+skip = ".*/version.py"
 
 [tool.mypy]
 files = [
   "argcomplete"
 ]
-strict = true
+
+[[tool.mypy.overrides]]
+module = "importlib.*"
+ignore_missing_imports = true

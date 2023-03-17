@@ -5,6 +5,7 @@ import argparse
 import contextlib
 import os
 import sys
+from typing import Dict, List, Tuple
 
 from . import completers
 from . import my_shlex as shlex
@@ -142,7 +143,7 @@ class CompletionFinder(object):
         self.validator = validator
         self.print_suppressed = print_suppressed
         self.completing = False
-        self._display_completions = {}
+        self._display_completions: Dict[Tuple[str], str] = {}
         self.default_completer = default_completer
         if append_space is None:
             append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
@@ -197,7 +198,7 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or
         their execution is otherwise desirable.
         """
-        self.__init__(
+        self.__init__(  # type: ignore
             argument_parser,
             always_complete_options=always_complete_options,
             exclude=exclude,
@@ -319,8 +320,8 @@ class CompletionFinder(object):
         figure out which subparsers need to be activated (then recursively monkey-patch those).
         We save all active ArgumentParsers to extract all their possible option names later.
         """
-        self.active_parsers = []
-        self.visited_positionals = []
+        self.active_parsers: List[argparse.ArgumentParser] = []
+        self.visited_positionals: List[argparse.Action] = []
 
         completer = self
 
@@ -340,7 +341,7 @@ class CompletionFinder(object):
                     continue
 
                 # TODO: accomplish this with super
-                class IntrospectAction(action.__class__):
+                class IntrospectAction(action.__class__):  # type: ignore
                     def __call__(self, parser, namespace, values, option_string=None):
                         debug("Action stub called on", self)
                         debug("\targs:", parser, namespace, values, option_string)
@@ -374,7 +375,7 @@ class CompletionFinder(object):
         def filter_aliases(aliases, prefix):
             return tuple(x for x in aliases if x.startswith(prefix))
 
-        aliases_by_parser = {}
+        aliases_by_parser: Dict[argparse.ArgumentParser, List[str]] = {}
         for key in parser.choices.keys():
             p = parser.choices[key]
             aliases_by_parser.setdefault(p, []).append(key)
@@ -399,13 +400,10 @@ class CompletionFinder(object):
         return []
 
     def _get_option_completions(self, parser, cword_prefix):
-        self._display_completions.update(
-            [
-                [tuple(x for x in action.option_strings if x.startswith(cword_prefix)), action.help]
-                for action in parser._actions
-                if action.option_strings
-            ]
-        )
+        for action in parser._actions:
+            if action.option_strings:
+                active_option_strings = tuple(str(x) for x in action.option_strings if x.startswith(cword_prefix))
+                self._display_completions[active_option_strings] = action.help  # type: ignore
 
         option_completions = []
         for action in parser._actions:
@@ -494,20 +492,19 @@ class CompletionFinder(object):
 
                     if completions_from_callable:
                         completions += completions_from_callable
-                        if isinstance(completer, completers.ChoicesCompleter):
-                            self._display_completions.update(
-                                [[(x,), active_action.help] for x in completions_from_callable]
-                            )
-                        else:
-                            self._display_completions.update([[(x,), ""] for x in completions_from_callable])
+                        for x in completions_from_callable:
+                            if isinstance(completer, completers.ChoicesCompleter):
+                                self._display_completions[(x,)] = active_action.help
+                            else:
+                                self._display_completions[(x,)] = ""
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
-                        next_completion = completer.complete(cword_prefix, i)
+                        next_completion = completer.complete(cword_prefix, i)  # type: ignore
                         if next_completion is None:
                             break
                         if self.validator(next_completion, cword_prefix):
-                            self._display_completions.update({(next_completion,): ""})
+                            self._display_completions.update({(next_completion,): ""})  # type: ignore
                             completions.append(next_completion)
                 if optional_prefix:
                     completions = [optional_prefix + "=" + completion for completion in completions]
@@ -570,16 +567,19 @@ class CompletionFinder(object):
 
     def filter_completions(self, completions):
         """
-        Ensures collected completions are Unicode text, de-duplicates them, and excludes those specified by ``exclude``.
-        Returns the filtered completions as an iterable.
+        De-duplicates completions and excludes those specified by ``exclude``.
+        Returns the filtered completions as a list.
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        # De-duplicate completions and remove excluded ones
-        if self.exclude is None:
-            self.exclude = set()
-        seen = set(self.exclude)
-        return [c for c in completions if c not in seen and not seen.add(c)]
+        filtered_completions = []
+        for completion in completions:
+            if self.exclude is not None:
+                if completion in self.exclude:
+                    continue
+            if completion not in filtered_completions:
+                filtered_completions.append(completion)
+        return filtered_completions
 
     def quote_completions(self, completions, cword_prequote, last_wordbreak_pos):
         """

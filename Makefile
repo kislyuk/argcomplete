@@ -1,11 +1,14 @@
+SHELL=/bin/bash
+
 test_deps:
 	python -m pip install .[test]
 
-lint: test_deps
-	flake8 $$(python setup.py --name)
+lint:
+	flake8
 	for script in scripts/*[^cmd]; do if grep -q python $$script; then flake8 $$script; fi; done
+	mypy --install-types --non-interactive --check-untyped-defs argcomplete
 
-test: lint test_deps
+test:
 	coverage run --source=argcomplete --omit=argcomplete/my_shlex.py ./test/test.py -v
 
 init_docs:
@@ -15,14 +18,14 @@ docs:
 	sphinx-build docs docs/html
 
 install: clean
-	pip install wheel
+	python -m pip install build
 	python -m build
-	pip install --upgrade dist/*.whl
+	python -m pip install --upgrade $$(echo dist/*.whl)[test]
 
 clean:
 	-rm -rf build dist
 	-rm -rf *.egg-info
 
-.PHONY: test test_deps docs install clean lint lint_deps
+.PHONY: test_deps lint test docs install clean
 
 include common.mk
