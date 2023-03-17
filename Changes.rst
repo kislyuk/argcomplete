@@ -1,3 +1,10 @@
+Changes for v2.1.2 (2023-03-17)
+===============================
+
+-  Test infrastructure improvements
+
+-  Indicate that there is no support commitment for fish and tcsh shells
+
 Changes for v2.1.1 (2023-03-06)
 ===============================
 
