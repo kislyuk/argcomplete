@@ -5,7 +5,7 @@ import argparse
 import contextlib
 import os
 import sys
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 from . import completers
 from . import my_shlex as shlex
@@ -151,46 +151,39 @@ class CompletionFinder(object):
 
     def __call__(
         self,
-        argument_parser,
-        always_complete_options=True,
-        exit_method=os._exit,
+        argument_parser: argparse.ArgumentParser,
+        always_complete_options: Union[bool, str] = True,
+        exit_method: Callable = os._exit,
         output_stream=None,
-        exclude=None,
-        validator=None,
-        print_suppressed=False,
-        append_space=None,
+        exclude: Optional[Sequence[str]] = None,
+        validator: Optional[Callable] = None,
+        print_suppressed: bool = False,
+        append_space: Optional[bool] = None,
         default_completer=FilesCompleter(),
     ):
         """
         :param argument_parser: The argument parser to autocomplete on
-        :type argument_parser: :class:`argparse.ArgumentParser`
         :param always_complete_options:
             Controls the autocompletion of option strings if an option string opening character (normally ``-``) has not
             been entered. If ``True`` (default), both short (``-x``) and long (``--x``) option strings will be
             suggested. If ``False``, no option strings will be suggested. If ``long``, long options and short options
             with no long variant will be suggested. If ``short``, short options and long options with no short variant
             will be suggested.
-        :type always_complete_options: boolean or string
         :param exit_method:
             Method used to stop the program after printing completions. Defaults to :meth:`os._exit`. If you want to
             perform a normal exit that calls exit handlers, use :meth:`sys.exit`.
-        :type exit_method: callable
         :param exclude: List of strings representing options to be omitted from autocompletion
-        :type exclude: iterable
         :param validator:
             Function to filter all completions through before returning (called with two string arguments, completion
             and prefix; return value is evaluated as a boolean)
-        :type validator: callable
         :param print_suppressed:
             Whether or not to autocomplete options that have the ``help=argparse.SUPPRESS`` keyword argument set.
-        :type print_suppressed: boolean
         :param append_space:
             Whether to append a space to unique matches. The default is ``True``.
-        :type append_space: boolean
 
         .. note::
             If you are not subclassing CompletionFinder to override its behaviors,
-            use ``argcomplete.autocomplete()`` directly. It has the same signature as this method.
+            use :meth:`argcomplete.autocomplete()` directly. It has the same signature as this method.
 
         Produces tab completions for ``argument_parser``. See module docs for more info.
 
@@ -308,7 +301,7 @@ class CompletionFinder(object):
         if "--" in comp_words:
             self.always_complete_options = False
 
-        completions = self.collect_completions(active_parsers, parsed_args, cword_prefix, debug)
+        completions = self.collect_completions(active_parsers, parsed_args, cword_prefix)
         completions = self.filter_completions(completions)
         completions = self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
         return completions
@@ -511,14 +504,16 @@ class CompletionFinder(object):
                 debug("Completions:", completions)
         return completions
 
-    def collect_completions(self, active_parsers, parsed_args, cword_prefix, debug):
+    def collect_completions(
+        self, active_parsers: List[argparse.ArgumentParser], parsed_args: argparse.Namespace, cword_prefix: str
+    ) -> List[str]:
         """
         Visits the active parsers and their actions, executes their completers or introspects them to collect their
         option strings. Returns the resulting completions as a list of strings.
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
-        completions = []
+        completions: List[str] = []
 
         debug("all active parsers:", active_parsers)
         active_parser = active_parsers[-1]
@@ -565,7 +560,7 @@ class CompletionFinder(object):
 
         return None
 
-    def filter_completions(self, completions):
+    def filter_completions(self, completions: List[str]) -> List[str]:
         """
         De-duplicates completions and excludes those specified by ``exclude``.
         Returns the filtered completions as a list.
@@ -581,7 +576,9 @@ class CompletionFinder(object):
                 filtered_completions.append(completion)
         return filtered_completions
 
-    def quote_completions(self, completions, cword_prequote, last_wordbreak_pos):
+    def quote_completions(
+        self, completions: List[str], cword_prequote: str, last_wordbreak_pos: Optional[int]
+    ) -> List[str]:
         """
         If the word under the cursor started with a quote (as indicated by a nonempty ``cword_prequote``), escapes
         occurrences of that quote character in the completions, and adds the quote to the beginning of each completion.
