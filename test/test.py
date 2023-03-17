@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# flake8: NOQA E302
 import argparse
 import contextlib
 import os
@@ -14,14 +13,14 @@ from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 import pexpect
 import pexpect.replwrap
 
-TEST_DIR = os.path.abspath(os.path.dirname(__file__))  # noqa
-BASE_DIR = os.path.dirname(TEST_DIR)  # noqa
-sys.path.insert(0, BASE_DIR)  # noqa
+TEST_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(TEST_DIR)
+sys.path.insert(0, BASE_DIR)
 
-from argparse import SUPPRESS, ArgumentParser
+from argparse import SUPPRESS, ArgumentParser  # noqa: E402
 
-import argcomplete
-from argcomplete import (
+import argcomplete  # noqa: E402
+from argcomplete import (  # noqa: E402
     CompletionFinder,
     ExclusiveCompletionFinder,
     _check_module,
@@ -30,15 +29,13 @@ from argcomplete import (
     split_line,
     warn,
 )
-from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter
+from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter  # noqa: E402
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(["bash", "-c", "echo $BASH_VERSION"]).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split(".")[0])
-FISH_VERSION_STR = subprocess.check_output(["fish", "-c", "echo -n $version"]).decode()
-FISH_VERSION_TUPLE = tuple(int(x) for x in FISH_VERSION_STR.split("."))
 
 
 def setUpModule():
@@ -1050,7 +1047,7 @@ class TestCheckModule(unittest.TestCase):
         open(path, "w").close()
 
 
-class _TestSh(object):
+class TestShellBase(object):
     """
     Contains tests which should work in any shell using argcomplete.
 
@@ -1093,7 +1090,7 @@ class _TestSh(object):
                 pass
 
             setattr(cls, name, wrapped)
-        super(_TestSh, cls).setUpClass(*args, **kwargs)
+        super().setUpClass(*args, **kwargs)
 
     def setUp(self):
         raise NotImplementedError
@@ -1189,7 +1186,7 @@ class _TestSh(object):
         self.assertEqual(self.sh.run_command("prog point 你好嘚瑟 \t"), "16\r\n")
 
 
-class TestBash(_TestSh, unittest.TestCase):
+class TestBash(TestShellBase, unittest.TestCase):
     expected_failures = [
         "test_parse_special_characters_dollar",
         "test_exclamation_in_double_quotes",
@@ -1317,105 +1314,6 @@ class TestBashGlobal(TestBash):
     def test_console_script_package_wheel(self):
         """Test completing a console_script for a package from a wheel."""
         self._test_console_script(package=True, wheel=True)
-
-
-class TestTcsh(_TestSh, unittest.TestCase):
-    expected_failures = [
-        "test_unquoted_space",
-        "test_quoted_space",
-        "test_continuation",
-        "test_parse_special_characters",
-        "test_parse_special_characters_dollar",
-        # Test case doesn't work under tcsh, could be fixed.
-        "test_comp_point",
-    ]
-
-    def setUp(self):
-        sh = Shell("tcsh")
-        path = " ".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$path"])
-        sh.run_command("set path = ({0})".format(path))
-        sh.run_command("setenv PYTHONPATH {0}".format(BASE_DIR))
-        # 'dummy' argument unused; checks multi-command registration works
-        # by passing 'prog' as the second argument.
-        output = sh.run_command("eval `register-python-argcomplete --shell tcsh dummy prog`")
-        self.assertEqual(output, "")
-        # Register a dummy completion with an external argcomplete script
-        # to ensure this doesn't overwrite our previous registration.
-        output = sh.run_command(
-            "eval `register-python-argcomplete --shell tcsh dummy --external-argcomplete-script dummy`"
-        )
-        self.assertEqual(output, "")
-        self.sh = sh
-
-    def tearDown(self):
-        # The shell wrapper is fragile; exactly which exception is raised
-        # differs depending on environment.
-        with self.assertRaises((pexpect.EOF, OSError)):
-            self.sh.run_command("exit")
-            self.sh.run_command("")
-
-
-class TestFish(_TestSh, unittest.TestCase):
-    expected_failures = [
-        "test_parse_special_characters",
-        "test_comp_point",
-    ]
-    if FISH_VERSION_TUPLE < (3, 1):
-        expected_failures.extend(["test_special_characters_double_quoted"])
-
-    skipped = ["test_single_quotes_in_single_quotes", "test_parse_special_characters_dollar"]
-
-    def setUp(self):
-        sh = Shell("fish")
-        path = " ".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
-        sh.run_command("set -x PATH {0}".format(path))
-        sh.run_command("set -x PYTHONPATH {0}".format(BASE_DIR))
-        # 'dummy' argument unused; checks multi-command registration works
-        # by passing 'prog' as the second argument.
-        output = sh.run_command("register-python-argcomplete --shell fish dummy prog | source")
-        self.assertEqual(output, "")
-        # Register a dummy completion with an external argcomplete script
-        # to ensure this doesn't overwrite our previous registration.
-        output = sh.run_command(
-            "register-python-argcomplete --shell fish dummy --external-argcomplete-script dummy | source"
-        )
-        self.assertEqual(output, "")
-        self.sh = sh
-
-    def tearDown(self):
-        # The shell wrapper is fragile; exactly which exception is raised
-        # differs depending on environment.
-        with self.assertRaises((pexpect.EOF, OSError)):
-            self.sh.run_command("exit")
-            self.sh.run_command("")
-
-
-@unittest.skipIf(FISH_VERSION_TUPLE < (3, 4), "Path completion is fixed in fish 3.4")
-class TestFishPathCompletion(unittest.TestCase):
-    def setUp(self):
-        sh = Shell("fish")
-        path = " ".join([os.path.join(BASE_DIR, "scripts"), "$PATH"])
-        sh.run_command("set -x PATH {0}".format(path))
-        sh.run_command("set -x PYTHONPATH {0}".format(BASE_DIR))
-        sh.run_command("set -x TEST_DIR {0}".format(TEST_DIR))
-        self.assertEqual(
-            sh.run_command("register-python-argcomplete --shell fish {0}/prog | source".format(TEST_DIR)), ""
-        )
-
-        self.sh = sh
-
-    def test_path_completion(self):
-        self.assertEqual(self.sh.run_command("{}/prog basic f\t".format(TEST_DIR)), "foo\r\n")
-        self.assertEqual(self.sh.run_command("$TEST_DIR/prog basic f\t".format(TEST_DIR)), "foo\r\n")
-        self.sh.run_command("cd {}".format(TEST_DIR))
-        self.assertEqual(self.sh.run_command("./prog basic f\t"), "foo\r\n")
-
-    def tearDown(self):
-        # The shell wrapper is fragile; exactly which exception is raised
-        # differs depending on environment.
-        with self.assertRaises((pexpect.EOF, OSError)):
-            self.sh.run_command("exit")
-            self.sh.run_command("")
 
 
 class Shell(object):
