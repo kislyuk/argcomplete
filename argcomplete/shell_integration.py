@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
+from shlex import quote
 
 bashcode = r"""
 # Run something, muting output or redirecting it to the debug stream
