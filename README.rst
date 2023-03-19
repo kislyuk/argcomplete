@@ -2,7 +2,7 @@ argcomplete - Bash/zsh tab completion for argparse
 ==================================================
 *Tab complete all the things!*
 
-Argcomplete provides easy, extensible command line tab completion of arguments for your Python script.
+Argcomplete provides easy, extensible command line tab completion of arguments for your Python application.
 
 It makes two assumptions:
 
@@ -26,7 +26,8 @@ Refresh your bash environment (start a new shell or ``source /etc/profile``).
 
 Synopsis
 --------
-Python code (e.g. ``my-awesome-script``):
+Add the ``PYTHON_ARGCOMPLETE_OK`` marker and a call to ``argcomplete.autocomplete()`` to your Python application as
+follows:
 
 .. code-block:: python
 
@@ -39,9 +40,12 @@ Python code (e.g. ``my-awesome-script``):
     args = parser.parse_args()
     ...
 
-Shellcode (only necessary if global completion is not activated - see `Global completion`_ below), to be put in e.g. ``.bashrc``::
+Register your Python application with your shell's completion framework by running ``register-python-argcomplete``::
 
-    eval "$(register-python-argcomplete my-awesome-script)"
+    eval "$(register-python-argcomplete my-python-app)"
+
+Quotes are significant; the registration will fail without them. See `Global completion`_ below for a way to enable
+argcomplete generally without registering each application individually.
 
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

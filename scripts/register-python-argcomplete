@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
 
-# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 """
@@ -43,8 +43,11 @@ parser.add_argument(
     help="arguments to call complete with; use of this option discards default options",
 )
 parser.add_argument(
-    "-s", "--shell", choices=("bash", "tcsh", "fish", "powershell"), default="bash",
-    help="output code for the specified shell"
+    "-s",
+    "--shell",
+    choices=("bash", "zsh", "tcsh", "fish", "powershell"),
+    default="bash",
+    help="output code for the specified shell",
 )
 parser.add_argument(
     "-e", "--external-argcomplete-script", help="external argcomplete script for auto completion of the executable"

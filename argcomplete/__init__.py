@@ -1,11 +1,11 @@
-# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 import argparse
 import contextlib
 import os
 import sys
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, List, Optional, Sequence, Union
 
 from . import completers
 from . import my_shlex as shlex
@@ -22,9 +22,6 @@ def debug(*args):
     if _DEBUG:
         print(file=debug_stream, *args)
 
-
-BASH_FILE_COMPLETION_FALLBACK = 79
-BASH_DIR_COMPLETION_FALLBACK = 80
 
 safe_actions = (
     argparse._StoreAction,
@@ -143,7 +140,7 @@ class CompletionFinder(object):
         self.validator = validator
         self.print_suppressed = print_suppressed
         self.completing = False
-        self._display_completions: Dict[Tuple[str], str] = {}
+        self._display_completions: Dict[str, str] = {}
         self.default_completer = default_completer
         if append_space is None:
             append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
@@ -225,10 +222,6 @@ class CompletionFinder(object):
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
 
-        # print("", stream=debug_stream)
-        # for v in "COMP_CWORD COMP_LINE COMP_POINT COMP_TYPE COMP_KEY _ARGCOMPLETE_COMP_WORDBREAKS COMP_WORDS".split():
-        #     print(v, os.environ[v], stream=debug_stream)
-
         ifs = os.environ.get("_ARGCOMPLETE_IFS", "\013")
         if len(ifs) != 1:
             debug("Invalid value for IFS, quitting [{v}]".format(v=ifs))
@@ -270,11 +263,12 @@ class CompletionFinder(object):
 
         if dfs:
             display_completions = {
-                key_part: value.replace(ifs, " ") if value else ""
-                for key, value in self._display_completions.items()
-                for key_part in key
+                key: value.replace(ifs, " ") if value else "" for key, value in self._display_completions.items()
             }
             completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
+
+        if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
+            completions = [f"{c}:{self._display_completions.get(c)}" for c in completions]
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions))
@@ -365,18 +359,15 @@ class CompletionFinder(object):
         return self.active_parsers
 
     def _get_subparser_completions(self, parser, cword_prefix):
-        def filter_aliases(aliases, prefix):
-            return tuple(x for x in aliases if x.startswith(prefix))
-
         aliases_by_parser: Dict[argparse.ArgumentParser, List[str]] = {}
         for key in parser.choices.keys():
             p = parser.choices[key]
             aliases_by_parser.setdefault(p, []).append(key)
 
         for action in parser._get_subactions():
-            subcmd_with_aliases = filter_aliases(aliases_by_parser[parser.choices[action.dest]], cword_prefix)
-            if subcmd_with_aliases:
-                self._display_completions[subcmd_with_aliases] = action.help
+            for alias in aliases_by_parser[parser.choices[action.dest]]:
+                if alias.startswith(cword_prefix):
+                    self._display_completions[alias] = action.help
 
         completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
         return completions
@@ -395,8 +386,9 @@ class CompletionFinder(object):
     def _get_option_completions(self, parser, cword_prefix):
         for action in parser._actions:
             if action.option_strings:
-                active_option_strings = tuple(str(x) for x in action.option_strings if x.startswith(cword_prefix))
-                self._display_completions[active_option_strings] = action.help  # type: ignore
+                for option_string in action.option_strings:
+                    if option_string.startswith(cword_prefix):
+                        self._display_completions[option_string] = action.help
 
         option_completions = []
         for action in parser._actions:
@@ -487,9 +479,9 @@ class CompletionFinder(object):
                         completions += completions_from_callable
                         for x in completions_from_callable:
                             if isinstance(completer, completers.ChoicesCompleter):
-                                self._display_completions[(x,)] = active_action.help
+                                self._display_completions[x] = active_action.help
                             else:
-                                self._display_completions[(x,)] = ""
+                                self._display_completions[x] = ""
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
@@ -497,7 +489,7 @@ class CompletionFinder(object):
                         if next_completion is None:
                             break
                         if self.validator(next_completion, cword_prefix):
-                            self._display_completions.update({(next_completion,): ""})  # type: ignore
+                            self._display_completions[next_completion] = ""
                             completions.append(next_completion)
                 if optional_prefix:
                     completions = [optional_prefix + "=" + completion for completion in completions]
@@ -656,36 +648,9 @@ class CompletionFinder(object):
 
     def get_display_completions(self):
         """
-        This function returns a mapping of option names to their help strings for displaying to the user
-
-        Usage:
-
-        .. code-block:: python
-
-            def display_completions(substitution, matches, longest_match_length):
-                _display_completions = argcomplete.autocomplete.get_display_completions()
-                print("")
-                if _display_completions:
-                    help_len = [len(x) for x in _display_completions.values() if x]
-
-                    if help_len:
-                        maxlen = max([len(x) for x in _display_completions])
-                        print("\\n".join("{0:{2}} -- {1}".format(k, v, maxlen)
-                                        for k, v in sorted(_display_completions.items())))
-                    else:
-                        print("    ".join(k for k in sorted(_display_completions)))
-                else:
-                    print(" ".join(x for x in sorted(matches)))
-
-                import readline
-                print("cli /> {0}".format(readline.get_line_buffer()), end="")
-                readline.redisplay()
-
-            ...
-            readline.set_completion_display_matches_hook(display_completions)
-
+        This function returns a mapping of option names to their help strings for displaying to the user.
         """
-        return {" ".join(k): v for k, v in self._display_completions.items()}
+        return self._display_completions
 
 
 class ExclusiveCompletionFinder(CompletionFinder):
@@ -713,7 +678,5 @@ def warn(*args):
     Prints **args** to standard error when running completions. This will interrupt the user's command line interaction;
     use it to indicate an error condition that is preventing your completer from working.
     """
-    # Don't be tempted to use `print("\n",..., *args)`,
-    # as that will indent **args** by one space character
     print(file=debug_stream)
     print(file=debug_stream, *args)

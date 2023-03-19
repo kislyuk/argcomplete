@@ -498,16 +498,6 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual("help for rover ", disp.get("sojourner", ""))
         self.assertEqual("", disp.get("low gain", ""))
 
-        completer.rl_complete('opportunity "low gain" list ', 0)
-        disp = completer.get_display_completions()
-        self.assertEqual("ttt", disp.get("-o --oh", ""))
-        self.assertEqual("list cat", disp.get("cat", ""))
-
-        completer.rl_complete("opportunity low\\ gain list --", 0)
-        disp = completer.get_display_completions()
-        self.assertEqual("ttt", disp.get("--oh", ""))
-        self.assertEqual("ccc", disp.get("--ch", ""))
-
     def test_display_completions_with_aliases(self):
         parser = ArgumentParser()
         parser.add_subparsers().add_parser("a", aliases=["b", "c"], help="abc help")
@@ -516,31 +506,34 @@ class TestArgcomplete(unittest.TestCase):
         completer = CompletionFinder(parser)
         completer.rl_complete("", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"a b c": "abc help", "-h --help": "show this help message and exit"}, disp)
+        self.assertEqual(
+            {
+                "a": "abc help",
+                "b": "abc help",
+                "c": "abc help",
+                "-h": "show this help message and exit",
+                "--help": "show this help message and exit",
+            },
+            disp,
+        )
 
         # a
         completer = CompletionFinder(parser)
         completer.rl_complete("a", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"a": "abc help", "": "show this help message and exit"}, disp)
+        self.assertEqual({"a": "abc help"}, disp)
 
         # b
         completer = CompletionFinder(parser)
         completer.rl_complete("b", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"b": "abc help", "": "show this help message and exit"}, disp)
+        self.assertEqual({"b": "abc help"}, disp)
 
         # c
         completer = CompletionFinder(parser)
         completer.rl_complete("c", 0)
         disp = completer.get_display_completions()
-        self.assertEqual({"c": "abc help", "": "show this help message and exit"}, disp)
-
-        # (
-        completer = CompletionFinder(parser)
-        completer.rl_complete("(", 0)
-        disp = completer.get_display_completions()
-        self.assertEqual({"": "show this help message and exit"}, disp)
+        self.assertEqual({"c": "abc help"}, disp)
 
     def test_nargs_one_or_more(self):
         def make_parser():

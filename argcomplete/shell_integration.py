@@ -33,21 +33,39 @@ _python_argcomplete%(function_suffix)s() {
     if compopt +o nospace 2> /dev/null; then
         SUPPRESS_SPACE=1
     fi
-    COMPREPLY=( $(IFS="$IFS" \
-                  COMP_LINE="$COMP_LINE" \
-                  COMP_POINT="$COMP_POINT" \
-                  COMP_TYPE="$COMP_TYPE" \
-                  _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
-                  _ARGCOMPLETE=1 \
-                  _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-                  __python_argcomplete_run "%(argcomplete_script)s") )
-    if [[ $? != 0 ]]; then
-        unset COMPREPLY
-    elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
-        compopt -o nospace
+
+    if [[ -n "${ZSH_VERSION-}" ]]; then
+        local completions
+        completions=($(IFS="$IFS" \
+            COMP_LINE="$BUFFER" \
+            COMP_POINT="$CURSOR" \
+            _ARGCOMPLETE=1 \
+            _ARGCOMPLETE_SHELL="zsh" \
+            _ARGCOMPLETE_SUPPRESS_SPACE=1 \
+            __python_argcomplete_run "${words[1]}") )
+        _describe "${words[1]}" completions -o nosort
+    else
+        COMPREPLY=($(IFS="$IFS" \
+            COMP_LINE="$COMP_LINE" \
+            COMP_POINT="$COMP_POINT" \
+            COMP_TYPE="$COMP_TYPE" \
+            _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
+            _ARGCOMPLETE=1 \
+            _ARGCOMPLETE_SHELL="bash" \
+            _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
+            __python_argcomplete_run "%(argcomplete_script)s"))
+        if [[ $? != 0 ]]; then
+            unset COMPREPLY
+        elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
+            compopt -o nospace
+        fi
     fi
 }
-complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
+if [[ -z "${ZSH_VERSION-}" ]]; then
+    complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
+else
+    compdef _python_argcomplete%(function_suffix)s %(executables)s
+fi
 """
 
 tcshcode = """\
@@ -103,7 +121,7 @@ def shellcode(executables, use_defaults=True, shell="bash", complete_arguments=N
 
     :param list(str) executables: Executables to be completed (when invoked exactly with this name)
     :param bool use_defaults: Whether to fallback to readline's default completion when no matches are generated.
-    :param str shell: Name of the shell to output code for (bash or tcsh)
+    :param str shell: Name of the shell to output code for
     :param complete_arguments: Arguments to call complete with
     :type complete_arguments: list(str) or None
     :param argcomplete_script: Script to call complete with, if not the executable to complete.
@@ -116,7 +134,7 @@ def shellcode(executables, use_defaults=True, shell="bash", complete_arguments=N
     else:
         complete_options = " ".join(complete_arguments)
 
-    if shell == "bash":
+    if shell == "bash" or shell == "zsh":
         quoted_executables = [quote(i) for i in executables]
         executables_list = " ".join(quoted_executables)
         script = argcomplete_script
