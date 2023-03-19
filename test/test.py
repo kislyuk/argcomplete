@@ -20,7 +20,7 @@ sys.path.insert(0, BASE_DIR)
 from argparse import SUPPRESS, ArgumentParser  # noqa: E402
 
 import argcomplete  # noqa: E402
-import argcomplete.io
+import argcomplete.io  # noqa: E402
 from argcomplete import (  # noqa: E402
     CompletionFinder,
     ExclusiveCompletionFinder,
@@ -30,7 +30,7 @@ from argcomplete import (  # noqa: E402
     warn,
 )
 from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter  # noqa: E402
-from argcomplete.lexers import _split_line
+from argcomplete.lexers import _split_line  # noqa: E402
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"

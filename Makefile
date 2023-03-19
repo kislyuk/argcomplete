@@ -9,7 +9,7 @@ lint:
 	mypy --install-types --non-interactive --check-untyped-defs argcomplete
 
 test:
-	coverage run --source=argcomplete --omit=argcomplete/vendor/_shlex.py ./test/test.py -v
+	coverage run --source=argcomplete --omit=argcomplete/packages/_shlex.py ./test/test.py -v
 
 init_docs:
 	cd docs; sphinx-quickstart
