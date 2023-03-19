@@ -229,11 +229,11 @@ argcomplete installed.
  destination code.
 
 If you choose not to use global completion, or ship a bash completion module that depends on argcomplete, you must
-register your script explicitly using ``eval "$(register-python-argcomplete my-awesome-script)"``. Standard bash
+register your script explicitly using ``eval "$(register-python-argcomplete my-python-app)"``. Standard bash
 completion registration roules apply: namely, the script name is passed directly to ``complete``, meaning it is only tab
-completed when invoked exactly as it was registered. In the above example, ``my-awesome-script`` must be on the path,
+completed when invoked exactly as it was registered. In the above example, ``my-python-app`` must be on the path,
 and the user must be attempting to complete it by that name. The above line alone would **not** allow you to complete
-``./my-awesome-script``, or ``/path/to/my-awesome-script``.
+``./my-python-app``, or ``/path/to/my-python-app``.
 
 Activating global completion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,15 +253,12 @@ The file's contents should then be sourced in e.g. ``~/.bashrc``.
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete
 
 Zsh Support
-------------
-To activate completions for zsh you need to have ``bashcompinit`` enabled in zsh::
+-----------
+Argcomplete supports zsh. On top of plain completions like in bash, zsh allows you to see argparse help strings as
+completion descriptions. Global completion is not currently supported in zsh, so you need to enable completion for your
+executables with ``register-python-argcomplete``::
 
-    autoload -U bashcompinit
-    bashcompinit
-
-Afterwards you can enable completion for your scripts with ``register-python-argcomplete``::
-
-    eval "$(register-python-argcomplete my-awesome-script)"
+    eval "$(register-python-argcomplete my-python-app)"
 
 External argcomplete script
 ---------------------------
@@ -280,19 +277,20 @@ Argcomplete requires Python 3.7+.
 
 Support for other shells
 ------------------------
-Argcomplete authors provide support only for the bash and zsh shells on Linux and MacOS. For resources related to other
-shells and platforms, please see the `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_ directory.
+Argcomplete maintainers provide support only for the bash and zsh shells on Linux and MacOS. For resources related to
+other shells and platforms, please see the `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_
+directory.
 
 Common Problems
 ---------------
 If global completion is not completing your script, bash may have registered a
 default completion function::
 
-    $ complete | grep my-awesome-script
-    complete -F _minimal my-awesome-script
+    $ complete | grep my-python-app
+    complete -F _minimal my-python-app
 
 You can fix this by restarting your shell, or by running
-``complete -r my-awesome-script``.
+``complete -r my-python-app``.
 
 Debugging
 ---------

@@ -407,7 +407,7 @@ class CompletionFinder(object):
     @staticmethod
     def _action_allowed(action, parser):
         # Logic adapted from take_action in ArgumentParser._parse_known_args
-        # (members are saved by my_argparse.IntrospectiveArgumentParser)
+        # (members are saved by vendor._argparse.IntrospectiveArgumentParser)
         for conflict_action in parser._action_conflicts.get(action, []):
             if conflict_action in parser._seen_non_default_actions:
                 return False
