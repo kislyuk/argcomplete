@@ -33,11 +33,6 @@ __python_argcomplete_run_inner() {
 
 _python_argcomplete%(function_suffix)s() {
     local IFS=$'\013'
-    local SUPPRESS_SPACE=0
-    if compopt +o nospace 2> /dev/null; then
-        SUPPRESS_SPACE=1
-    fi
-
     if [[ -n "${ZSH_VERSION-}" ]]; then
         local completions
         completions=($(IFS="$IFS" \
@@ -49,6 +44,10 @@ _python_argcomplete%(function_suffix)s() {
             __python_argcomplete_run "${words[1]}") )
         _describe "${words[1]}" completions -o nosort
     else
+        local SUPPRESS_SPACE=0
+        if compopt +o nospace 2> /dev/null; then
+            SUPPRESS_SPACE=1
+        fi
         COMPREPLY=($(IFS="$IFS" \
             COMP_LINE="$COMP_LINE" \
             COMP_POINT="$COMP_POINT" \
