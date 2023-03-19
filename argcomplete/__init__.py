@@ -8,10 +8,10 @@ import sys
 from typing import Callable, Dict, List, Optional, Sequence, Union
 
 from . import completers
-from . import my_shlex as shlex
 from .completers import FilesCompleter, SuppressCompleter
-from .my_argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
 from .shell_integration import shellcode  # noqa
+from .vendor import _shlex
+from .vendor._argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
 
 _DEBUG = "_ARC_DEBUG" in os.environ
 
@@ -63,7 +63,7 @@ def split_line(line, point=None):
     if point is None:
         point = len(line)
     line = line[:point]
-    lexer = shlex.shlex(line, posix=True)
+    lexer = _shlex.shlex(line, posix=True)
     lexer.whitespace_split = True
     lexer.wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
     words = []
