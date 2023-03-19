@@ -1,3 +1,13 @@
+Changes for v3.0.0 (2023-03-19)
+===============================
+
+-  Fully support zsh. Argcomplete now supports completion descriptions
+   and global completion in zsh.
+
+-  Clean up top level namespace.
+
+-  Documentation and test improvements.
+
 Changes for v2.1.2 (2023-03-17)
 ===============================
 
