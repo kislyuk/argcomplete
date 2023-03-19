@@ -20,16 +20,17 @@ sys.path.insert(0, BASE_DIR)
 from argparse import SUPPRESS, ArgumentParser  # noqa: E402
 
 import argcomplete  # noqa: E402
+import argcomplete.io
 from argcomplete import (  # noqa: E402
     CompletionFinder,
     ExclusiveCompletionFinder,
     _check_module,
     autocomplete,
     shellcode,
-    split_line,
     warn,
 )
 from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter  # noqa: E402
+from argcomplete.lexers import _split_line
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
@@ -834,7 +835,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         pass
 
     def run_completer(self, parser, completer, command, point=None, **kwargs):
-        cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(command)
+        cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = _split_line(command)
 
         completions = completer._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
 
@@ -946,10 +947,10 @@ class TestSplitLine(unittest.TestCase):
         os.environ = self._os_environ
 
     def prefix(self, line):
-        return split_line(line)[1]
+        return _split_line(line)[1]
 
     def wordbreak(self, line):
-        return split_line(line)[4]
+        return _split_line(line)[4]
 
     def test_simple(self):
         self.assertEqual(self.prefix("a b c"), "c")
@@ -1328,12 +1329,12 @@ class Warn(unittest.TestCase):
     def test_warn(self):
         @contextlib.contextmanager
         def redirect_debug_stream(stream):
-            debug_stream = argcomplete.debug_stream
-            argcomplete.debug_stream = stream
+            debug_stream = argcomplete.io.debug_stream
+            argcomplete.io.debug_stream = stream
             try:
                 yield
             finally:
-                argcomplete.debug_stream = debug_stream
+                argcomplete.io.debug_stream = debug_stream
 
         test_stream = StringIO()
         with redirect_debug_stream(test_stream):
