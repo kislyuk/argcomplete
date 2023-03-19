@@ -5,7 +5,7 @@
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 """
-Activate the generic bash-completion script for the argcomplete module.
+Activate the generic bash-completion script or zsh completion autoload function for the argcomplete module.
 """
 
 import argparse
@@ -19,7 +19,7 @@ import argcomplete
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
 dest_opt = parser.add_argument(
-    "--dest", default="/etc/bash_completion.d", help="Specify the bash completion modules directory to install into"
+    "--dest", default="/etc/bash_completion.d", help="Specify the shell completion modules directory to install into"
 )
 parser.add_argument("--user", help="Install into user directory (~/.bash_completion.d/)", action="store_true")
 parser.add_argument(
@@ -72,7 +72,7 @@ if args.dest == "-":
 else:
     dest = os.path.join(args.dest, "python-argcomplete")
 
-    sys.stdout.write("Installing bash completion script " + dest)
+    sys.stdout.write("Installing shell completion script " + dest)
     if not args.use_defaults:
         sys.stdout.write(" without -o default")
     elif args.complete_arguments:
@@ -90,6 +90,6 @@ else:
         if args.dest == dest_opt.default:
             err += (
                 "\nPlease try --user to install into a user directory, "
-                "or --dest to specify the bash completion modules directory"
+                "or --dest to specify the shell completion modules directory"
             )
         parser.error(err)
