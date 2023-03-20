@@ -68,7 +68,7 @@ _python_argcomplete_global() {
         local executable=$1
         __python_argcomplete_expand_tilde_by_ref executable
     else
-        if [[ "$service" == "-default-" ]]; then
+        if [[ "$service" != "-default-" ]]; then
             return
         fi
         local executable=${words[1]}
