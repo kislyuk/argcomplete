@@ -27,6 +27,7 @@ from argcomplete import (  # noqa: E402
     _check_module,
     autocomplete,
     shellcode,
+    split_line,
     warn,
 )
 from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter  # noqa: E402
