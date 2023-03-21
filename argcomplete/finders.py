@@ -11,7 +11,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Union
 from . import io as _io
 from .completers import ChoicesCompleter, FilesCompleter, SuppressCompleter
 from .io import debug, mute_stderr
-from .lexers import _split_line
+from .lexers import split_line
 from .packages._argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
 
 safe_actions = {
@@ -148,7 +148,7 @@ class CompletionFinder(object):
         comp_line = os.environ["COMP_LINE"]
         comp_point = int(os.environ["COMP_POINT"])
 
-        cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = _split_line(comp_line, comp_point)
+        cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
         # _ARGCOMPLETE is set by the shell script to tell us where comp_words
         # should start, based on what we're completing.
@@ -549,7 +549,7 @@ class CompletionFinder(object):
             result = input("prompt> ")
         """
         if state == 0:
-            cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = _split_line(text)
+            cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
             comp_words.insert(0, sys.argv[0])
             matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
             self._rl_matches = [text + match[len(cword_prefix) :] for match in matches]

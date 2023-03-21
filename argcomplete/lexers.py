@@ -5,7 +5,7 @@ from .io import debug
 from .packages import _shlex
 
 
-def _split_line(line, point=None):
+def split_line(line, point=None):
     if point is None:
         point = len(line)
     line = line[:point]

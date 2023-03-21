@@ -6,7 +6,7 @@ from .completers import ChoicesCompleter, DirectoriesCompleter, EnvironCompleter
 from .exceptions import ArgcompleteException
 from .finders import CompletionFinder, ExclusiveCompletionFinder, safe_actions
 from .io import debug, mute_stderr, warn
-from .lexers import _split_line as split_line
+from .lexers import split_line
 from .shell_integration import shellcode
 
 autocomplete = CompletionFinder()
