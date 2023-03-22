@@ -69,6 +69,12 @@ elif args.user:
         ' using "activate-global-python-argcomplete --dest=- > completions-dir/_python-argcomplete".',
         file=sys.stderr,
     )
+    user_destination = os.path.expanduser("~/.bash_completion")
+    if os.path.exists(user_destination):
+        parser.error(
+            f'Bash user completion configuration file {user_destination} already exists. Please remove it and try '
+            f'again, or use "activate-global-python-argcomplete --dest=- >> {user_destination}".'
+        )
     destinations.append(os.path.expanduser("~/.bash_completion"))
 else:
     destinations.append(f"{get_zsh_system_dir()}/_python-argcomplete")
