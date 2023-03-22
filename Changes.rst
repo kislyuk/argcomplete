@@ -1,3 +1,14 @@
+Changes for v3.0.4 (2023-03-21)
+===============================
+
+-  activate-global-python-argcomplete: do not overwrite existing dotfile
+   in user directory
+
+-  Add NOTICE file
+
+-  Establish long term name for split_line as
+   argcomplete.lexers.split_line
+
 Changes for v3.0.3 (2023-03-20)
 ===============================
 
