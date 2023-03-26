@@ -5,8 +5,7 @@ import glob
 from setuptools import find_packages, setup
 
 install_requires = []
-lint_require = ["flake8", "mypy"]
-tests_require = ["coverage", "pexpect", "wheel"] + lint_require
+tests_require = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
 importlib_backport_requires = ["importlib-metadata >= 0.23, < 6"]
 
 setup(
@@ -29,7 +28,6 @@ setup(
     tests_require=tests_require,
     extras_require={
         "test": tests_require,
-        "lint": lint_require,
         ':python_version == "3.6"': importlib_backport_requires,
         ':python_version == "3.7"': importlib_backport_requires,
     },

@@ -4,8 +4,8 @@ test_deps:
 	python -m pip install .[test]
 
 lint:
-	flake8
-	for script in scripts/*[^cmd]; do if grep -q python $$script; then flake8 $$script; fi; done
+	ruff $$(dirname */__init__.py)
+	for script in scripts/*[^cmd]; do if grep -q python $$script; then ruff $$script; fi; done
 	mypy --install-types --non-interactive --check-untyped-defs argcomplete
 
 test:
