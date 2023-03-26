@@ -68,6 +68,7 @@ _python_argcomplete_global() {
         local executable=$1
         __python_argcomplete_expand_tilde_by_ref executable
     else
+        # TODO: check if we should call _default or use a different condition here
         if [[ "$service" != "-default-" ]]; then
             return
         fi
@@ -133,7 +134,9 @@ _python_argcomplete_global() {
                 compopt -o nospace
             fi
         fi
-    elif [[ -z "${ZSH_VERSION-}" ]]; then
+    elif [[ -n "${ZSH_VERSION-}" ]]; then
+        _default
+    else
         type -t _completion_loader | grep -q 'function' && _completion_loader "$@"
     fi
 }
