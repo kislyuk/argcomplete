@@ -1,3 +1,10 @@
+Changes for v3.0.5 (2023-03-25)
+===============================
+
+-  Call \_default as fallback in zsh global completion hook
+
+-  Begin support for mapping-emitting completers
+
 Changes for v3.0.4 (2023-03-21)
 ===============================
 
