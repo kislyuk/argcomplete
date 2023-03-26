@@ -76,16 +76,18 @@ class TestArgcomplete(unittest.TestCase):
         os.environ["_ARC_DEBUG"] = "yes"
         os.environ["IFS"] = IFS
         os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = COMP_WORDBREAKS
+        os.environ["_ARGCOMPLETE_SHELL"] = "bash"
 
     def tearDown(self):
         os.environ = self._os_environ
 
-    def run_completer(self, parser, command, point=None, completer=autocomplete, **kwargs):
+    def run_completer(self, parser, command, point=None, completer=autocomplete, shell="bash", **kwargs):
         if point is None:
             point = str(len(command))
         with TemporaryFile(mode="w+") as t:
             os.environ["COMP_LINE"] = command
             os.environ["COMP_POINT"] = point
+            os.environ["_ARGCOMPLETE_SHELL"] = shell
             with self.assertRaises(SystemExit) as cm:
                 completer(parser, output_stream=t, exit_method=sys.exit, **kwargs)
             if cm.exception.code != 0:
@@ -227,8 +229,10 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
     def test_completers(self):
+        self.completions = ["http://url1", "http://url2"]
+
         def c_url(prefix, parsed_args, **kwargs):
-            return ["http://url1", "http://url2"]
+            return self.completions
 
         def make_parser():
             parser = ArgumentParser()
@@ -248,6 +252,24 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+        self.completions = {"http://url1": "foo", "http://url2": "bar"}
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+        zsh_expected_outputs = (
+            ("prog --url ", ["http://url1:foo", "http://url2:bar"]),
+            ('prog --url "', ["http://url1:foo", "http://url2:bar"]),
+            ('prog --url "http://url1" --email ', ["a@b.c:", "a@b.d:", "ab@c.d:", "bcd@e.f:", "bce@f.g:"]),
+            ('prog --url "http://url1" --email a', ["a@b.c:", "a@b.d:", "ab@c.d:"]),
+            ('prog --url "http://url1" --email "a@', ["a@b.c:", "a@b.d:"]),
+            ('prog --url "http://url1" --email "a@b.c" "a@b.d" "a@', ["a@b.c:", "a@b.d:"]),
+            (
+                'prog --url "http://url1" --email "a@b.c" "a@b.d" "ab@c.d" ',
+                ["--url:", "--email:", "-h:show this help message and exit", "--help:show this help message and exit"],
+            ),
+        )
+        for cmd, output in zsh_expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, shell="zsh")), set(output))
 
     def test_subparser_completers(self):
         def c_depends_on_positional_arg1(prefix, parsed_args, **kwargs):
@@ -766,13 +788,13 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ")), {r"\"\' "})
         self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "')), {r"\"'"})
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '")), {"\"'\\''"})
-        os.environ["_ARGCOMPLETE_SHELL"] = "tcsh"
-        self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ")), {"bar<$>baz "})
+
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ", shell="tcsh")), {"bar<$>baz "})
         # The trailing space won't actually work correctly in tcsh.
-        self.assertEqual(set(self.run_completer(make_parser(), "prog -2 ")), {r"\*  "})
-        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ")), {"\"' "})
-        self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "')), {"\"'"})
-        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '")), {"\"'"})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -2 ", shell="tcsh")), {r"\*  "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ", shell="tcsh")), {"\"' "})
+        self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "', shell="tcsh")), {"\"'"})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '", shell="tcsh")), {"\"'"})
 
     def test_shellcode_utility(self):
         with NamedTemporaryFile() as fh:
@@ -804,7 +826,6 @@ class TestArgcomplete(unittest.TestCase):
     def test_option_help(self):
         os.environ["_ARGCOMPLETE_DFS"] = "\t"
         os.environ["_ARGCOMPLETE_SUPPRESS_SPACE"] = "1"
-        os.environ["_ARGCOMPLETE_SHELL"] = "fish"
 
         p = ArgumentParser()
         p.add_argument("--foo", help="foo" + IFS + "help")
@@ -814,17 +835,17 @@ class TestArgcomplete(unittest.TestCase):
         subparsers.add_parser("subcommand", help="subcommand help")
         subparsers.add_parser("subcommand 2", help="subcommand 2 help")
 
-        completions = self.run_completer(p, "prog --f")
+        completions = self.run_completer(p, "prog --f", shell="fish")
         self.assertEqual(set(completions), {"--foo\tfoo help"})
 
-        completions = self.run_completer(p, "prog --b")
+        completions = self.run_completer(p, "prog --b", shell="fish")
         self.assertEqual(set(completions), {"--bar\tbar help", "--bar2\tbar help"})
 
-        completions = self.run_completer(p, "prog sub")
+        completions = self.run_completer(p, "prog sub", shell="fish")
         self.assertEqual(set(completions), {"subcommand\tsubcommand help", "subcommand 2\tsubcommand 2 help"})
 
         os.environ["_ARGCOMPLETE_DFS"] = "invalid"
-        self.assertRaises(Exception, self.run_completer, p, "prog --b")
+        self.assertRaises(Exception, self.run_completer, p, "prog --b", shell="fish")
 
 
 class TestArgcompleteREPL(unittest.TestCase):

@@ -6,6 +6,7 @@
 import argparse
 import os
 import sys
+from collections.abc import Mapping
 from typing import Callable, Dict, List, Optional, Sequence, Union
 
 from . import io as _io
@@ -280,7 +281,7 @@ class CompletionFinder(object):
         for action in parser._get_subactions():
             for alias in aliases_by_parser[parser.choices[action.dest]]:
                 if alias.startswith(cword_prefix):
-                    self._display_completions[alias] = action.help
+                    self._display_completions[alias] = action.help or ""
 
         completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
         return completions
@@ -301,7 +302,7 @@ class CompletionFinder(object):
             if action.option_strings:
                 for option_string in action.option_strings:
                     if option_string.startswith(cword_prefix):
-                        self._display_completions[option_string] = action.help
+                        self._display_completions[option_string] = action.help or ""
 
         option_completions = []
         for action in parser._actions:
@@ -380,21 +381,22 @@ class CompletionFinder(object):
                     continue
 
                 if callable(completer):
-                    completions_from_callable = [
-                        c
-                        for c in completer(
-                            prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args
-                        )
-                        if self.validator(c, cword_prefix)
-                    ]
-
-                    if completions_from_callable:
-                        completions += completions_from_callable
-                        for x in completions_from_callable:
-                            if isinstance(completer, ChoicesCompleter):
-                                self._display_completions[x] = active_action.help
-                            else:
-                                self._display_completions[x] = ""
+                    completer_output = completer(
+                        prefix=cword_prefix, action=active_action, parser=parser, parsed_args=parsed_args
+                    )
+                    if isinstance(completer_output, Mapping):
+                        for completion, description in completer_output.items():
+                            if self.validator(completion, cword_prefix):
+                                completions.append(completion)
+                                self._display_completions[completion] = description
+                    else:
+                        for completion in completer_output:
+                            if self.validator(completion, cword_prefix):
+                                completions.append(completion)
+                                if isinstance(completer, ChoicesCompleter):
+                                    self._display_completions[completion] = active_action.help or ""
+                                else:
+                                    self._display_completions[completion] = ""
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
