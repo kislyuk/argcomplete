@@ -11,7 +11,7 @@ from io import StringIO
 from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 
 import pexpect
-import pexpect.replwrap
+from pexpect.replwrap import REPLWrapper, PEXPECT_PROMPT, PEXPECT_CONTINUATION_PROMPT
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = os.path.dirname(TEST_DIR)
@@ -37,6 +37,25 @@ COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
 
 BASH_VERSION = subprocess.check_output(["bash", "-c", "echo $BASH_VERSION"]).decode()
 BASH_MAJOR_VERSION = int(BASH_VERSION.split(".")[0])
+
+
+def _repl_sh(command, args, non_printable_insert):
+    child = pexpect.spawn(command, args, echo=False, encoding='utf-8')
+    ps1 = PEXPECT_PROMPT[:5] + non_printable_insert + PEXPECT_PROMPT[5:]
+    ps2 = PEXPECT_CONTINUATION_PROMPT[:5] + non_printable_insert + PEXPECT_CONTINUATION_PROMPT[5:]
+    prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
+    return REPLWrapper(child, u'\\$', prompt_change, extra_init_cmd="export PAGER=cat")
+
+
+def bash_repl(command="bash"):
+    """Start a bash shell and return a :class:`REPLWrapper` object."""
+    bashrc = os.path.join(os.path.dirname(__file__), 'bashrc.sh')
+    return _repl_sh(command, ['--rcfile', bashrc], non_printable_insert='\\[\\]')
+
+
+def zsh_repl(command="zsh"):
+    """Start a zsh shell and return a :class:`REPLWrapper` object."""
+    return _repl_sh(command, ['--no-rcs'], non_printable_insert='%G')
 
 
 def setUpModule():
@@ -1215,7 +1234,7 @@ class TestBash(TestShellBase, unittest.TestCase):
     install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
 
     def setUp(self):
-        sh = pexpect.replwrap.bash()
+        sh = bash_repl()
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
         sh.run_command("export PATH={0}".format(path))
         sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
