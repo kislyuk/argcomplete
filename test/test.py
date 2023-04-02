@@ -71,7 +71,7 @@ def bash_repl(command="bash"):
 
 def zsh_repl(command="zsh"):
     sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%(!..)")
-    sh.run_command("autoload compinit; compinit -C")
+    sh.run_command("autoload compinit; compinit -u")
     return sh
 
 
@@ -1304,9 +1304,11 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
         "test_comp_point",  # FIXME
         "test_completion_environment",  # FIXME
         "test_continuation",  # FIXME
-        "test_parse_special_characters",  # FIXME
         "test_wordbreak_chars",  # FIXME
     ]
+
+    def test_parse_special_characters(self):
+        pass  # FIXME: test crashes in teardown
 
     def repl_provider(self):
         return zsh_repl()
