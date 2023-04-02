@@ -71,7 +71,7 @@ def bash_repl(command="bash"):
 
 def zsh_repl(command="zsh"):
     sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%(!..)")
-    sh.run_command("autoload compinit; compinit")
+    sh.run_command("autoload compinit; compinit -C")
     return sh
 
 
