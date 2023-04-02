@@ -39,30 +39,47 @@ BASH_VERSION = subprocess.check_output(["bash", "-c", "echo $BASH_VERSION"]).dec
 BASH_MAJOR_VERSION = int(BASH_VERSION.split(".")[0])
 
 
+class ArgcompleteREPLWrapper(REPLWrapper):
+    def run_command(self, command, **kwargs):
+        if "\n" in command:
+            raise Exception("newlines not supported in REPL input")
+        res = super().run_command(command, **kwargs)
+        if self.child.command.split("/")[-1] == "zsh":
+            if "\n" not in res:
+                raise Exception("Expected to see a newline in command response")
+            echo_cmd, actual_res = res.split("\n", 1)
+            actual_res = actual_res.replace("\x1b[0m\x1b[23m\x1b[24m\x1b[J", "")
+            return actual_res
+        else:
+            return res
+
+
 def _repl_sh(command, args, non_printable_insert):
-    child = pexpect.spawn(command, args, echo=False, encoding='utf-8')
+    os.environ["PS1"] = "$"
+    child = pexpect.spawn(command, args, echo=False, encoding="utf-8")
     ps1 = PEXPECT_PROMPT[:5] + non_printable_insert + PEXPECT_PROMPT[5:]
     ps2 = PEXPECT_CONTINUATION_PROMPT[:5] + non_printable_insert + PEXPECT_CONTINUATION_PROMPT[5:]
-    prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
-    return REPLWrapper(child, u'\\$', prompt_change, extra_init_cmd="export PAGER=cat")
+    prompt_change = f"PS1='{ps1}' PS2='{ps2}' PROMPT_COMMAND=''"
+    return ArgcompleteREPLWrapper(child, "\\$", prompt_change, extra_init_cmd="export PAGER=cat")
 
 
 def bash_repl(command="bash"):
-    """Start a bash shell and return a :class:`REPLWrapper` object."""
-    bashrc = os.path.join(os.path.dirname(__file__), 'bashrc.sh')
-    return _repl_sh(command, ['--rcfile', bashrc], non_printable_insert='\\[\\]')
+    bashrc = os.path.join(os.path.dirname(pexpect.__file__), "replwrap", "bashrc.sh")
+    sh = _repl_sh(command, ["--rcfile", bashrc], non_printable_insert="\\[\\]")
+    return sh
 
 
 def zsh_repl(command="zsh"):
-    """Start a zsh shell and return a :class:`REPLWrapper` object."""
-    return _repl_sh(command, ['--no-rcs'], non_printable_insert='%G')
+    sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%G")
+    sh.run_command("autoload compinit; compinit")
+    return sh
 
 
 def setUpModule():
-    os.environ['INPUTRC'] = os.path.join(os.path.dirname(__file__), 'inputrc')
+    os.environ["INPUTRC"] = os.path.join(os.path.dirname(__file__), "inputrc")
 
 
-class TempDir(object):
+class TempDir:
     """
     Temporary directory for testing FilesCompletion
 
@@ -1081,7 +1098,7 @@ class TestCheckModule(unittest.TestCase):
         open(path, "w").close()
 
 
-class TestShellBase(object):
+class TestShellBase:
     """
     Contains tests which should work in any shell using argcomplete.
 
@@ -1220,7 +1237,29 @@ class TestShellBase(object):
         self.assertEqual(self.sh.run_command("prog point 你好嘚瑟 \t"), "16\r\n")
 
 
-class TestBash(TestShellBase, unittest.TestCase):
+class TestBashZshBase(TestShellBase):
+    # 'dummy' argument unused; checks multi-command registration works
+    # by passing 'prog' as the second argument.
+    install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
+
+    def setUp(self):
+        sh = self.repl_provider()
+        path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
+        sh.run_command("export PATH={0}".format(path))
+        sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
+        if self.repl_provider == bash_repl:
+            # Disable the "python" module provided by bash-completion
+            sh.run_command("complete -r python python2 python3")
+        output = sh.run_command(self.install_cmd)
+        self.assertEqual(output, "")
+        # Register a dummy completion with an external argcomplete script
+        # to ensure this doesn't overwrite our previous registration.
+        output = sh.run_command('eval "$(register-python-argcomplete dummy --external-argcomplete-script dummy)"')
+        self.assertEqual(output, "")
+        self.sh = sh
+
+
+class TestBash(TestBashZshBase, unittest.TestCase):
     expected_failures = [
         "test_parse_special_characters_dollar",
         "test_exclamation_in_double_quotes",
@@ -1229,24 +1268,8 @@ class TestBash(TestShellBase, unittest.TestCase):
         # This requires compopt which is not available in 3.x.
         expected_failures.append("test_quoted_exact")
 
-    # 'dummy' argument unused; checks multi-command registration works
-    # by passing 'prog' as the second argument.
-    install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
-
-    def setUp(self):
-        sh = bash_repl()
-        path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
-        sh.run_command("export PATH={0}".format(path))
-        sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
-        # Disable the "python" module provided by bash-completion
-        sh.run_command("complete -r python python2 python3")
-        output = sh.run_command(self.install_cmd)
-        self.assertEqual(output, "")
-        # Register a dummy completion with an external argcomplete script
-        # to ensure this doesn't overwrite our previous registration.
-        output = sh.run_command('eval "$(register-python-argcomplete dummy --external-argcomplete-script dummy)"')
-        self.assertEqual(output, "")
-        self.sh = sh
+    def repl_provider(self):
+        return bash_repl()
 
     def test_one_space_after_exact(self):
         """Test exactly one space is appended after an exact match."""
@@ -1273,6 +1296,20 @@ class TestBash(TestShellBase, unittest.TestCase):
     def test_nounset(self):
         self.sh.run_command("set -o nounset")
         self.test_simple_completion()
+
+
+class TestZsh(TestBashZshBase, unittest.TestCase):
+    expected_failures = [
+        "test_parse_special_characters_dollar",
+        "test_comp_point",  # FIXME
+        "test_completion_environment",  # FIXME
+        "test_continuation",  # FIXME
+        "test_parse_special_characters",  # FIXME
+        "test_wordbreak_chars",  # FIXME
+    ]
+
+    def repl_provider(self):
+        return zsh_repl()
 
 
 @unittest.skipIf(BASH_MAJOR_VERSION < 4, "complete -D not supported")
@@ -1352,7 +1389,7 @@ class TestBashGlobal(TestBash):
         self._test_console_script(package=True, wheel=True)
 
 
-class Shell(object):
+class Shell:
     def __init__(self, shell):
         self.child = pexpect.spawn(shell, encoding="utf-8")
 
