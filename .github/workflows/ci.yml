@@ -18,7 +18,7 @@ jobs:
         python-version: ${{matrix.python-version}}
     - name: Install CI dependencies
       run: |
-        [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish
+        [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish zsh
         [[ $(uname) == Darwin ]] && brew install bash tcsh fish
         python -m pip install --quiet --upgrade codecov
     - run: make install
