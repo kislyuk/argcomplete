@@ -22,7 +22,7 @@ Installation
 
 On Linux, you will need to run the second command with ``sudo``. See `Activating global completion`_ below for details.
 
-Refresh your shell environment (start a new shell or ``source /etc/profile``).
+Refresh your shell environment (start a new shell).
 
 Synopsis
 --------
@@ -82,8 +82,9 @@ readline-style. Callable completers are simpler. They are called with the follow
 * ``parsed_args``: The result of argument parsing so far (the ``argparse.Namespace`` args object normally returned by
   ``ArgumentParser.parse_args()``).
 
-Completers should return their completions as a list of strings. An example completer for names of environment
-variables might look like this:
+Completers can return their completions as a sequence (list) of strings or a mapping (dict) of strings to their
+descriptions (zsh will display the descriptions as context help alongside completions). An example completer for names
+of environment variables might look like this:
 
 .. code-block:: python
 
