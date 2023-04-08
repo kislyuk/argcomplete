@@ -269,8 +269,8 @@ Argcomplete requires Python 3.7+.
 Support for other shells
 ------------------------
 Argcomplete maintainers provide support only for the bash and zsh shells on Linux and MacOS. For resources related to
-other shells and platforms, please see the `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_
-directory.
+other shells and platforms, including fish, tcsh, xonsh, powershell, and Windows, please see the
+`contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_ directory.
 
 Common Problems
 ---------------
@@ -299,7 +299,6 @@ Links
 * `Documentation <https://kislyuk.github.io/argcomplete/>`_
 * `Package distribution (PyPI) <https://pypi.python.org/pypi/argcomplete>`_
 * `Change log <https://github.com/kislyuk/argcomplete/blob/master/Changes.rst>`_
-* `xontrib-argcomplete <https://github.com/anki-code/xontrib-argcomplete>`_ - support argcomplete in `xonsh <https://github.com/xonsh/xonsh>`_ shell
 
 Bugs
 ~~~~
