@@ -35,12 +35,12 @@ parser.add_argument(
     dest="use_defaults",
     action="store_false",
     default=True,
-    help="When no matches are generated, do not fallback to readline's default completion",
+    help="when no matches are generated, do not fallback to readline's default completion (affects bash only)",
 )
 parser.add_argument(
     "--complete-arguments",
     nargs=argparse.REMAINDER,
-    help="arguments to call complete with; use of this option discards default options",
+    help="arguments to call complete with; use of this option discards default options (affects bash only)",
 )
 parser.add_argument(
     "-s",
