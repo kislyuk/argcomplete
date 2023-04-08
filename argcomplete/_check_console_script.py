@@ -17,12 +17,12 @@ import sys
 try:
     from importlib.metadata import entry_points as importlib_entry_points
 except ImportError:
-    from importlib_metadata import entry_points as importlib_entry_points  # type:ignore
+    from importlib_metadata import entry_points as importlib_entry_points  # type: ignore[import,no-redef]
 
 from ._check_module import ArgcompleteMarkerNotFound, find
 
 
-def main():
+def main() -> None:
     # Argument is the full path to the console script.
     script_path = sys.argv[1]
 

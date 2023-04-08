@@ -4,7 +4,9 @@
 # files with source copies of this package and derivative works is **REQUIRED** as specified by the Apache License.
 # See https://github.com/kislyuk/argcomplete for more info.
 
+from collections.abc import Iterable
 from shlex import quote
+from typing import Optional
 
 bashcode = r"""
 # Run something, muting output or redirecting it to the debug stream
@@ -118,16 +120,22 @@ Register-ArgumentCompleter -Native -CommandName %(executable)s -ScriptBlock {
 shell_codes = {"bash": bashcode, "tcsh": tcshcode, "fish": fishcode, "powershell": powershell_code}
 
 
-def shellcode(executables, use_defaults=True, shell="bash", complete_arguments=None, argcomplete_script=None):
+def shellcode(
+    executables: Iterable[str],
+    use_defaults: bool = True,
+    shell: str = "bash",
+    complete_arguments: Optional[Iterable[str]] = None,
+    argcomplete_script: Optional[str] = None,
+) -> str:
     """
     Provide the shell code required to register a python executable for use with the argcomplete module.
 
-    :param list(str) executables: Executables to be completed (when invoked exactly with this name)
+    :param Iterable(str) executables: Executables to be completed (when invoked exactly with this name)
     :param bool use_defaults: Whether to fallback to readline's default completion when no matches are generated
         (affects bash only)
     :param str shell: Name of the shell to output code for
     :param complete_arguments: Arguments to call complete with (affects bash only)
-    :type complete_arguments: list(str) or None
+    :type complete_arguments: Iterable(str) or None
     :param argcomplete_script: Script to call complete with, if not the executable to complete.
         If supplied, will be used to complete *all* passed executables.
     :type argcomplete_script: str or None

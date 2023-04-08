@@ -4,9 +4,11 @@
 import argparse
 import os
 import subprocess
+from collections.abc import Iterable
+from typing import Any, Callable, List, Union
 
 
-def _call(*args, **kwargs):
+def _call(*args, **kwargs) -> List[str]:
     # TODO: replace "universal_newlines" with "text" once 3.6 support is dropped
     kwargs["universal_newlines"] = True
     try:
@@ -22,20 +24,20 @@ class BaseCompleter:
 
     def __call__(
         self, *, prefix: str, action: argparse.Action, parser: argparse.ArgumentParser, parsed_args: argparse.Namespace
-    ):
+    ) -> Iterable[str]:
         raise NotImplementedError("This method should be implemented by a subclass.")
 
 
 class ChoicesCompleter(BaseCompleter):
-    def __init__(self, choices):
+    def __init__(self, choices: Iterable[Any]):
         self.choices = choices
 
-    def _convert(self, choice):
+    def _convert(self, choice: Any) -> str:
         if not isinstance(choice, str):
-            choice = str(choice)
+            return str(choice)
         return choice
 
-    def __call__(self, **kwargs):
+    def __call__(self, **kwargs) -> Iterable[str]:
         return (self._convert(c) for c in self.choices)
 
 
@@ -47,15 +49,15 @@ class FilesCompleter(BaseCompleter):
     File completer class, optionally takes a list of allowed extensions
     """
 
-    def __init__(self, allowednames=(), directories=True):
+    def __init__(self, allowednames: Union[str, Iterable[str]] = (), directories: bool = True):
         # Fix if someone passes in a string instead of a list
-        if isinstance(allowednames, (str, bytes)):
+        if isinstance(allowednames, str):
             allowednames = [allowednames]
 
         self.allowednames = [x.lstrip("*").lstrip(".") for x in allowednames]
         self.directories = directories
 
-    def __call__(self, prefix, **kwargs):
+    def __call__(self, *, prefix: str, **kwargs) -> Iterable[str]:
         completion = []
         if self.allowednames:
             if self.directories:
@@ -74,17 +76,16 @@ class FilesCompleter(BaseCompleter):
 
 
 class _FilteredFilesCompleter(BaseCompleter):
-    def __init__(self, predicate):
+    def __init__(self, predicate: Callable[[str], bool]):
         """
         Create the completer
 
         A predicate accepts as its only argument a candidate path and either
         accepts it or rejects it.
         """
-        assert predicate, "Expected a callable predicate"
         self.predicate = predicate
 
-    def __call__(self, prefix, **kwargs):
+    def __call__(self, *, prefix: str, **kwargs) -> Iterable[str]:
         """
         Provide completions on prefix
         """
@@ -105,7 +106,7 @@ class _FilteredFilesCompleter(BaseCompleter):
 
 
 class DirectoriesCompleter(_FilteredFilesCompleter):
-    def __init__(self):
+    def __init__(self) -> None:
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
 
 
@@ -114,10 +115,10 @@ class SuppressCompleter(BaseCompleter):
     A completer used to suppress the completion of specific arguments
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def suppress(self):
+    def suppress(self) -> bool:
         """
         Decide if the completion should be suppressed
         """
