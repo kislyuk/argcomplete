@@ -251,17 +251,6 @@ completion descriptions. All shellcode included with argcomplete is compatible w
 completer commands ``activate-global-python-argcomplete`` and ``eval "$(register-python-argcomplete my-python-app)"``
 work for zsh as well.
 
-External argcomplete script
----------------------------
-To register an argcomplete script for an arbitrary name, the ``--external-argcomplete-script`` argument of the ``register-python-argcomplete`` script can be used::
-
-    eval "$(register-python-argcomplete --external-argcomplete-script /path/to/script arbitrary-name)"
-
-This allows, for example, to use the auto completion functionality of argcomplete for an application not written in Python. 
-The command line interface of this program must be additionally implemented in a Python script with argparse and argcomplete and whenever the application is called the registered external argcomplete script is used for auto completion.
-
-This option can also be used in combination with the other supported shells.
-
 Python Support
 --------------
 Argcomplete requires Python 3.7+.

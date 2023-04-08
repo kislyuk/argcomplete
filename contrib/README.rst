@@ -43,3 +43,14 @@ Xonsh support
 -------------
 The third-party `xontrib-argcomplete <https://github.com/anki-code/xontrib-argcomplete>`_ project provides support for
 argcomplete in the `xonsh <https://github.com/xonsh/xonsh>`_ shell.
+
+External argcomplete script
+---------------------------
+To register an argcomplete script for an arbitrary name, the ``--external-argcomplete-script`` argument of the
+``register-python-argcomplete`` script can be used::
+
+    eval "$(register-python-argcomplete --external-argcomplete-script /path/to/script arbitrary-name)"
+
+This allows, for example, to use the auto completion functionality of argcomplete for an application not written in
+Python. The command line interface of this program must be additionally implemented in a Python script with argparse and
+argcomplete; whenever the application is called, the registered external argcomplete script is used for autocompletion.
