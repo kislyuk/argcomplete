@@ -20,7 +20,7 @@ Completion Description For Fish
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 By default help string is added as completion description.
 
-.. image:: docs/fish_help_string.png
+.. image:: ../docs/fish_help_string.png
 
 You can disable this feature by removing ``_ARGCOMPLETE_DFS`` variable, e.g::
 
