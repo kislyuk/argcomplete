@@ -1,95 +1,87 @@
 #!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
 
-# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 """
-Activate the generic bash-completion script for the argcomplete module.
+Activate the generic bash-completion script or zsh completion autoload function for the argcomplete module.
 """
 
 import argparse
-import fileinput
 import os
 import shutil
 import sys
 
 import argcomplete
 
-parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
-dest_opt = parser.add_argument(
-    "--dest", default="/etc/bash_completion.d", help="Specify the bash completion modules directory to install into"
-)
-parser.add_argument("--user", help="Install into user directory (~/.bash_completion.d/)", action="store_true")
-parser.add_argument(
-    "--no-defaults",
-    dest="use_defaults",
-    action="store_false",
-    default=True,
-    help="When no matches are generated, do not fallback to readline's default completion",
-)
-parser.add_argument(
-    "--complete-arguments",
-    nargs=argparse.REMAINDER,
-    help="arguments to call complete with; use of this option discards default options",
-)
+def get_zsh_system_dir():
+    return "/usr/local/share/zsh/site-functions"
+
+
+def get_bash_system_dir():
+    if "BASH_COMPLETION_COMPAT_DIR" in os.environ:
+        return os.environ["BASH_COMPLETION_COMPAT_DIR"]
+    elif os.path.exists("/etc/bash_completion.d"):
+        return "/etc/bash_completion.d"
+    else:
+        return "/usr/local/etc/bash_completion.d"
+
+
+def install_to_destination(dest):
+    activator = os.path.join(os.path.dirname(argcomplete.__file__), "bash_completion.d", "python-argcomplete")
+    if dest == "-":
+        with open(activator) as fh:
+            sys.stdout.write(fh.read())
+        return
+    destdir = os.path.dirname(dest)
+    if not os.path.exists(destdir):
+        try:
+            os.makedirs(destdir, exist_ok=True)
+        except Exception as e:
+            parser.error(f"path {destdir} does not exist and could not be created: {e}")
+    try:
+        print(f"Installing {activator} to {dest}...", file=sys.stderr)
+        shutil.copy(activator, dest)
+        print("Installed.", file=sys.stderr)
+    except Exception as e:
+        parser.error(
+            f"while installing to {dest}: {e}. Please run this command using sudo, or see --help for more options."
+        )
+
+
+parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument("--dest", help='Specify the shell completion modules directory to install into, or "-" for stdout')
+parser.add_argument("--user", help="Install into user directory", action="store_true")
 argcomplete.autocomplete(parser)
 args = parser.parse_args()
+destinations = []
 
-if args.user:
-    args.dest = os.path.expanduser("~/.bash_completion.d/")
-    if not os.path.exists(args.dest):
-        try:
-            os.mkdir(args.dest)
-        except Exception as e:
-            parser.error("Path {d} does not exist and could not be created: {e}".format(d=args.dest, e=e))
-elif not os.path.exists(args.dest) and args.dest != "-":
-    if sys.platform == "darwin" and args.dest == dest_opt.default and os.path.exists("/usr/local" + dest_opt.default):
-        args.dest = "/usr/local" + dest_opt.default
-    else:
-        parser.error("Path {d} does not exist".format(d=args.dest))
-
-activator = os.path.join(os.path.dirname(argcomplete.__file__), "bash_completion.d", "python-argcomplete")
-
-if args.complete_arguments is None:
-    complete_options = "-o default -o bashdefault" if args.use_defaults else "-o bashdefault"
+if args.dest:
+    if args.dest != "-" and not os.path.exists(args.dest):
+        parser.error(f"directory {args.dest} was specified via --dest, but it does not exist")
+    destinations.append(args.dest)
+elif args.user:
+    print(
+        'WARNING: zsh has no standard user completions directory. To use global completion with zsh, please run this '
+        'command using sudo, or run "echo $fpath" and install the completion module into one of the listed directories'
+        ' using "activate-global-python-argcomplete --dest=- > completions-dir/_python-argcomplete".',
+        file=sys.stderr,
+    )
+    user_destination = os.path.expanduser("~/.bash_completion")
+    if os.path.exists(user_destination):
+        parser.error(
+            f'Bash user completion configuration file {user_destination} already exists. Please remove it and try '
+            f'again, or use "activate-global-python-argcomplete --dest=- >> {user_destination}".'
+        )
+    destinations.append(os.path.expanduser("~/.bash_completion"))
 else:
-    complete_options = " ".join(args.complete_arguments)
-complete_call = "complete{} -D -F _python_argcomplete_global".format(" " + complete_options if complete_options else "")
+    destinations.append(f"{get_zsh_system_dir()}/_python-argcomplete")
+    destinations.append(f"{get_bash_system_dir()}/python-argcomplete")
 
+for destination in destinations:
+    install_to_destination(destination)
 
-def replaceCompleteCall(line):
-    if line.startswith("complete") and "_python_argcomplete_global" in line:
-        return complete_call + ("\n" if line.endswith("\n") else "")
-    else:
-        return line
-
-
-if args.dest == "-":
-    for line in open(activator):
-        sys.stdout.write(replaceCompleteCall(line))
-else:
-    dest = os.path.join(args.dest, "python-argcomplete")
-
-    sys.stdout.write("Installing bash completion script " + dest)
-    if not args.use_defaults:
-        sys.stdout.write(" without -o default")
-    elif args.complete_arguments:
-        sys.stdout.write(" with options: " + complete_options)
-    sys.stdout.write("\n")
-
-    try:
-        shutil.copy(activator, dest)
-        if args.complete_arguments or not args.use_defaults:
-            for line in fileinput.input(dest, inplace=True):
-                # fileinput with inplace=True redirects stdout to the edited file
-                sys.stdout.write(replaceCompleteCall(line))
-    except Exception as e:
-        err = str(e)
-        if args.dest == dest_opt.default:
-            err += (
-                "\nPlease try --user to install into a user directory, "
-                "or --dest to specify the bash completion modules directory"
-            )
-        parser.error(err)
+if args.dest is None:
+    print("Please restart your shell or source the installed file to activate it.", file=sys.stderr)

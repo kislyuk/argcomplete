@@ -5,13 +5,12 @@ import glob
 from setuptools import find_packages, setup
 
 install_requires = []
-lint_require = ["flake8", "mypy"]
-tests_require = ["coverage", "pexpect", "wheel"] + lint_require
+tests_require = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
 importlib_backport_requires = ["importlib-metadata >= 0.23, < 6"]
 
 setup(
     name="argcomplete",
-    version="2.1.1",
+    version="3.0.5",
     url="https://github.com/kislyuk/argcomplete",
     project_urls={
         "Documentation": "https://kislyuk.github.io/argcomplete",
@@ -29,13 +28,12 @@ setup(
     tests_require=tests_require,
     extras_require={
         "test": tests_require,
-        "lint": lint_require,
         ':python_version == "3.6"': importlib_backport_requires,
         ':python_version == "3.7"': importlib_backport_requires,
     },
     packages=find_packages(exclude=["test", "test.*"]),
     scripts=glob.glob("scripts/*"),
-    package_data={"argcomplete": ["bash_completion.d/python-argcomplete"]},
+    package_data={"argcomplete": ["bash_completion.d/python-argcomplete", "py.typed"]},
     zip_safe=False,
     include_package_data=True,
     platforms=["MacOS X", "Posix"],
@@ -48,11 +46,11 @@ setup(
         "Operating System :: POSIX",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Development Status :: 5 - Production/Stable",

@@ -1,3 +1,53 @@
+Changes for v3.0.5 (2023-03-25)
+===============================
+
+-  Call \_default as fallback in zsh global completion hook
+
+-  Begin support for mapping-emitting completers
+
+Changes for v3.0.4 (2023-03-21)
+===============================
+
+-  activate-global-python-argcomplete: do not overwrite existing dotfile
+   in user directory
+
+-  Add NOTICE file
+
+-  Establish long term name for split_line as
+   argcomplete.lexers.split_line
+
+Changes for v3.0.3 (2023-03-20)
+===============================
+
+-  Re-add split_line to API (#419)
+
+Changes for v3.0.2 (2023-03-19)
+===============================
+
+Fix zsh default completion issues
+
+Changes for v3.0.1 (2023-03-19)
+===============================
+
+-  Fix zsh autoload issues
+
+Changes for v3.0.0 (2023-03-19)
+===============================
+
+-  Fully support zsh. Argcomplete now supports completion descriptions
+   and global completion in zsh.
+
+-  Clean up top level namespace.
+
+-  Documentation and test improvements.
+
+Changes for v2.1.2 (2023-03-17)
+===============================
+
+-  Test infrastructure improvements
+
+-  Indicate that there is no support commitment for fish and tcsh shells
+
 Changes for v2.1.1 (2023-03-06)
 ===============================
 

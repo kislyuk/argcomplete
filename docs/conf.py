@@ -5,12 +5,18 @@ copyright = "Andrey Kislyuk and argcomplete contributors"
 author = "Andrey Kislyuk"
 version = ""
 release = ""
-language = None
+language = "en"
 master_doc = "index"
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx.ext.intersphinx"]
 source_suffix = [".rst", ".md"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
+autodoc_member_order = "bysource"
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented_params"
+intersphinx_mapping = {
+    "https://docs.python.org/3": None,
+}
 
 if "readthedocs.org" in os.getcwd().split("/"):
     with open("index.rst", "w") as fh:

@@ -10,23 +10,20 @@ jobs:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
-        exclude:
-          - os: ubuntu-22.04
-            python-version: 3.6
 
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with:
         python-version: ${{matrix.python-version}}
-    - name: Install
+    - name: Install CI dependencies
       run: |
-        [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish
+        [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish zsh
         [[ $(uname) == Darwin ]] && brew install bash tcsh fish
         python -m pip install --quiet --upgrade codecov
-    - name: Test
-      run: |
-        make test
+    - run: make install
+    - run: make lint
+    - run: make test
     - uses: codecov/codecov-action@v3
   black:
     runs-on: ubuntu-22.04

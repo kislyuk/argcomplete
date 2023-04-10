@@ -1,6 +1,7 @@
-# Copyright 2012-2021, Andrey Kislyuk and argcomplete contributors.
+# Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+import argparse
 import os
 import subprocess
 
@@ -14,7 +15,18 @@ def _call(*args, **kwargs):
         return []
 
 
-class ChoicesCompleter(object):
+class BaseCompleter:
+    """
+    This is the base class that all argcomplete completers should subclass.
+    """
+
+    def __call__(
+        self, *, prefix: str, action: argparse.Action, parser: argparse.ArgumentParser, parsed_args: argparse.Namespace
+    ):
+        raise NotImplementedError("This method should be implemented by a subclass.")
+
+
+class ChoicesCompleter(BaseCompleter):
     def __init__(self, choices):
         self.choices = choices
 
@@ -30,7 +42,7 @@ class ChoicesCompleter(object):
 EnvironCompleter = ChoicesCompleter(os.environ)
 
 
-class FilesCompleter(object):
+class FilesCompleter(BaseCompleter):
     """
     File completer class, optionally takes a list of allowed extensions
     """
@@ -61,7 +73,7 @@ class FilesCompleter(object):
         return completion
 
 
-class _FilteredFilesCompleter(object):
+class _FilteredFilesCompleter(BaseCompleter):
     def __init__(self, predicate):
         """
         Create the completer
@@ -97,7 +109,7 @@ class DirectoriesCompleter(_FilteredFilesCompleter):
         _FilteredFilesCompleter.__init__(self, predicate=os.path.isdir)
 
 
-class SuppressCompleter(object):
+class SuppressCompleter(BaseCompleter):
     """
     A completer used to suppress the completion of specific arguments
     """

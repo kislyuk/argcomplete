@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+# Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors. Licensed under the terms of the
+# `Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_. Distribution of the LICENSE and NOTICE
+# files with source copies of this package and derivative works is **REQUIRED** as specified by the Apache License.
+# See https://github.com/kislyuk/argcomplete for more info.
 
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
+from shlex import quote
 
 bashcode = r"""
 # Run something, muting output or redirecting it to the debug stream
@@ -32,25 +33,42 @@ __python_argcomplete_run_inner() {
 
 _python_argcomplete%(function_suffix)s() {
     local IFS=$'\013'
-    local SUPPRESS_SPACE=0
-    if compopt +o nospace 2> /dev/null; then
-        SUPPRESS_SPACE=1
-    fi
-    COMPREPLY=( $(IFS="$IFS" \
-                  COMP_LINE="$COMP_LINE" \
-                  COMP_POINT="$COMP_POINT" \
-                  COMP_TYPE="$COMP_TYPE" \
-                  _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
-                  _ARGCOMPLETE=1 \
-                  _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-                  __python_argcomplete_run "%(argcomplete_script)s") )
-    if [[ $? != 0 ]]; then
-        unset COMPREPLY
-    elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
-        compopt -o nospace
+    if [[ -n "${ZSH_VERSION-}" ]]; then
+        local completions
+        completions=($(IFS="$IFS" \
+            COMP_LINE="$BUFFER" \
+            COMP_POINT="$CURSOR" \
+            _ARGCOMPLETE=1 \
+            _ARGCOMPLETE_SHELL="zsh" \
+            _ARGCOMPLETE_SUPPRESS_SPACE=1 \
+            __python_argcomplete_run "${words[1]}") )
+        _describe "${words[1]}" completions -o nosort
+    else
+        local SUPPRESS_SPACE=0
+        if compopt +o nospace 2> /dev/null; then
+            SUPPRESS_SPACE=1
+        fi
+        COMPREPLY=($(IFS="$IFS" \
+            COMP_LINE="$COMP_LINE" \
+            COMP_POINT="$COMP_POINT" \
+            COMP_TYPE="$COMP_TYPE" \
+            _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
+            _ARGCOMPLETE=1 \
+            _ARGCOMPLETE_SHELL="bash" \
+            _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
+            __python_argcomplete_run "%(argcomplete_script)s"))
+        if [[ $? != 0 ]]; then
+            unset COMPREPLY
+        elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
+            compopt -o nospace
+        fi
     fi
 }
-complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
+if [[ -z "${ZSH_VERSION-}" ]]; then
+    complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
+else
+    compdef _python_argcomplete%(function_suffix)s %(executables)s
+fi
 """
 
 tcshcode = """\
@@ -105,9 +123,10 @@ def shellcode(executables, use_defaults=True, shell="bash", complete_arguments=N
     Provide the shell code required to register a python executable for use with the argcomplete module.
 
     :param list(str) executables: Executables to be completed (when invoked exactly with this name)
-    :param bool use_defaults: Whether to fallback to readline's default completion when no matches are generated.
-    :param str shell: Name of the shell to output code for (bash or tcsh)
-    :param complete_arguments: Arguments to call complete with
+    :param bool use_defaults: Whether to fallback to readline's default completion when no matches are generated
+        (affects bash only)
+    :param str shell: Name of the shell to output code for
+    :param complete_arguments: Arguments to call complete with (affects bash only)
     :type complete_arguments: list(str) or None
     :param argcomplete_script: Script to call complete with, if not the executable to complete.
         If supplied, will be used to complete *all* passed executables.
@@ -119,7 +138,7 @@ def shellcode(executables, use_defaults=True, shell="bash", complete_arguments=N
     else:
         complete_options = " ".join(complete_arguments)
 
-    if shell == "bash":
+    if shell == "bash" or shell == "zsh":
         quoted_executables = [quote(i) for i in executables]
         executables_list = " ".join(quoted_executables)
         script = argcomplete_script
