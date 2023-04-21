@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 install_requires = []
 tests_require = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
-importlib_backport_requires = ["importlib-metadata >= 0.23, < 6"]
+importlib_backport_requires = ["importlib-metadata >= 0.23, < 7"]
 
 setup(
     name="argcomplete",
