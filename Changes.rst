@@ -1,3 +1,14 @@
+Changes for v3.0.6 (2023-04-22)
+===============================
+
+-  Allow importlib-metadata 6.x; skip test failures on Python 3.7 (#420,
+   #424)
+
+-  Note completers can return iterables of strings, not just lists
+   (#422)
+
+-  Documentation and test improvements
+
 Changes for v3.0.5 (2023-03-25)
 ===============================
 
