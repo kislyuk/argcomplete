@@ -1369,11 +1369,13 @@ class TestBashGlobal(TestBash):
             self.assertEqual(self.sh.run_command(command), "arg\r\n")
 
     @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
+    @unittest.skipIf(sys.version_info < (3, 8), "Skip test that fails on Python 3.7 with importlib_metadata > 4")
     def test_console_script_module(self):
         """Test completing a console_script for a module."""
         self._test_console_script()
 
     @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
+    @unittest.skipIf(sys.version_info < (3, 8), "Skip test that fails on Python 3.7 with importlib_metadata > 4")
     def test_console_script_package(self):
         """Test completing a console_script for a package."""
         self._test_console_script(package=True)
