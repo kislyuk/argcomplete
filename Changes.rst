@@ -1,3 +1,8 @@
+Changes for v3.0.7 (2023-04-23)
+===============================
+
+-  Test suite: Use general regex to cut zsh reset ANSI sequences (#425)
+
 Changes for v3.0.6 (2023-04-22)
 ===============================
 
