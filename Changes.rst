@@ -1,3 +1,8 @@
+Changes for v3.0.8 (2023-04-23)
+===============================
+
+-  Test suite shell wrapper: Accept OSError on exit
+
 Changes for v3.0.7 (2023-04-23)
 ===============================
 
