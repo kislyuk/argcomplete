@@ -3,6 +3,7 @@ import argparse
 import contextlib
 import os
 import os.path
+import re
 import shutil
 import subprocess
 import sys
@@ -11,7 +12,7 @@ from io import StringIO
 from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 
 import pexpect
-from pexpect.replwrap import REPLWrapper, PEXPECT_PROMPT, PEXPECT_CONTINUATION_PROMPT
+from pexpect.replwrap import PEXPECT_CONTINUATION_PROMPT, PEXPECT_PROMPT, REPLWrapper
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = os.path.dirname(TEST_DIR)
@@ -48,8 +49,8 @@ class ArgcompleteREPLWrapper(REPLWrapper):
             if "\n" not in res:
                 raise Exception("Expected to see a newline in command response")
             echo_cmd, actual_res = res.split("\n", 1)
-            actual_res = actual_res.replace("\x1b[0m\x1b[23m\x1b[24m\x1b[J", "")
-            return actual_res
+            res_without_ansi_seqs = re.sub(r"\x1b\[0m.+\x1b\[J", "", actual_res)
+            return res_without_ansi_seqs
         else:
             return res
 
