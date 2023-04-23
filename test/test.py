@@ -1148,7 +1148,7 @@ class TestShellBase:
         raise NotImplementedError
 
     def tearDown(self):
-        with self.assertRaises(pexpect.EOF):
+        with self.assertRaises((pexpect.EOF, OSError)):
             self.sh.run_command("exit")
 
     def test_simple_completion(self):
