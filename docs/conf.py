@@ -7,7 +7,7 @@ version = ""
 release = ""
 language = "en"
 master_doc = "index"
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx.ext.intersphinx"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx.ext.intersphinx", "sphinx_copybutton"]
 source_suffix = [".rst", ".md"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
@@ -17,24 +17,19 @@ autodoc_typehints_description_target = "documented_params"
 intersphinx_mapping = {
     "https://docs.python.org/3": None,
 }
+templates_path = [""]
 
 if "readthedocs.org" in os.getcwd().split("/"):
     with open("index.rst", "w") as fh:
         fh.write("Documentation for this project has moved to https://kislyuk.github.io/" + project)
 else:
-    import guzzle_sphinx_theme
-
-    html_theme_path = guzzle_sphinx_theme.html_theme_path()
-    html_theme = "guzzle_sphinx_theme"
-    html_theme_options = {
-        "project_nav_name": project,
-        "projectlink": "https://github.com/kislyuk/" + project,
-    }
+    html_theme = "furo"
     html_sidebars = {
         "**": [
-            "logo-text.html",
-            # "globaltoc.html",
-            "localtoc.html",
-            "searchbox.html",
+            "sidebar/brand.html",
+            "sidebar/search.html",
+            "sidebar/scroll-start.html",
+            "toc.html",
+            "sidebar/scroll-end.html",
         ]
     }
