@@ -10,3 +10,11 @@ API documentation
    :imported-members:
    :special-members:
    :exclude-members: __weakref__
+
+Change log
+==========
+
+.. toctree::
+   :maxdepth: 5
+
+   changelog
