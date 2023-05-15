@@ -1,28 +1,9 @@
-# -------------------------------------------------------------------------------------------------
-# Build system settings
-# -------------------------------------------------------------------------------------------------
 [build-system]
 requires = ["setuptools>=67.7.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-include-package-data = true
-platforms = ["MacOS X", "Posix"]
-zip-safe = false
-
-[tool.setuptools.packages.find]
-include = ["argcomplete"]
-namespaces = false # to disable scanning PEP 420 namespaces (true by default)
-
-[tool.setuptools.package-data]
-argcomplete = ["py.typed", "bash_completion.d/python-argcomplete"]
-
-# -------------------------------------------------------------------------------------------------
-# Project Metadata
-# -------------------------------------------------------------------------------------------------
 [project]
 name = "argcomplete"
-version = "3.0.8"
 description = "Bash tab completion for argparse"
 readme = "README.rst"
 requires-python = ">=3.6"
@@ -61,10 +42,6 @@ test = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
 "Issue Tracker"= "https://github.com/kislyuk/argcomplete/issues"
 "Change Log"= "https://github.com/kislyuk/argcomplete/blob/master/Changes.rst"
 
-
-# -------------------------------------------------------------------------------------------------
-# Linter and formatter settings
-# -------------------------------------------------------------------------------------------------
 [tool.black]
 line-length = 120
 exclude = ".*/version.py"
