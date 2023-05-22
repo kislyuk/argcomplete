@@ -1355,7 +1355,7 @@ class TestBashGlobal(TestBash):
             self.sh.run_command("export PATH=$PATH:./bin")
             self.sh.run_command("export PYTHONPATH=.:$PYTHONPATH")
             test_package = os.path.join(TEST_DIR, "test_package")
-            command = "pip install {} --target .".format(test_package)
+            command = "pip install --no-build-isolation {} --target .".format(test_package)
             if not wheel:
                 command += " --no-binary :all:"
                 if sys.platform == "darwin":
