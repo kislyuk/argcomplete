@@ -520,7 +520,11 @@ class CompletionFinder(object):
             completions = [c.replace("'", r"'\''") for c in completions]
 
         # PowerShell uses ` as escape character.
-        escape_char = '`' if os.getenv('PSModulePath') else "\\"
+        if os.getenv('PSModulePath'):
+            escape_char = '`'
+            special_chars = special_chars.replace('`', '')
+        else:
+            escape_char = "\\"
         for char in special_chars:
             completions = [c.replace(char, escape_char + char) for c in completions]
 
