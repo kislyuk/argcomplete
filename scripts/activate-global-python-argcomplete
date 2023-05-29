@@ -23,10 +23,10 @@ def get_zsh_system_dir():
 def get_bash_system_dir():
     if "BASH_COMPLETION_COMPAT_DIR" in os.environ:
         return os.environ["BASH_COMPLETION_COMPAT_DIR"]
-    elif os.path.exists("/etc/bash_completion.d"):
-        return "/etc/bash_completion.d"
+    elif sys.platform == "darwin":
+        return "/usr/local/etc/bash_completion.d" # created by homebrew
     else:
-        return "/usr/local/etc/bash_completion.d"
+        return "/etc/bash_completion.d" # created by bash-completion
 
 
 def install_to_destination(dest):
