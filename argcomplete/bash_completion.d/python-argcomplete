@@ -47,7 +47,9 @@ __python_argcomplete_run_inner() {
 
 __python_argcomplete_upshift_bash_rematch() {
     if [[ -z "${ZSH_VERSION-}" ]]; then
-        BASH_REMATCH=( "" "${BASH_REMATCH[@]}" )
+        _BASH_REMATCH=( "" "${BASH_REMATCH[@]}" )
+    else
+        _BASH_REMATCH=( "${BASH_REMATCH[@]}" )
     fi
 }
 
@@ -73,13 +75,13 @@ __python_argcomplete_scan_head() {
         read -r -N 1024 < "$file"
     fi
 
-    # Since, ZSH does not support a -n option we
+    # Since ZSH does not support a -n option, we
     # trim all characters after the first line in both shells
     if [[ "$target" = "interpreter" ]]; then
         read -r <<< "$REPLY"
     fi
 
-    local regex;
+    local regex
 
     case "$target" in
             magic_string) regex='PYTHON_ARGCOMPLETE_OK' ;;
@@ -116,6 +118,10 @@ _python_argcomplete_global() {
         # BASH_REMATCH variable rather than MATCH
         setopt local_options BASH_REMATCH
     fi
+
+    # 1-based version of BASH_REMATCH. Modifying BASH_REMATCH
+    # directly causes older versions of Bash to exit
+    local _BASH_REMATCH="";
 
     local executable=""
 
@@ -158,20 +164,27 @@ _python_argcomplete_global() {
         fi
     elif __python_argcomplete_which "$executable" >/dev/null 2>&1; then
         local SCRIPT_NAME=$(__python_argcomplete_which "$executable")
-	__python_argcomplete_scan_head_noerr "$SCRIPT_NAME" interpreter
+        __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" interpreter
         if (__python_argcomplete_which pyenv && [[ "$SCRIPT_NAME" = $(pyenv root)/shims/* ]]) >/dev/null 2>&1; then
             local SCRIPT_NAME=$(pyenv which "$executable")
         fi
         if __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" magic_string; then
-            local ARGCOMPLETE=1
-        elif __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" interpreter && [[ "${BASH_REMATCH[2]}" =~ ^.*(python|pypy)[0-9\.]*$ ]]; then
+            ARGCOMPLETE=1
+        elif __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" interpreter; then
             __python_argcomplete_upshift_bash_rematch
-            local interpreter="${BASH_REMATCH[2]}"
+            local interpreter="${_BASH_REMATCH[2]}"
+
+            if [[ -n "${ZSH_VERSION-}" ]]; then
+                interpreter=($=interpreter)
+            else
+                interpreter=($interpreter)
+            fi
+
             if (__python_argcomplete_scan_head_noerr "$SCRIPT_NAME" easy_install \
-                && "$interpreter" "$(__python_argcomplete_which python-argcomplete-check-easy-install-script)" "$SCRIPT_NAME") >/dev/null 2>&1; then
-                local ARGCOMPLETE=1
-            elif __python_argcomplete_run "$interpreter" -m argcomplete._check_console_script "$SCRIPT_NAME"; then
-                local ARGCOMPLETE=1
+                && "${interpreter[@]}" "$(__python_argcomplete_which python-argcomplete-check-easy-install-script)" "$SCRIPT_NAME") >/dev/null 2>&1; then
+                ARGCOMPLETE=1
+            elif __python_argcomplete_run "${interpreter[@]}" -m argcomplete._check_console_script "$SCRIPT_NAME"; then
+                ARGCOMPLETE=1
             fi
         fi
     fi
@@ -187,7 +200,7 @@ _python_argcomplete_global() {
                 _ARGCOMPLETE_SHELL="zsh" \
                 _ARGCOMPLETE_SUPPRESS_SPACE=1 \
                 __python_argcomplete_run "$executable" "${(@)req_argv[1, ${ARGCOMPLETE}-1]}"))
-            _describe "$executable" completions -o nosort
+            _describe "$executable" completions
         else
             COMPREPLY=($(IFS="$IFS" \
                 COMP_LINE="$COMP_LINE" \
