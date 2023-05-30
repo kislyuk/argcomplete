@@ -7,7 +7,7 @@ _DEBUG = "_ARC_DEBUG" in os.environ
 debug_stream = sys.stderr
 
 
-def debug(*args):
+def debug(*args) -> None:
     if _DEBUG:
         print(file=debug_stream, *args)
 
@@ -33,7 +33,7 @@ def mute_stderr():
         sys.stderr = stderr
 
 
-def warn(*args):
+def warn(*args) -> None:
     """
     Prints **args** to standard error when running completions. This will interrupt the user's command line interaction;
     use it to indicate an error condition that is preventing your completer from working.

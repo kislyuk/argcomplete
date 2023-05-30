@@ -11,7 +11,7 @@ import sys
 import tokenize
 
 try:
-    from importlib.util import find_spec  # type:ignore
+    from importlib.util import find_spec  # type: ignore
 except ImportError:
     import typing as t
     from collections import namedtuple
@@ -19,7 +19,7 @@ except ImportError:
 
     ModuleSpec = namedtuple("ModuleSpec", ["origin", "has_location", "submodule_search_locations"])
 
-    def find_spec(  # type:ignore
+    def find_spec(  # type: ignore[misc]
         name: str,
         package: t.Optional[str] = None,
     ) -> t.Optional[ModuleSpec]:
@@ -62,7 +62,7 @@ def find(name, return_package=False):
         return path + ".py"
 
 
-def main():
+def main() -> None:
     try:
         name = sys.argv[1]
     except IndexError:

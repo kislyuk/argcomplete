@@ -7,10 +7,10 @@ import argparse
 import os
 import sys
 from collections.abc import Mapping
-from typing import Callable, Dict, List, Optional, Sequence, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 from . import io as _io
-from .completers import ChoicesCompleter, FilesCompleter, SuppressCompleter
+from .completers import BaseCompleter, ChoicesCompleter, FilesCompleter, SuppressCompleter
 from .io import debug, mute_stderr
 from .lexers import split_line
 from .packages._argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
@@ -26,7 +26,7 @@ safe_actions = {
 }
 
 
-def default_validator(completion, prefix):
+def default_validator(completion: str, prefix: str) -> bool:
     return completion.startswith(prefix)
 
 
@@ -40,12 +40,12 @@ class CompletionFinder(object):
     def __init__(
         self,
         argument_parser=None,
-        always_complete_options=True,
-        exclude=None,
-        validator=None,
-        print_suppressed=False,
-        default_completer=FilesCompleter(),
-        append_space=None,
+        always_complete_options: Union[bool, str] = True,
+        exclude: Optional[Sequence[str]] = None,
+        validator: Optional[Callable[[str, str], bool]] = None,
+        print_suppressed: bool = False,
+        default_completer: BaseCompleter = FilesCompleter(),
+        append_space: Optional[bool] = None,
     ):
         self._parser = argument_parser
         self.always_complete_options = always_complete_options
@@ -65,14 +65,14 @@ class CompletionFinder(object):
         self,
         argument_parser: argparse.ArgumentParser,
         always_complete_options: Union[bool, str] = True,
-        exit_method: Callable = os._exit,
+        exit_method: Callable[[int], Any] = os._exit,
         output_stream=None,
         exclude: Optional[Sequence[str]] = None,
-        validator: Optional[Callable] = None,
+        validator: Optional[Callable[[str, str], bool]] = None,
         print_suppressed: bool = False,
         append_space: Optional[bool] = None,
-        default_completer=FilesCompleter(),
-    ):
+        default_completer: BaseCompleter = FilesCompleter(),
+    ) -> None:
         """
         :param argument_parser: The argument parser to autocomplete on
         :param always_complete_options:
@@ -103,7 +103,7 @@ class CompletionFinder(object):
         added to argcomplete.safe_actions, if their values are wanted in the ``parsed_args`` completer argument, or
         their execution is otherwise desirable.
         """
-        self.__init__(  # type: ignore
+        self.__init__(  # type: ignore[misc]
             argument_parser,
             always_complete_options=always_complete_options,
             exclude=exclude,
@@ -242,7 +242,7 @@ class CompletionFinder(object):
                     continue
 
                 # TODO: accomplish this with super
-                class IntrospectAction(action.__class__):  # type: ignore
+                class IntrospectAction(action.__class__):  # type: ignore[name-defined]
                     def __call__(self, parser, namespace, values, option_string=None):
                         debug("Action stub called on", self)
                         debug("\targs:", parser, namespace, values, option_string)
@@ -400,7 +400,7 @@ class CompletionFinder(object):
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
-                        next_completion = completer.complete(cword_prefix, i)  # type: ignore
+                        next_completion = completer.complete(cword_prefix, i)
                         if next_completion is None:
                             break
                         if self.validator(next_completion, cword_prefix):
