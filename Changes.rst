@@ -1,3 +1,17 @@
+Changes for v3.1.0 (2023-06-10)
+===============================
+
+-  setup.py -> pyproject.toml migration start (#427)
+
+-  Improve user install logic in activate-global-python-argcomplete
+   (#437)
+
+-  Ensure Python 3.7 compatibility in check_console_script (#436)
+
+-  ZSH implementation fixes (#431, #433)
+
+-  Documentation improvements
+
 Changes for v3.0.8 (2023-04-23)
 ===============================
 
