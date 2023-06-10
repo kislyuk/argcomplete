@@ -33,7 +33,7 @@ setup(
     },
     packages=find_packages(exclude=["test", "test.*"]),
     scripts=glob.glob("scripts/*"),
-    package_data={"argcomplete": ["bash_completion.d/python-argcomplete", "py.typed"]},
+    package_data={"argcomplete": ["bash_completion.d/_python-argcomplete", "py.typed"]},
     zip_safe=False,
     include_package_data=True,
     platforms=["MacOS X", "Posix"],
