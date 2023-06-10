@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=67.7.2", "wheel"]
+requires = ["setuptools>=67.7.2", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,6 +10,7 @@ requires-python = ">=3.6"
 license = { text = "Apache Software License" }
 authors = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
 maintainers = []
+dynamic = ["version"]
 classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
@@ -41,6 +42,8 @@ test = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
 "Source Code"= "https://github.com/kislyuk/argcomplete"
 "Issue Tracker"= "https://github.com/kislyuk/argcomplete/issues"
 "Change Log"= "https://github.com/kislyuk/argcomplete/blob/master/Changes.rst"
+
+[tool.setuptools_scm]
 
 [tool.black]
 line-length = 120
