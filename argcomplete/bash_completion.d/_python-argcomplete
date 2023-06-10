@@ -3,6 +3,8 @@
 # Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+# Note: both the leading underscore in the name of this file and the first line (compdef) are required by zsh
+
 # Copy of __expand_tilde_by_ref from bash-completion
 # ZSH implementation added
 __python_argcomplete_expand_tilde_by_ref () {

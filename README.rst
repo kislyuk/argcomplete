@@ -236,13 +236,10 @@ must be attempting to complete it by that name. The above line alone would **not
 
 Activating global completion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The script ``activate-global-python-argcomplete`` will try to install the global completion script
-``bash_completion.d/python-argcomplete`` (`see on GitHub`_) into an appropriate location on your system for both bash
-and zsh. The specific location depends on your platform and whether you installed argcomplete system-wide using
-``sudo`` or locally (into your user's home directory). The script will prompt you for confirmation before taking any
-actions. Run ``activate-global-python-argcomplete --help`` to see other options.
-
-.. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete
+The script ``activate-global-python-argcomplete`` installs the global completion script
+`bash_completion.d/_python-argcomplete <https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/_python-argcomplete>`_
+into an appropriate location on your system for both bash and zsh. The specific location depends on your platform and
+whether you installed argcomplete system-wide using ``sudo`` or locally (into your user's home directory).
 
 Zsh Support
 -----------
