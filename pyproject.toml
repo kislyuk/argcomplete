@@ -1,3 +1,50 @@
+[build-system]
+requires = ["setuptools>=67.7.2", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argcomplete"
+description = "Bash tab completion for argparse"
+readme = "README.rst"
+requires-python = ">=3.6"
+license = { text = "Apache Software License" }
+authors = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
+maintainers = []
+dynamic = ["version"]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: POSIX",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Development Status :: 5 - Production/Stable",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Shells",
+  "Topic :: Terminals",
+]
+dependencies = ["importlib-metadata >= 0.23, < 7; python_version < '3.8'"]
+
+[project.optional-dependencies]
+test = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
+
+[project.urls]
+"Documentation"= "https://kislyuk.github.io/argcomplete"
+"Source Code"= "https://github.com/kislyuk/argcomplete"
+"Issue Tracker"= "https://github.com/kislyuk/argcomplete/issues"
+"Change Log"= "https://github.com/kislyuk/argcomplete/blob/master/Changes.rst"
+
+[tool.setuptools_scm]
+
 [tool.black]
 line-length = 120
 exclude = ".*/version.py"
