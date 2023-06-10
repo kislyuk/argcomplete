@@ -20,7 +20,7 @@ Installation
     pip install argcomplete
     activate-global-python-argcomplete
 
-On Linux, you will need to run the second command with ``sudo``. See `Activating global completion`_ below for details.
+See `Activating global completion`_ below for details about the second step.
 
 Refresh your shell environment (start a new shell).
 
@@ -212,9 +212,8 @@ In global completion mode, you don't have to register each argcomplete-capable e
 will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
 completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
 
-Additionally, completion is activated for scripts run as ``python <script>`` and ``python -m <module>``.
-This also works for alternate Python versions (e.g. ``python3`` and ``pypy``), as long as that version of Python has
-argcomplete installed.
+Additionally, completion is activated for scripts run as ``python <script>`` and ``python -m <module>``. If you're using
+multiple Python versions on the same system, the version being used to run the script must have argcomplete installed.
 
 .. admonition:: Bash version compatibility
 
@@ -239,8 +238,9 @@ Activating global completion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The script ``activate-global-python-argcomplete`` will try to install the global completion script
 ``bash_completion.d/python-argcomplete`` (`see on GitHub`_) into an appropriate location on your system for both bash
-and zsh (``/etc/bash_completion.d`` and ``/usr/local/share/zsh/site-functions``). On Linux, you will need to run the
-script with sudo: ``sudo activate-global-python-argcomplete``, or run the script with ``--help`` to see other options.
+and zsh. The specific location depends on your platform and whether you installed argcomplete system-wide using
+``sudo`` or locally (into your user's home directory). The script will prompt you for confirmation before taking any
+actions. Run ``activate-global-python-argcomplete --help`` to see other options.
 
 .. _`see on GitHub`: https://github.com/kislyuk/argcomplete/blob/master/argcomplete/bash_completion.d/python-argcomplete
 
