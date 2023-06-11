@@ -1,3 +1,10 @@
+Changes for v3.1.1 (2023-06-11)
+===============================
+
+-  Search through asdf shims
+
+-  Use \` as escape character in PowerShell (#434)
+
 Changes for v3.1.0 (2023-06-10)
 ===============================
 
