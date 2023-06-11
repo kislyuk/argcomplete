@@ -88,6 +88,7 @@ __python_argcomplete_scan_head() {
     case "$target" in
             magic_string) regex='PYTHON_ARGCOMPLETE_OK' ;;
             easy_install) regex="(PBR Generated)|(EASY-INSTALL-(SCRIPT|ENTRY-SCRIPT|DEV-SCRIPT))" ;;
+            asdf) regex="asdf exec " ;;
             interpreter) regex='^#!(.*)$' ;;
     esac
 
@@ -169,6 +170,9 @@ _python_argcomplete_global() {
         __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" interpreter
         if (__python_argcomplete_which pyenv && [[ "$SCRIPT_NAME" = $(pyenv root)/shims/* ]]) >/dev/null 2>&1; then
             local SCRIPT_NAME=$(pyenv which "$executable")
+        fi
+        if (__python_argcomplete_which asdf && __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" asdf) >/dev/null 2>&1; then
+            local SCRIPT_NAME=$(asdf which "$executable")
         fi
         if __python_argcomplete_scan_head_noerr "$SCRIPT_NAME" magic_string; then
             ARGCOMPLETE=1
