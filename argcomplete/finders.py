@@ -520,7 +520,7 @@ class CompletionFinder(object):
             completions = [c.replace("'", r"'\''") for c in completions]
 
         # PowerShell uses ` as escape character.
-        if os.getenv('PSModulePath'):
+        if os.environ.get("_ARGCOMPLETE_SHELL") == "powershell":
             escape_char = '`'
             special_chars = special_chars.replace('`', '')
         else:
