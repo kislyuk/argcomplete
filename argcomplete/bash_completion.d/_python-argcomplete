@@ -57,12 +57,12 @@ __python_argcomplete_upshift_bash_rematch() {
 
 # This function scans the beginning of an executable file provided as the first
 # argument ($1) for certain indicators, specified by the second argument ($2),
-# or the "target".  There are three possible targets: "interpreter",
+# or the "target". There are three possible targets: "interpreter",
 # "magic_string", and "easy_install". If the target is "interpreter", the
 # function matches the interpreter line, alongside any optional interpreter
 # arguments. If the target is "magic_string", a match is attempted for the
-# "PYTHON_ARGCOMPLETE_OK" magic string, indicating that the file should be
-# searched.  If the target is "easy_install", the function matches either
+# "PYTHON_ARGCOMPLETE_OK" magic string, indicating that the file should be run
+# to get completions. If the target is "easy_install", the function matches either
 # "PBR Generated" or any of the "EASY-INSTALL" scripts (either SCRIPT,
 # ENTRY-SCRIPT, or DEV-SCRIPT). In all cases, only the first kilobyte of
 # the file is searched. The regex matches are returned in BASH_REMATCH,
