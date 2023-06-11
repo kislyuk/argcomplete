@@ -519,8 +519,14 @@ class CompletionFinder(object):
             special_chars = ""
             completions = [c.replace("'", r"'\''") for c in completions]
 
+        # PowerShell uses ` as escape character.
+        if os.getenv('PSModulePath'):
+            escape_char = '`'
+            special_chars = special_chars.replace('`', '')
+        else:
+            escape_char = "\\"
         for char in special_chars:
-            completions = [c.replace(char, "\\" + char) for c in completions]
+            completions = [c.replace(char, escape_char + char) for c in completions]
 
         if self.append_space:
             # Similar functionality in bash was previously turned off by supplying the "-o nospace" option to complete.
