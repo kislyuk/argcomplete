@@ -229,7 +229,7 @@ multiple Python versions on the same system, the version being used to run the s
 
 If you choose not to use global completion, or ship a completion module that depends on argcomplete, you must register
 your script explicitly using ``eval "$(register-python-argcomplete my-python-app)"``. Standard completion module
-registration roules apply: namely, the script name is passed directly to ``complete``, meaning it is only tab completed
+registration rules apply: namely, the script name is passed directly to ``complete``, meaning it is only tab completed
 when invoked exactly as it was registered. In the above example, ``my-python-app`` must be on the path, and the user
 must be attempting to complete it by that name. The above line alone would **not** allow you to complete
 ``./my-python-app``, or ``/path/to/my-python-app``.
