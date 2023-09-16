@@ -39,7 +39,8 @@ def main():
 
     # The importlib_metadata backport returns a tuple of entry point objects
     # whereas the official library returns a SelectableGroups object
-    if not use_entry_points_backport:
+    # Python 3.12+ behaves like the importlib_metadata backport
+    if not use_entry_points_backport and sys.version_info < (3, 12):
         entry_points = entry_points["console_scripts"] # type:ignore
 
     entry_points = [ep for ep in entry_points \
