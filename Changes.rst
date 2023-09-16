@@ -1,3 +1,8 @@
+Changes for v3.1.2 (2023-09-16)
+===============================
+
+-  Ensure Python 3.12+ compatibility in check_console_script (#448)
+
 Changes for v3.1.1 (2023-06-11)
 ===============================
 
