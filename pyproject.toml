@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "argcomplete"
 description = "Bash tab completion for argparse"
 readme = "README.rst"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 license = { text = "Apache Software License" }
 authors = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
 maintainers = []
@@ -24,6 +24,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Development Status :: 5 - Production/Stable",
@@ -32,7 +33,6 @@ classifiers = [
   "Topic :: System :: Shells",
   "Topic :: Terminals",
 ]
-dependencies = ["importlib-metadata >= 0.23, < 7; python_version < '3.8'"]
 
 [project.optional-dependencies]
 test = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
