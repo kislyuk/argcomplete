@@ -7,6 +7,15 @@ Changes for v3.1.3 (2023-11-01)
 
 -  Add support for Python 3.12 and drop EOL 3.6 and 3.7 (#449)
 
+Changes for v3.1.3 (2023-11-01)
+===============================
+
+-  Use homebrew prefix by default
+
+-  zsh: Allow to use external script (#453)
+
+-  Add support for Python 3.12 and drop EOL 3.6 and 3.7 (#449)
+
 Changes for v3.1.2 (2023-09-16)
 ===============================
 
