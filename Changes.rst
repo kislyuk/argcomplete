@@ -1,3 +1,8 @@
+Changes for v3.1.4 (2023-11-01)
+===============================
+
+-  Call \_default as a fallback in zsh global completion
+
 Changes for v3.1.3 (2023-11-01)
 ===============================
 
