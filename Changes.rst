@@ -1,3 +1,8 @@
+Changes for v3.1.5 (2023-11-12)
+===============================
+
+-  Escape colon in zsh completions. Fixes #456
+
 Changes for v3.1.4 (2023-11-01)
 ===============================
 
