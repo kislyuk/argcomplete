@@ -294,8 +294,8 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
         zsh_expected_outputs = (
-            ("prog --url ", ["http://url1:foo", "http://url2:bar"]),
-            ('prog --url "', ["http://url1:foo", "http://url2:bar"]),
+            ("prog --url ", ["http\\://url1:foo", "http\\://url2:bar"]),
+            ('prog --url "', ["http\\://url1:foo", "http\\://url2:bar"]),
             ('prog --url "http://url1" --email ', ["a@b.c:", "a@b.d:", "ab@c.d:", "bcd@e.f:", "bce@f.g:"]),
             ('prog --url "http://url1" --email a', ["a@b.c:", "a@b.d:", "ab@c.d:"]),
             ('prog --url "http://url1" --email "a@', ["a@b.c:", "a@b.d:"]),
