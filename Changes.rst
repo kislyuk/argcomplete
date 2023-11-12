@@ -1,3 +1,8 @@
+Changes for v3.1.6 (2023-11-12)
+===============================
+
+-  Respect user choice in activate-global-python-argcomplete
+
 Changes for v3.1.5 (2023-11-12)
 ===============================
 
