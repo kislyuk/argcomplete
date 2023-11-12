@@ -1300,16 +1300,14 @@ class TestBash(TestBashZshBase, unittest.TestCase):
 
 
 class TestZsh(TestBashZshBase, unittest.TestCase):
-    expected_failures = [
+    skipped = [
+        "test_parse_special_characters",
         "test_parse_special_characters_dollar",
         "test_comp_point",  # FIXME
         "test_completion_environment",  # FIXME
         "test_continuation",  # FIXME
         "test_wordbreak_chars",  # FIXME
     ]
-
-    def test_parse_special_characters(self):
-        pass  # FIXME: test crashes in teardown
 
     def repl_provider(self):
         return zsh_repl()
