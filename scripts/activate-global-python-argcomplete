@@ -12,8 +12,8 @@ import argparse
 import os
 import shutil
 import site
-import sys
 import subprocess
+import sys
 
 import argcomplete
 
@@ -96,7 +96,9 @@ def append_to_config_file(path, shellcode):
         print(f"argcomplete needs to append to the file {path}. The following code will be appended:", file=sys.stderr)
         for line in shellcode.splitlines():
             print(">", line, file=sys.stderr)
-        get_consent()
+        if not get_consent():
+            print("Not added.", file=sys.stderr)
+            return
     print(f"Adding shellcode to {path}...", file=sys.stderr)
     with open(path, "a") as fh:
         fh.write(shellcode)
