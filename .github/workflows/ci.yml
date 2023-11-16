@@ -29,8 +29,10 @@ jobs:
   black:
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@v4
       - uses: psf/black@stable
   isort:
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@v4
       - uses: isort/isort-action@v1.1.0
