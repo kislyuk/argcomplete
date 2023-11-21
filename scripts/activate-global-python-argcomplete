@@ -98,6 +98,10 @@ def get_consent():
 
 def append_to_config_file(path, shellcode):
     if os.path.exists(path):
+        with open(path, 'r') as fh:
+            if shellcode in fh.read():
+                print(f"The code already exists in the file {path}.", file=sys.stderr)
+                return
         print(f"argcomplete needs to append to the file {path}. The following code will be appended:", file=sys.stderr)
         for line in shellcode.splitlines():
             print(">", line, file=sys.stderr)
