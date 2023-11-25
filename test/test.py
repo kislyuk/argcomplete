@@ -54,7 +54,11 @@ class ArgcompleteREPLWrapper(REPLWrapper):
                 raise Exception("Expected to see a newline in command response")
             echo_cmd, actual_res = res.split("\n", 1)
             res_without_ansi_seqs = re.sub(r"\x1b\[0m.+\x1b\[J", "", actual_res)
-            return res_without_ansi_seqs
+            # Unsure why some environments produce trailing null characters,
+            # but they break tests and trimming them seems to be harmless.
+            # https://github.com/kislyuk/argcomplete/issues/447
+            res_without_null_chars = res_without_ansi_seqs.rstrip("\x00")
+            return res_without_null_chars
         else:
             return res
 
