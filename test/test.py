@@ -1321,6 +1321,15 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
 class TestBashZshGlobalBase(TestBashZshBase):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
+    def test_redirection_completion(self):
+        with TempDir(prefix="test_dir_py", dir="."):
+            self.sh.run_command("cd " + os.getcwd())
+            self.sh.run_command("echo failure > ./foo.txt")
+            self.sh.run_command("echo success > ./foo.\t")
+            with open("foo.txt") as f:
+                msg = f.read()
+            self.assertEqual(msg, "success\n")
+
     def test_python_completion(self):
         self.sh.run_command("cd " + TEST_DIR)
         self.assertEqual(self.sh.run_command("python3 ./prog basic f\t"), "foo\r\n")

@@ -138,9 +138,6 @@ _python_argcomplete_global() {
         req_argv=( "" "${COMP_WORDS[@]:1}" )
         __python_argcomplete_expand_tilde_by_ref executable
     else
-        if [[ "$service" != "-default-" ]]; then
-            return
-        fi
         executable="${words[1]}"
         req_argv=( "${words[@]:1}" )
     fi
@@ -240,5 +237,8 @@ if [[ -z "${ZSH_VERSION-}" ]]; then
     complete -o default -o bashdefault -D -F _python_argcomplete_global
 else
     autoload is-at-least
-    compdef _python_argcomplete_global -P '*'
+    # Replace only the default completer (_default).
+    # There are many other special contexts we don't want to override.
+    # https://zsh.sourceforge.io/Doc/Release/Completion-System.html
+    compdef _python_argcomplete_global -default-
 fi
