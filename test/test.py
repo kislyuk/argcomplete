@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import unittest
+import unittest.util
 from io import StringIO
 from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 
@@ -32,6 +33,9 @@ from argcomplete import (  # noqa: E402
 )
 from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter  # noqa: E402
 from argcomplete.lexers import split_line  # noqa: E402
+
+# Default max length is insufficient for troubleshooting.
+unittest.util._MAX_LENGTH = 1000
 
 IFS = "\013"
 COMP_WORDBREAKS = " \t\n\"'><=;|&(:"
@@ -1239,12 +1243,16 @@ class TestShellBase:
 
 
 class TestBashZshBase(TestShellBase):
+    maxDiff = None
+
     # 'dummy' argument unused; checks multi-command registration works
     # by passing 'prog' as the second argument.
     install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
 
     def setUp(self):
         sh = self.repl_provider()
+        output = sh.run_command("echo ready")
+        self.assertEqual(output, "ready\r\n")
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
         sh.run_command("export PATH={0}".format(path))
         sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
