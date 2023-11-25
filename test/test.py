@@ -77,6 +77,8 @@ def bash_repl(command="bash"):
 def zsh_repl(command="zsh"):
     sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%(!..)")
     sh.run_command("autoload compinit; compinit -u")
+    # Require two tabs to print all options (some tests rely on this).
+    sh.run_command("setopt BASH_AUTO_LIST")
     return sh
 
 
@@ -1256,9 +1258,6 @@ class TestBashZshBase(TestShellBase):
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
         sh.run_command("export PATH={0}".format(path))
         sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
-        if self.repl_provider == bash_repl:
-            # Disable the "python" module provided by bash-completion
-            sh.run_command("complete -r python python2 python3")
         output = sh.run_command(self.install_cmd)
         self.assertEqual(output, "")
         # Register a dummy completion with an external argcomplete script
@@ -1313,16 +1312,13 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
         "test_parse_special_characters_dollar",
         "test_comp_point",  # FIXME
         "test_completion_environment",  # FIXME
-        "test_continuation",  # FIXME
-        "test_wordbreak_chars",  # FIXME
     ]
 
     def repl_provider(self):
         return zsh_repl()
 
 
-@unittest.skipIf(BASH_MAJOR_VERSION < 4, "complete -D not supported")
-class TestBashGlobal(TestBash):
+class TestBashZshGlobalBase(TestBashZshBase):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
 
     def test_python_completion(self):
@@ -1394,6 +1390,15 @@ class TestBashGlobal(TestBash):
     def test_console_script_package_wheel(self):
         """Test completing a console_script for a package from a wheel."""
         self._test_console_script(package=True, wheel=True)
+
+
+@unittest.skipIf(BASH_MAJOR_VERSION < 4, "complete -D not supported")
+class TestBashGlobal(TestBash, TestBashZshGlobalBase):
+    pass
+
+
+class TestZshGlobal(TestZsh, TestBashZshGlobalBase):
+    pass
 
 
 class Shell:
