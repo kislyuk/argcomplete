@@ -21,6 +21,9 @@ jobs:
       run: |
         [[ $(uname) == Linux ]] && sudo apt-get install --yes rpm tcsh fish zsh
         [[ $(uname) == Darwin ]] && brew install bash tcsh fish
+        # Some runners have python-argcomplete preinstalled
+        # as a dependency of pipx, which interferes with the tests.
+        [[ $(uname) == Darwin ]] && brew uninstall --ignore-dependencies python-argcomplete || true
         python -m pip install --quiet --upgrade codecov
     - run: make install
     - run: make lint
