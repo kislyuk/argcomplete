@@ -1369,9 +1369,6 @@ class TestBashZshGlobalBase(TestBashZshBase):
             command = "pip install {} --target .".format(test_package)
             if not wheel:
                 command += " --no-binary :all:"
-                if sys.platform == "darwin":
-                    # Work around https://stackoverflow.com/questions/24257803
-                    command += ' --install-option="--prefix="'
             install_output = self.sh.run_command(command)
             self.assertEqual(self.sh.run_command("echo $?"), "0\r\n", install_output)
             command = "test-module"
@@ -1380,22 +1377,18 @@ class TestBashZshGlobalBase(TestBashZshBase):
             command += " a\t"
             self.assertEqual(self.sh.run_command(command), "arg\r\n")
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_module(self):
         """Test completing a console_script for a module."""
         self._test_console_script()
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_package(self):
         """Test completing a console_script for a package."""
         self._test_console_script(package=True)
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_module_wheel(self):
         """Test completing a console_script for a module from a wheel."""
         self._test_console_script(wheel=True)
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_package_wheel(self):
         """Test completing a console_script for a package from a wheel."""
         self._test_console_script(package=True, wheel=True)
