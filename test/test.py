@@ -81,6 +81,8 @@ def bash_repl(command="bash"):
 def zsh_repl(command="zsh"):
     sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%(!..)")
     sh.run_command("autoload compinit; compinit -u")
+    # Require two tabs to print all options (some tests rely on this).
+    sh.run_command("setopt BASH_AUTO_LIST")
     return sh
 
 
@@ -1260,9 +1262,6 @@ class TestBashZshBase(TestShellBase):
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
         sh.run_command("export PATH={0}".format(path))
         sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
-        if self.repl_provider == bash_repl:
-            # Disable the "python" module provided by bash-completion
-            sh.run_command("complete -r python python2 python3")
         output = sh.run_command(self.install_cmd)
         self.assertEqual(output, "")
         # Register a dummy completion with an external argcomplete script
@@ -1317,17 +1316,23 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
         "test_parse_special_characters_dollar",
         "test_comp_point",  # FIXME
         "test_completion_environment",  # FIXME
-        "test_continuation",  # FIXME
-        "test_wordbreak_chars",  # FIXME
     ]
 
     def repl_provider(self):
         return zsh_repl()
 
 
-@unittest.skipIf(BASH_MAJOR_VERSION < 4, "complete -D not supported")
-class TestBashGlobal(TestBash):
+class TestBashZshGlobalBase(TestBashZshBase):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'
+
+    def test_redirection_completion(self):
+        with TempDir(prefix="test_dir_py", dir="."):
+            self.sh.run_command("cd " + os.getcwd())
+            self.sh.run_command("echo failure > ./foo.txt")
+            self.sh.run_command("echo success > ./foo.\t")
+            with open("foo.txt") as f:
+                msg = f.read()
+            self.assertEqual(msg, "success\n")
 
     def test_python_completion(self):
         self.sh.run_command("cd " + TEST_DIR)
@@ -1368,9 +1373,6 @@ class TestBashGlobal(TestBash):
             command = "pip install {} --target .".format(test_package)
             if not wheel:
                 command += " --no-binary :all:"
-                if sys.platform == "darwin":
-                    # Work around https://stackoverflow.com/questions/24257803
-                    command += ' --install-option="--prefix="'
             install_output = self.sh.run_command(command)
             self.assertEqual(self.sh.run_command("echo $?"), "0\r\n", install_output)
             command = "test-module"
@@ -1379,25 +1381,30 @@ class TestBashGlobal(TestBash):
             command += " a\t"
             self.assertEqual(self.sh.run_command(command), "arg\r\n")
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_module(self):
         """Test completing a console_script for a module."""
         self._test_console_script()
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_package(self):
         """Test completing a console_script for a package."""
         self._test_console_script(package=True)
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_module_wheel(self):
         """Test completing a console_script for a module from a wheel."""
         self._test_console_script(wheel=True)
 
-    @unittest.skipIf(os.uname()[0] == "Darwin", "Skip test that fails on MacOS")
     def test_console_script_package_wheel(self):
         """Test completing a console_script for a package from a wheel."""
         self._test_console_script(package=True, wheel=True)
+
+
+@unittest.skipIf(BASH_MAJOR_VERSION < 4, "complete -D not supported")
+class TestBashGlobal(TestBash, TestBashZshGlobalBase):
+    pass
+
+
+class TestZshGlobal(TestZsh, TestBashZshGlobalBase):
+    pass
 
 
 class Shell:
