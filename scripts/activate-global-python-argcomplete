@@ -81,11 +81,8 @@ def install_to_destination(dest):
 
 
 def get_consent():
-    try:
-        if args.yes is True:
-            return True
-    except NameError:
-        pass
+    if args.yes is True:
+        return True
     while True:
         res = input("OK to proceed? [y/n] ")
         if res.lower() not in {"y", "n", "yes", "no"}:
