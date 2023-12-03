@@ -115,7 +115,6 @@ __python_argcomplete_which() {
 }
 
 _python_argcomplete_global() {
-
     if [[ -n "${ZSH_VERSION-}" ]]; then
         # Store result of a regex match in the
         # BASH_REMATCH variable rather than MATCH
@@ -237,8 +236,8 @@ if [[ -z "${ZSH_VERSION-}" ]]; then
     complete -o default -o bashdefault -D -F _python_argcomplete_global
 else
     autoload is-at-least
-    # Replace only the default completer (_default).
-    # There are many other special contexts we don't want to override.
+    # Set a hook for argcomplete to be called first if no other completers are defined for the given command.
+    # "compdef _python_argcomplete_global -P *" overrides other special contexts that we want to preserve:
     # https://zsh.sourceforge.io/Doc/Release/Completion-System.html
-    compdef _python_argcomplete_global -default-
+    compdef _python_argcomplete_global -first-
 fi
