@@ -241,7 +241,9 @@ _python_argcomplete_global() {
 if [[ -z "${ZSH_VERSION-}" ]]; then
     complete -o default -o bashdefault -D -F _python_argcomplete_global
 else
-    autoload is-at-least
+    # -Uz is recommended for the use of functions supplied with the zsh distribution.
+    # https://unix.stackexchange.com/a/214306
+    autoload -Uz is-at-least
     # The comment at the top of this file causes zsh to invoke this script directly,
     # so we must explicitly call the global completion function.
     _python_argcomplete_global
