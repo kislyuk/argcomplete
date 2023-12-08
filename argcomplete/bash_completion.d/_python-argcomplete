@@ -1,9 +1,14 @@
-#compdef -P *
+#compdef -default-
 
 # Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
 # Note: both the leading underscore in the name of this file and the first line (compdef) are required by zsh
+
+# In zsh, this file is autoloaded and used as the default completer (_default).
+# There are many other special contexts we don't want to override
+# (as would be the case with `#compdef -P *`).
+# https://zsh.sourceforge.io/Doc/Release/Completion-System.html
 
 # Copy of __expand_tilde_by_ref from bash-completion
 # ZSH implementation added
@@ -237,8 +242,7 @@ if [[ -z "${ZSH_VERSION-}" ]]; then
     complete -o default -o bashdefault -D -F _python_argcomplete_global
 else
     autoload is-at-least
-    # Replace only the default completer (_default).
-    # There are many other special contexts we don't want to override.
-    # https://zsh.sourceforge.io/Doc/Release/Completion-System.html
-    compdef _python_argcomplete_global -default-
+    # The comment at the top of this file causes zsh to invoke this script directly,
+    # so we must explicitly call the global completion function.
+    _python_argcomplete_global
 fi

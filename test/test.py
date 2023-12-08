@@ -80,7 +80,6 @@ def bash_repl(command="bash"):
 
 def zsh_repl(command="zsh"):
     sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%(!..)")
-    sh.run_command("autoload compinit; compinit -u")
     # Require two tabs to print all options (some tests rely on this).
     sh.run_command("setopt BASH_AUTO_LIST")
     return sh
@@ -1251,6 +1250,7 @@ class TestShellBase:
 class TestBashZshBase(TestShellBase):
     maxDiff = None
 
+    init_cmd = None
     # 'dummy' argument unused; checks multi-command registration works
     # by passing 'prog' as the second argument.
     install_cmd = 'eval "$(register-python-argcomplete dummy prog)"'
@@ -1262,8 +1262,12 @@ class TestBashZshBase(TestShellBase):
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
         sh.run_command("export PATH={0}".format(path))
         sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
-        output = sh.run_command(self.install_cmd)
-        self.assertEqual(output, "")
+        if self.init_cmd is not None:
+            output = sh.run_command(self.init_cmd)
+            self.assertEqual(output, "")
+        if self.install_cmd is not None:
+            output = sh.run_command(self.install_cmd)
+            self.assertEqual(output, "")
         # Register a dummy completion with an external argcomplete script
         # to ensure this doesn't overwrite our previous registration.
         output = sh.run_command('eval "$(register-python-argcomplete dummy --external-argcomplete-script dummy)"')
@@ -1311,6 +1315,8 @@ class TestBash(TestBashZshBase, unittest.TestCase):
 
 
 class TestZsh(TestBashZshBase, unittest.TestCase):
+    init_cmd = "autoload compinit; compinit -u"
+
     skipped = [
         "test_parse_special_characters",
         "test_parse_special_characters_dollar",
@@ -1404,7 +1410,13 @@ class TestBashGlobal(TestBash, TestBashZshGlobalBase):
 
 
 class TestZshGlobal(TestZsh, TestBashZshGlobalBase):
-    pass
+    # In zsh, the file is not sourced directly;
+    # it is added to fpath and autoloaded by the completion system.
+    # Running `eval "$(activate-global-python-argcomplete --dest=-)"`
+    # as in bash does *not* work in zsh!
+    zsh_fpath = os.path.join(os.path.abspath(os.path.dirname(argcomplete.__file__)), "bash_completion.d")
+    init_cmd = f'fpath=( {zsh_fpath} "${{fpath[@]}}" ); autoload compinit; compinit -u'
+    install_cmd = None
 
 
 class Shell:
