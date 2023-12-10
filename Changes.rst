@@ -1,3 +1,12 @@
+Changes for v3.2.0 (2023-12-09)
+===============================
+
+-  Fix and test global completion in zsh (#463, #466)
+
+-  Add –yes option to activate-global-python-argcomplete (#461)
+
+-  Test suite improvements
+
 Changes for v3.1.6 (2023-11-12)
 ===============================
 
