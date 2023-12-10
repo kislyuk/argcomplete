@@ -1,3 +1,8 @@
+Changes for v3.2.1 (2023-12-10)
+===============================
+
+-  Allow explicit zsh global completion activation (#467)
+
 Changes for v3.2.0 (2023-12-09)
 ===============================
 
