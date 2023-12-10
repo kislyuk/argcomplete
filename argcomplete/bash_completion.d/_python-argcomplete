@@ -244,7 +244,17 @@ else
     # -Uz is recommended for the use of functions supplied with the zsh distribution.
     # https://unix.stackexchange.com/a/214306
     autoload -Uz is-at-least
-    # The comment at the top of this file causes zsh to invoke this script directly,
+    # If this is being implicitly loaded because we placed it on fpath,
+    # the comment at the top of this file causes zsh to invoke this script directly,
     # so we must explicitly call the global completion function.
-    _python_argcomplete_global
+    # Note $service should only ever be -default- because the comment at the top
+    # registers this script as the default completer (#compdef -default-).
+    if [[ $service == -default- ]]; then
+        _python_argcomplete_global
+    fi
+    # If this has been executed directly (e.g. `eval "$(activate-global-python-argcomplete --dest=-)"`)
+    # we need to explicitly call compdef to register the completion function.
+    # If we have been implicitly loaded, we still call compdef as a slight optimisation
+    # (there is no need to execute any top-level code more than once).
+    compdef _python_argcomplete_global -default-
 fi
