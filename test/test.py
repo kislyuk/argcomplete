@@ -1409,11 +1409,13 @@ class TestBashGlobal(TestBash, TestBashZshGlobalBase):
     pass
 
 
-class TestZshGlobal(TestZsh, TestBashZshGlobalBase):
-    # In zsh, the file is not sourced directly;
+class TestZshGlobalExplicit(TestZsh, TestBashZshGlobalBase):
+    pass
+
+
+class TestZshGlobalImplicit(TestZsh, TestBashZshGlobalBase):
+    # In zsh, the file is typically not sourced directly;
     # it is added to fpath and autoloaded by the completion system.
-    # Running `eval "$(activate-global-python-argcomplete --dest=-)"`
-    # as in bash does *not* work in zsh!
     zsh_fpath = os.path.join(os.path.abspath(os.path.dirname(argcomplete.__file__)), "bash_completion.d")
     init_cmd = f'fpath=( {zsh_fpath} "${{fpath[@]}}" ); autoload compinit; compinit -u'
     install_cmd = None
