@@ -5,7 +5,7 @@
 
 from shlex import quote
 
-bashcode = r"""
+bashcode = r"""#compdef %(executables)s
 # Run something, muting output or redirecting it to the debug stream
 # depending on the value of _ARC_DEBUG.
 # If ARGCOMPLETE_USE_TEMPFILES is set, use tempfiles for IPC.
@@ -76,7 +76,11 @@ if [[ -z "${ZSH_VERSION-}" ]]; then
     complete %(complete_opts)s -F _python_argcomplete%(function_suffix)s %(executables)s
 else
     autoload is-at-least
-    compdef _python_argcomplete%(function_suffix)s %(executables)s
+    if [[ $zsh_eval_context == *func ]]; then
+        _python_argcomplete%(function_suffix)s "$@"
+    else
+        compdef _python_argcomplete%(function_suffix)s %(executables)s
+    fi
 fi
 """
 
