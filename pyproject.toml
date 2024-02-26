@@ -34,14 +34,26 @@ classifiers = [
   "Topic :: Terminals",
 ]
 
+[project.scripts]
+activate-global-python-argcomplete = "argcomplete.scripts.activate_global_python_argcomplete:main"
+python-argcomplete-check-easy-install-script = "argcomplete.scripts.python_argcomplete_check_easy_install_script:main"
+register-python-argcomplete = "argcomplete.scripts.register_python_argcomplete:main"
+
 [project.optional-dependencies]
 test = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
 
 [project.urls]
+"Homepage" = "https://github.com/kislyuk/argcomplete"
 "Documentation"= "https://kislyuk.github.io/argcomplete"
 "Source Code"= "https://github.com/kislyuk/argcomplete"
 "Issue Tracker"= "https://github.com/kislyuk/argcomplete/issues"
 "Change Log"= "https://github.com/kislyuk/argcomplete/blob/master/Changes.rst"
+
+[tool.setuptools]
+platforms=["MacOS X", "Posix"]
+
+[tool.setuptools.packages.find]
+exclude = ["contrib"]
 
 [tool.setuptools_scm]
 
