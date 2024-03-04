@@ -30,6 +30,14 @@ source "{activator}"
 """
 
 
+parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument("-y", "--yes", help="automatically answer yes for all questions", action="store_true")
+parser.add_argument("--dest", help='Specify the shell completion modules directory to install into, or "-" for stdout')
+parser.add_argument("--user", help="Install into user directory", action="store_true")
+argcomplete.autocomplete(parser)
+args = None
+
+
 def get_local_dir():
     try:
         return subprocess.check_output(["brew", "--prefix"]).decode().strip()
@@ -121,11 +129,7 @@ def link_user_rcfiles():
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("-y", "--yes", help="automatically answer yes for all questions", action="store_true")
-    parser.add_argument("--dest", help='Specify the shell completion modules directory to install into, or "-" for stdout')
-    parser.add_argument("--user", help="Install into user directory", action="store_true")
-    argcomplete.autocomplete(parser)
+    global args
     args = parser.parse_args()
     destinations = []
 
