@@ -1,3 +1,12 @@
+Changes for v3.2.3 (2024-03-07)
+===============================
+
+-  Allow register-python-argcomplete output to be used as lazy-loaded
+   zsh completion module (#475)
+
+-  Move debug_stream initialization to helper method to allow fd 9
+   behavior to be overridden in subclasses (#471)
+
 Changes for v3.2.2 (2024-01-23)
 ===============================
 
