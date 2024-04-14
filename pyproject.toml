@@ -59,6 +59,9 @@ skip = ".*/version.py"
 line-length = 120
 per-file-ignores = {"argcomplete/__init__.py" = ["F401"]}
 
+[tool.ruff.format]
+quote-style = "preserve"
+
 [tool.mypy]
 files = [
   "argcomplete"
