@@ -1,3 +1,9 @@
+Changes for v3.3.0 (2024-04-14)
+===============================
+
+-  Preserve compatibility with argparse option tuples of length 4. This
+   update is required to use argcomplete on Python 3.11.9+ or 3.12.3+.
+
 Changes for v3.2.3 (2024-03-07)
 ===============================
 
