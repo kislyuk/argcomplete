@@ -76,6 +76,7 @@ __python_argcomplete_scan_head() {
     local file="$1"
     local target="$2"
 
+    local REPLY
     if [[ -n "${ZSH_VERSION-}" ]]; then
         read -r -k 1024 -u 0 < "$file";
     else
