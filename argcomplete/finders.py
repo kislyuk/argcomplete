@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 from collections.abc import Mapping
-from typing import Callable, Dict, List, Optional, Sequence, Union, TextIO
+from typing import Callable, Dict, List, Optional, Sequence, TextIO, Union
 
 from . import io as _io
 from .completers import BaseCompleter, ChoicesCompleter, FilesCompleter, SuppressCompleter
