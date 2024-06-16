@@ -59,13 +59,13 @@ class FilesCompleter(BaseCompleter):
         completion = []
         if self.allowednames:
             if self.directories:
-                files = _call(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
+                files = _call(["bash", "-c", f"compgen -A directory -- '{prefix}'"])
                 completion += [f + "/" for f in files]
             for x in self.allowednames:
-                completion += _call(["bash", "-c", "compgen -A file -X '!*.{0}' -- '{p}'".format(x, p=prefix)])
+                completion += _call(["bash", "-c", f"compgen -A file -X '!*.{x}' -- '{prefix}'"])
         else:
-            completion += _call(["bash", "-c", "compgen -A file -- '{p}'".format(p=prefix)])
-            anticomp = _call(["bash", "-c", "compgen -A directory -- '{p}'".format(p=prefix)])
+            completion += _call(["bash", "-c", f"compgen -A file -- '{prefix}'"])
+            anticomp = _call(["bash", "-c", f"compgen -A directory -- '{prefix}'"])
             completion = list(set(completion) - set(anticomp))
 
             if self.directories:

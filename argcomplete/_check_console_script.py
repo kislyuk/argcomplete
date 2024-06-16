@@ -46,9 +46,9 @@ def main():
     # Check this looks like the script we really expected.
     with open(script_path) as f:
         script = f.read()
-    if "from {} import {}".format(module_name, function_name) not in script:
+    if f"from {module_name} import {function_name}" not in script:
         raise ArgcompleteMarkerNotFound("does not appear to be a console script")
-    if "sys.exit({}())".format(function_name) not in script:
+    if f"sys.exit({function_name}())" not in script:
         raise ArgcompleteMarkerNotFound("does not appear to be a console script")
 
     # Look for the argcomplete marker in the script it imports.

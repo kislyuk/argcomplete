@@ -24,8 +24,8 @@ class TestTcsh(TestShellBase, unittest.TestCase):
     def setUp(self):
         sh = Shell("tcsh")
         path = " ".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$path"])
-        sh.run_command("set path = ({0})".format(path))
-        sh.run_command("setenv PYTHONPATH {0}".format(BASE_DIR))
+        sh.run_command(f"set path = ({path})")
+        sh.run_command(f"setenv PYTHONPATH {BASE_DIR}")
         # 'dummy' argument unused; checks multi-command registration works
         # by passing 'prog' as the second argument.
         output = sh.run_command("eval `register-python-argcomplete --shell tcsh dummy prog`")
@@ -58,8 +58,8 @@ class TestFish(TestShellBase, unittest.TestCase):
     def setUp(self):
         sh = Shell("fish")
         path = " ".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
-        sh.run_command("set -x PATH {0}".format(path))
-        sh.run_command("set -x PYTHONPATH {0}".format(BASE_DIR))
+        sh.run_command(f"set -x PATH {path}")
+        sh.run_command(f"set -x PYTHONPATH {BASE_DIR}")
         # 'dummy' argument unused; checks multi-command registration works
         # by passing 'prog' as the second argument.
         output = sh.run_command("register-python-argcomplete --shell fish dummy prog | source")

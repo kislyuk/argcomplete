@@ -88,9 +88,9 @@ class shlex:
         self.lineno = 1
         if self.debug:
             if newfile is not None:
-                print('shlex: pushing to file %s' % (self.infile,))
+                print('shlex: pushing to file {}'.format(self.infile))
             else:
-                print('shlex: pushing to stream %s' % (self.instream,))
+                print('shlex: pushing to stream {}'.format(self.instream))
 
     def pop_source(self):
         "Pop the input source stack."
@@ -143,7 +143,7 @@ class shlex:
             if nextchar == '\n':
                 self.lineno += 1
             if self.debug >= 3:
-                print("shlex: in state %r I see character: %r" % (self.state, nextchar))
+                print("shlex: in state {!r} I see character: {!r}".format(self.state, nextchar))
             if self.state is None:
                 self.token = ''  # past end of file
                 break
@@ -287,7 +287,7 @@ class shlex:
         # Modified by argcomplete: 2/3 compatibility
         if isinstance(self.infile, str) and not os.path.isabs(newfile):
             newfile = os.path.join(os.path.dirname(self.infile), newfile)
-        return (newfile, open(newfile, "r"))
+        return (newfile, open(newfile))
 
     def error_leader(self, infile=None, lineno=None):
         "Emit a C-compiler-like, Emacs-friendly error-message leader."

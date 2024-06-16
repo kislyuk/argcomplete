@@ -147,16 +147,16 @@ class TestArgcomplete(unittest.TestCase):
         p.add_argument("--bar")
 
         completions = self.run_completer(p, "prog ")
-        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
         completions = self.run_completer(p, "prog -")
-        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
         completions = self.run_completer(p, "prog ", always_complete_options=False)
-        self.assertEqual(set(completions), set([""]))
+        self.assertEqual(set(completions), {""})
 
         completions = self.run_completer(p, "prog -", always_complete_options=False)
-        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
     def test_choices(self):
         def make_parser():
@@ -353,7 +353,7 @@ class TestArgcomplete(unittest.TestCase):
             os.makedirs(os.path.join("abcaha", "klm"))
             with open("abcxyz", "w") as fp:
                 fp.write("test")
-            self.assertEqual(set(fc("a")), set(["abcdefж/", "abcaha/", "abcxyz"]))
+            self.assertEqual(set(fc("a")), {"abcdefж/", "abcaha/", "abcxyz"})
 
     def test_filescompleter_filetype_integration(self):
         def make_parser():
@@ -394,14 +394,14 @@ class TestArgcomplete(unittest.TestCase):
                     fp1.write("A test")
                     fp2.write("Another test")
             # Test completions
-            self.assertEqual(c("a"), set(["abb/", "abc/"]))
-            self.assertEqual(c("ab"), set(["abc/", "abb/"]))
-            self.assertEqual(c("abc"), set(["abc/"]))
-            self.assertEqual(c("abc/"), set(["abc/baz/", "abc/faz/"]))
-            self.assertEqual(c("d"), set(["def/"]))
-            self.assertEqual(c("def/"), set(["def/baz/"]))
-            self.assertEqual(c("e"), set([]))
-            self.assertEqual(c("def/k"), set([]))
+            self.assertEqual(c("a"), {"abb/", "abc/"})
+            self.assertEqual(c("ab"), {"abc/", "abb/"})
+            self.assertEqual(c("abc"), {"abc/"})
+            self.assertEqual(c("abc/"), {"abc/baz/", "abc/faz/"})
+            self.assertEqual(c("d"), {"def/"})
+            self.assertEqual(c("def/"), {"def/baz/"})
+            self.assertEqual(c("e"), set())
+            self.assertEqual(c("def/k"), set())
         return
 
     def test_default_completer(self):
@@ -449,10 +449,10 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
-            self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=["-h"])), set(output) - set(["-h"]))
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=["-h"])), set(output) - {"-h"})
             self.assertEqual(
                 set(self.run_completer(make_parser(), cmd, exclude=["-h", "--help"])),
-                set(output) - set(["-h", "--help"]),
+                set(output) - {"-h", "--help"},
             )
 
     def test_non_ascii(self):
@@ -916,10 +916,10 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog ")
-        assert set(completions) == set(["-h", "--help", "--foo", "--bar"])
+        assert set(completions) == {"-h", "--help", "--foo", "--bar"}
 
         completions = self.run_completer(p, c, "prog --")
-        assert set(completions) == set(["--help", "--foo", "--bar"])
+        assert set(completions) == {"--help", "--foo", "--bar"}
 
     def test_repl_parse_after_complete(self):
         p = ArgumentParser()
@@ -929,7 +929,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog ")
-        assert set(completions) == set(["-h", "--help", "--foo", "bar"])
+        assert set(completions) == {"-h", "--help", "--foo", "bar"}
 
         args = p.parse_args(["--foo", "spam", "bar"])
         assert args.foo == "spam"
@@ -949,7 +949,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog foo ")
-        assert set(completions) == set(["-h", "--help", "bar"])
+        assert set(completions) == {"-h", "--help", "bar"}
 
         args = p.parse_args(["foo", "bar"])
         assert args.bar == "bar"
@@ -997,11 +997,11 @@ class TestArgcompleteREPL(unittest.TestCase):
 
         c = CompletionFinder(p, always_complete_options=True)
 
-        self.assertEqual(set(self.run_completer(p, c, "prog ")), set(["-h", "--help", "aa", "bb", "cc"]))
+        self.assertEqual(set(self.run_completer(p, c, "prog ")), {"-h", "--help", "aa", "bb", "cc"})
 
-        self.assertEqual(set(self.run_completer(p, c, "prog aa ")), set(["-h", "--help", "d", "e"]))
+        self.assertEqual(set(self.run_completer(p, c, "prog aa ")), {"-h", "--help", "d", "e"})
 
-        self.assertEqual(set(self.run_completer(p, c, "prog ")), set(["-h", "--help", "aa", "bb", "cc"]))
+        self.assertEqual(set(self.run_completer(p, c, "prog ")), {"-h", "--help", "aa", "bb", "cc"})
 
 
 class TestSplitLine(unittest.TestCase):
@@ -1260,8 +1260,8 @@ class TestBashZshBase(TestShellBase):
         output = sh.run_command("echo ready")
         self.assertEqual(output, "ready\r\n")
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
-        sh.run_command("export PATH={0}".format(path))
-        sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
+        sh.run_command(f"export PATH={path}")
+        sh.run_command(f"export PYTHONPATH={BASE_DIR}")
         if self.init_cmd is not None:
             output = sh.run_command(self.init_cmd)
             self.assertEqual(output, "")
@@ -1380,7 +1380,7 @@ class TestBashZshGlobalBase(TestBashZshBase):
             self.sh.run_command("export PATH=$PATH:./bin")
             self.sh.run_command("export PYTHONPATH=.:$PYTHONPATH")
             test_package = os.path.join(TEST_DIR, "test_package")
-            command = "pip install {} --target .".format(test_package)
+            command = f"pip install {test_package} --target ."
             if not wheel:
                 command += " --no-binary :all:"
             install_output = self.sh.run_command(command)
@@ -1431,7 +1431,7 @@ class Shell:
 
     def run_command(self, command):
         try:
-            self.child.sendline(r"echo -n \#\#\#; {0}; echo -n \#\#\#".format(command))
+            self.child.sendline(fr"echo -n \#\#\#; {command}; echo -n \#\#\#")
             self.child.expect_exact("###", timeout=5)
             self.child.expect_exact("###", timeout=5)
             return self.child.before

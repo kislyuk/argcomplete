@@ -44,12 +44,12 @@ def find(name, return_package=False):
     names = name.split(".")
     spec = find_spec(names[0])
     if spec is None:
-        raise ArgcompleteMarkerNotFound('no module named "{}"'.format(names[0]))
+        raise ArgcompleteMarkerNotFound(f'no module named "{names[0]}"')
     if not spec.has_location:
         raise ArgcompleteMarkerNotFound("cannot locate file")
     if spec.submodule_search_locations is None:
         if len(names) != 1:
-            raise ArgcompleteMarkerNotFound("{} is not a package".format(names[0]))
+            raise ArgcompleteMarkerNotFound(f"{names[0]} is not a package")
         return spec.origin
     if len(spec.submodule_search_locations) != 1:
         raise ArgcompleteMarkerNotFound("expecting one search location")
