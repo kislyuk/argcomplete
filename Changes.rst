@@ -1,3 +1,23 @@
+Changes for v3.4.0 (2024-06-16)
+===============================
+
+-  No stdin for python calls from bash completion functions (#488)
+
+   Prevents usage of stdin by (python) executables that are called
+   during completion generation. This prevents the completion locking up
+   the entire shell when the python script is broken i.e. it enters an
+   interactive mode (REPL) instead of generating the completions, as
+   expected.
+
+-  Localize shell variable REPLY to avoid overwriting users’ value
+   (#489)
+
+   The variable REPLY is used by default by the ``read`` shell builtin
+   to store the return value, and like all bash/zsh variables, is scoped
+   globally. This change allows this variable to be used for other needs
+   by appropriately scoping its internal use by an argcomplete utility
+   function that uses ``read``.
+
 Changes for v3.3.0 (2024-04-14)
 ===============================
 
