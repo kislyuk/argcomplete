@@ -1348,6 +1348,10 @@ class TestBashZshGlobalBase(TestBashZshBase):
         self.sh.run_command("cd " + TEST_DIR)
         self.assertEqual(self.sh.run_command("python3 ./pro\tbasic f\t"), "foo\r\n")
 
+    def test_python_stuck(self):
+        self.sh.run_command("cd " + TEST_DIR)
+        self.sh.run_command("python3 ./stuck no\t-input")
+
     def test_python_not_executable(self):
         """Test completing a script that cannot be run directly."""
         prog = os.path.join(TEST_DIR, "prog")
