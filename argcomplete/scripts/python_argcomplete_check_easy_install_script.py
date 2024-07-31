@@ -15,6 +15,7 @@ Usage:
 
 import sys
 
+# PEP 366
 __package__ = "argcomplete"
 
 def main():

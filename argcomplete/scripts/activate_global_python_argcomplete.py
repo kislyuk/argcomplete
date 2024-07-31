@@ -17,6 +17,7 @@ import sys
 
 import argcomplete
 
+# PEP 366
 __package__ = "argcomplete"
 
 zsh_shellcode = """
