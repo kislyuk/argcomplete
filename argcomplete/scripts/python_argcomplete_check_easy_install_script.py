@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
@@ -15,49 +15,56 @@ Usage:
 
 import sys
 
-if len(sys.argv) != 2:
-    sys.exit(__doc__)
+__package__ = "argcomplete"
 
-sys.tracebacklimit = 0
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
 
-with open(sys.argv[1]) as fh:
-    line1, head = fh.read(1024).split("\n", 1)[:2]
-    if line1.startswith("#") and ("py" in line1 or "Py" in line1):
-        import re
+    sys.tracebacklimit = 0
 
-        lines = head.split("\n", 12)
-        for line in lines:
-            if line.startswith("# EASY-INSTALL-SCRIPT"):
-                import pkg_resources
+    with open(sys.argv[1]) as fh:
+        line1, head = fh.read(1024).split("\n", 1)[:2]
+        if line1.startswith("#") and ("py" in line1 or "Py" in line1):
+            import re
 
-                dist, script = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line).groups()
-                if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata("scripts/" + script):
-                    exit(0)
-            elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
-                dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
-                import pkgutil
+            lines = head.split("\n", 12)
+            for line in lines:
+                if line.startswith("# EASY-INSTALL-SCRIPT"):
+                    import pkg_resources
 
-                import pkg_resources
+                    dist, script = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line).groups()
+                    if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata("scripts/" + script):
+                        return 0
+                elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
+                    dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
+                    import pkgutil
 
-                module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
-                with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:
-                    if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
-                        exit(0)
-            elif line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
-                for line2 in lines:
-                    if line2.startswith("__file__"):
-                        filename = re.match("__file__ = '(.+)'", line2).group(1)
-                        with open(filename) as mod_fh:
-                            if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
-                                exit(0)
-            elif line.startswith("# PBR Generated"):
-                module = re.search("from (.*) import", head).groups()[0]
-                import pkgutil
+                    import pkg_resources
 
-                import pkg_resources
+                    module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
+                    with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:
+                        if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
+                            return 0
+                elif line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
+                    for line2 in lines:
+                        if line2.startswith("__file__"):
+                            filename = re.match("__file__ = '(.+)'", line2).group(1)
+                            with open(filename) as mod_fh:
+                                if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
+                                    return 0
+                elif line.startswith("# PBR Generated"):
+                    module = re.search("from (.*) import", head).groups()[0]
+                    import pkgutil
 
-                with open(pkgutil.get_loader(module).get_filename()) as mod_fh:
-                    if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
-                        exit(0)
+                    import pkg_resources
 
-exit(1)
+                    with open(pkgutil.get_loader(module).get_filename()) as mod_fh:
+                        if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
+                            return 0
+
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
