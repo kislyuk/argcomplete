@@ -28,44 +28,51 @@ import sys
 
 import argcomplete
 
-parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+__package__ = "argcomplete"
 
-parser.add_argument(
-    "--no-defaults",
-    dest="use_defaults",
-    action="store_false",
-    default=True,
-    help="when no matches are generated, do not fallback to readline's default completion (affects bash only)",
-)
-parser.add_argument(
-    "--complete-arguments",
-    nargs=argparse.REMAINDER,
-    help="arguments to call complete with; use of this option discards default options (affects bash only)",
-)
-parser.add_argument(
-    "-s",
-    "--shell",
-    choices=("bash", "zsh", "tcsh", "fish", "powershell"),
-    default="bash",
-    help="output code for the specified shell",
-)
-parser.add_argument(
-    "-e", "--external-argcomplete-script", help="external argcomplete script for auto completion of the executable"
-)
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
-parser.add_argument("executable", nargs="+", help="executable to completed (when invoked by exactly this name)")
-
-argcomplete.autocomplete(parser)
-
-if len(sys.argv) == 1:
-    parser.print_help()
-    sys.exit(1)
-
-args = parser.parse_args()
-
-
-sys.stdout.write(
-    argcomplete.shellcode(
-        args.executable, args.use_defaults, args.shell, args.complete_arguments, args.external_argcomplete_script
+    parser.add_argument(
+        "--no-defaults",
+        dest="use_defaults",
+        action="store_false",
+        default=True,
+        help="when no matches are generated, do not fallback to readline's default completion (affects bash only)",
     )
-)
+    parser.add_argument(
+        "--complete-arguments",
+        nargs=argparse.REMAINDER,
+        help="arguments to call complete with; use of this option discards default options (affects bash only)",
+    )
+    parser.add_argument(
+        "-s",
+        "--shell",
+        choices=("bash", "zsh", "tcsh", "fish", "powershell"),
+        default="bash",
+        help="output code for the specified shell",
+    )
+    parser.add_argument(
+        "-e", "--external-argcomplete-script", help="external argcomplete script for auto completion of the executable"
+    )
+
+    parser.add_argument("executable", nargs="+", help="executable to completed (when invoked by exactly this name)")
+
+    argcomplete.autocomplete(parser)
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+
+    args = parser.parse_args()
+
+
+    sys.stdout.write(
+        argcomplete.shellcode(
+            args.executable, args.use_defaults, args.shell, args.complete_arguments, args.external_argcomplete_script
+        )
+    )
+
+
+if __name__ == "__main__":
+    sys.exit(main())
