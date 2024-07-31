@@ -28,6 +28,7 @@ import sys
 
 import argcomplete
 
+# PEP 366
 __package__ = "argcomplete"
 
 def main():
