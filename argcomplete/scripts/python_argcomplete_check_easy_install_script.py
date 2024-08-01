@@ -16,7 +16,7 @@ Usage:
 import sys
 
 # PEP 366
-__package__ = "argcomplete"
+__package__ = "argcomplete.scripts"
 
 def main():
     if len(sys.argv) != 2:
