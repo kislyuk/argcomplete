@@ -29,7 +29,7 @@ import sys
 import argcomplete
 
 # PEP 366
-__package__ = "argcomplete"
+__package__ = "argcomplete.scripts"
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

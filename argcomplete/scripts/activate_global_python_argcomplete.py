@@ -18,7 +18,7 @@ import sys
 import argcomplete
 
 # PEP 366
-__package__ = "argcomplete"
+__package__ = "argcomplete.scripts"
 
 zsh_shellcode = """
 # Begin added by argcomplete
