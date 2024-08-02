@@ -1,9 +1,0 @@
-#!/usr/bin/env python3
-# PYTHON_ARGCOMPLETE_OK
-
-# Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
-# Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
-
-import sys
-from argcomplete.scripts import activate_global_python_argcomplete
-sys.exit(activate_global_python_argcomplete())
