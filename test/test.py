@@ -80,7 +80,7 @@ def bash_repl(command="bash"):
 
 
 def zsh_repl(command="zsh"):
-    sh = _repl_sh(command, ["--no-rcs", "-V"], non_printable_insert="%(!..)")
+    sh = _repl_sh(command, ["--no-rcs", "--no-globalrcs", "-V"], non_printable_insert="%(!..)")
     # Require two tabs to print all options (some tests rely on this).
     sh.run_command("setopt BASH_AUTO_LIST")
     return sh
