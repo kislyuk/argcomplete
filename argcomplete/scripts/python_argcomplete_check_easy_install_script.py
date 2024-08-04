@@ -34,33 +34,43 @@ def main():
                 if line.startswith("# EASY-INSTALL-SCRIPT"):
                     import pkg_resources
 
-                    dist, script = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line).groups()
+                    re_match = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line)
+                    assert re_match is not None
+                    dist, script = re_match.groups()
                     if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata("scripts/" + script):
                         return 0
                 elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
-                    dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
+                    re_match = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line)
+                    assert re_match is not None
+                    dist, group, name = re_match.groups()
                     import pkgutil
 
                     import pkg_resources
 
-                    module_name = pkg_resources.get_distribution(dist).get_entry_info(group, name).module_name
-                    with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:
+                    entry_point_info = pkg_resources.get_distribution(dist).get_entry_info(group, name)
+                    assert entry_point_info is not None
+                    module_name = entry_point_info.module_name
+                    with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:  # type: ignore
                         if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                             return 0
                 elif line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
                     for line2 in lines:
                         if line2.startswith("__file__"):
-                            filename = re.match("__file__ = '(.+)'", line2).group(1)
+                            re_match = re.match("__file__ = '(.+)'", line2)
+                            assert re_match is not None
+                            filename = re_match.group(1)
                             with open(filename) as mod_fh:
                                 if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                                     return 0
                 elif line.startswith("# PBR Generated"):
-                    module = re.search("from (.*) import", head).groups()[0]
+                    re_match = re.search("from (.*) import", head)
+                    assert re_match is not None
+                    module = re_match.groups()[0]
                     import pkgutil
 
                     import pkg_resources
 
-                    with open(pkgutil.get_loader(module).get_filename()) as mod_fh:
+                    with open(pkgutil.get_loader(module).get_filename()) as mod_fh:  # type: ignore
                         if "PYTHON_ARGCOMPLETE_OK" in mod_fh.read(1024):
                             return 0
 

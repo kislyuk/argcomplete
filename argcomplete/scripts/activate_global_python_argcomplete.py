@@ -91,6 +91,7 @@ def install_to_destination(dest):
 
 
 def get_consent():
+    assert args is not None
     if args.yes is True:
         return True
     while True:
@@ -140,7 +141,7 @@ def main():
         if args.dest != "-" and not os.path.exists(args.dest):
             parser.error(f"directory {args.dest} was specified via --dest, but it does not exist")
         destinations.append(args.dest)
-    elif site.ENABLE_USER_SITE and site.USER_SITE in argcomplete.__file__:
+    elif site.ENABLE_USER_SITE and site.USER_SITE and site.USER_SITE in argcomplete.__file__:
         print(
             "Argcomplete was installed in the user site local directory. Defaulting to user installation.", file=sys.stderr
         )
