@@ -18,6 +18,7 @@ import sys
 # PEP 366
 __package__ = "argcomplete.scripts"
 
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
@@ -37,7 +38,9 @@ def main():
                     re_match = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line)
                     assert re_match is not None
                     dist, script = re_match.groups()
-                    if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata("scripts/" + script):
+                    if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata(
+                        "scripts/" + script
+                    ):
                         return 0
                 elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
                     re_match = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line)

@@ -143,7 +143,8 @@ def main():
         destinations.append(args.dest)
     elif site.ENABLE_USER_SITE and site.USER_SITE and site.USER_SITE in argcomplete.__file__:
         print(
-            "Argcomplete was installed in the user site local directory. Defaulting to user installation.", file=sys.stderr
+            "Argcomplete was installed in the user site local directory. Defaulting to user installation.",
+            file=sys.stderr,
         )
         link_user_rcfiles()
     elif sys.prefix != sys.base_prefix:

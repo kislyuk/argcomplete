@@ -31,6 +31,7 @@ import argcomplete
 # PEP 366
 __package__ = "argcomplete.scripts"
 
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -66,7 +67,6 @@ def main():
         sys.exit(1)
 
     args = parser.parse_args()
-
 
     sys.stdout.write(
         argcomplete.shellcode(
