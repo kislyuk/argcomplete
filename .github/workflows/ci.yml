@@ -29,6 +29,7 @@ jobs:
     - run: make lint
     - run: make test
     - uses: codecov/codecov-action@v3
+      if: ${{matrix.python-version == '3.12' && matrix.os == 'ubuntu-22.04'}}
   black:
     runs-on: ubuntu-22.04
     steps:
