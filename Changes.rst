@@ -1,3 +1,10 @@
+Changes for v3.5.0 (2024-08-06)
+===============================
+
+-  Use project.scripts instead of setuptools scripts (#498)
+
+-  Test infrastructure improvements
+
 Changes for v3.4.0 (2024-06-16)
 ===============================
 
