@@ -43,10 +43,17 @@ register-python-argcomplete = "argcomplete.scripts.register_python_argcomplete:m
 test = ["coverage", "pexpect", "wheel", "ruff", "mypy"]
 
 [project.urls]
+"Homepage" = "https://github.com/kislyuk/argcomplete"
 "Documentation"= "https://kislyuk.github.io/argcomplete"
 "Source Code"= "https://github.com/kislyuk/argcomplete"
 "Issue Tracker"= "https://github.com/kislyuk/argcomplete/issues"
 "Change Log"= "https://github.com/kislyuk/argcomplete/blob/master/Changes.rst"
+
+[tool.setuptools]
+platforms=["MacOS X", "Posix"]
+
+[tool.setuptools.packages.find]
+exclude = ["contrib"]
 
 [tool.setuptools_scm]
 
