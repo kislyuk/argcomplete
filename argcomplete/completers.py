@@ -60,7 +60,7 @@ class FilesCompleter(BaseCompleter):
         if self.allowednames:
             if self.directories:
                 # Using '-i' and 'bind' in this and the following commands is a workaround to a bug in bash
-                # that was fixed in bash 3.5 but affects older versions. Environment variables are not treated
+                # that was fixed in bash 5.3 but affects older versions. Environment variables are not treated
                 # correctly in older versions and calling bind makes them available. For details, see
                 # https://savannah.gnu.org/support/index.php?111125
                 files = _call(["bash", "-ic", "bind; compgen -A directory -- '{p}'".format(p=prefix)])
