@@ -1,3 +1,8 @@
+Changes for v3.5.1 (2024-10-06)
+===============================
+
+-  Restore compatibility with argparse in Python 3.12.7+ (#508)
+
 Changes for v3.5.0 (2024-08-06)
 ===============================
 
