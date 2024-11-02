@@ -68,7 +68,9 @@ __python_argcomplete_upshift_bash_rematch() {
 # function matches the interpreter line, alongside any optional interpreter
 # arguments. If the target is "magic_string", a match is attempted for the
 # "PYTHON_ARGCOMPLETE_OK" magic string, indicating that the file should be run
-# to get completions. If the target is "easy_install", the function matches either
+# to get completions. Additionally, "PYTHON_ARGCOMPLETE_OK_PATHS" env var is
+# checked to see if it contains the first argument ($1)
+# If the target is "easy_install", the function matches either
 # "PBR Generated" or any of the "EASY-INSTALL" scripts (either SCRIPT,
 # ENTRY-SCRIPT, or DEV-SCRIPT). In all cases, only the first kilobyte of
 # the file is searched. The regex matches are returned in BASH_REMATCH,
@@ -76,6 +78,13 @@ __python_argcomplete_upshift_bash_rematch() {
 __python_argcomplete_scan_head() {
     local file="$1"
     local target="$2"
+
+	local abspath="$(echo "$file" | sed -E "s|//+|/|g")"
+    if [[ "$target" == "magic_string" ]] && [[ ":${PYTHON_ARGCOMPLETE_OK_PATHS}:" == *":$abspath"* ]]; then
+        [[ "$regex" =~ $regex ]]  # Put a match in BASH_REMATCH
+        __python_argcomplete_upshift_bash_rematch
+        return
+    fi
 
     local REPLY
     if [[ -n "${ZSH_VERSION-}" ]]; then

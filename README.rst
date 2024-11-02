@@ -40,6 +40,8 @@ follows:
     args = parser.parse_args()
     ...
 
+Alternatively, add the absolute file path to the ``PYTHON_ARGCOMPLETE_OK_PATHS`` environment variable.
+
 Register your Python application with your shell's completion framework by running ``register-python-argcomplete``::
 
     eval "$(register-python-argcomplete my-python-app)"
@@ -210,7 +212,8 @@ Global completion
 -----------------
 In global completion mode, you don't have to register each argcomplete-capable executable separately. Instead, the shell
 will look for the string **PYTHON_ARGCOMPLETE_OK** in the first 1024 bytes of any executable that it's running
-completion for, and if it's found, follow the rest of the argcomplete protocol as described above.
+completion for, and if it's found, follow the rest of the argcomplete protocol as described above. Alternatively, the
+executable path may be added to the environment variable **PYTHON_ARGCOMPLETE_OK_PATHS**.
 
 Additionally, completion is activated for scripts run as ``python <script>`` and ``python -m <module>``. If you're using
 multiple Python versions on the same system, the version being used to run the script must have argcomplete installed.
@@ -225,7 +228,7 @@ multiple Python versions on the same system, the version being used to run the s
 
 .. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
  argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
- destination code.
+ destination code, it will also check if the wrapper or wrapped scripts are defined in ``PYTHON_ARGCOMPLETE_OK_PATHS``.
 
 If you choose not to use global completion, or ship a completion module that depends on argcomplete, you must register
 your script explicitly using ``eval "$(register-python-argcomplete my-python-app)"``. Standard completion module
