@@ -79,8 +79,8 @@ __python_argcomplete_scan_head() {
     local file="$1"
     local target="$2"
 
-	local abspath="$(echo "$file" | sed -E "s|//+|/|g")"
-    if [[ "$target" == "magic_string" ]] && [[ ":${PYTHON_ARGCOMPLETE_OK_PATHS}:" == *":$abspath"* ]]; then
+    local abspath="$(echo "$file" | sed -E "s|//+|/|g")"
+    if [[ "$target" == "magic_string" ]] && [[ ":${PYTHON_ARGCOMPLETE_OK_PATHS}:" == *":${abspath}:"* ]]; then
         [[ "$regex" =~ $regex ]]  # Put a match in BASH_REMATCH
         __python_argcomplete_upshift_bash_rematch
         return

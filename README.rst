@@ -228,7 +228,7 @@ multiple Python versions on the same system, the version being used to run the s
 
 .. note:: If you use setuptools/distribute ``scripts`` or ``entry_points`` directives to package your module,
  argcomplete will follow the wrapper scripts to their destination and look for ``PYTHON_ARGCOMPLETE_OK`` in the
- destination code, it will also check if the wrapper or wrapped scripts are defined in ``PYTHON_ARGCOMPLETE_OK_PATHS``.
+ destination code, it will also check if the wrapper is defined in ``PYTHON_ARGCOMPLETE_OK_PATHS``.
 
 If you choose not to use global completion, or ship a completion module that depends on argcomplete, you must register
 your script explicitly using ``eval "$(register-python-argcomplete my-python-app)"``. Standard completion module
