@@ -5,6 +5,7 @@
 
 # This file contains argparse introspection utilities used in the course of argcomplete execution.
 
+import sys
 from argparse import (
     ONE_OR_MORE,
     OPTIONAL,
@@ -15,6 +16,7 @@ from argparse import (
     Action,
     ArgumentError,
     ArgumentParser,
+    Namespace,
     _get_action_name,
     _SubParsersAction,
 )
@@ -74,6 +76,19 @@ class IntrospectiveArgumentParser(ArgumentParser):
     '''The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
     '''
+
+    def _parse_known_args2(self, args, namespace, intermixed):
+        if args is None:
+            # args default to the system args
+            args = sys.argv[1:]
+        else:
+            # make sure that args are mutable
+            args = list(args)
+
+        # default Namespace built from parser defaults
+        if namespace is None:
+            namespace = Namespace()
+        return self._parse_known_args(args, namespace)
 
     def _parse_known_args(self, arg_strings, namespace):
         _num_consumed_args.clear()  # Added by argcomplete
