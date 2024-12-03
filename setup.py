@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import glob
-
 from setuptools import find_packages, setup
 
 setup(
