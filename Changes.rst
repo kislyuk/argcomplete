@@ -3,6 +3,8 @@ Changes for v3.5.2 (2024-12-06)
 
 -  Fix \_parse_known_args monkeypatching
 
+   - Note: This fix is required to restore compatibility with Python 3.12.8 and 3.13.1.
+
 -  CI improvements
 
 Changes for v3.5.1 (2024-10-06)
