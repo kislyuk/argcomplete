@@ -1,3 +1,10 @@
+Changes for v3.5.2 (2024-12-06)
+===============================
+
+-  Fix \_parse_known_args monkeypatching
+
+-  CI improvements
+
 Changes for v3.5.1 (2024-10-06)
 ===============================
 
