@@ -20,7 +20,7 @@ release:
 	@if ! type -P gh; then echo "Please install gh"; exit 1; fi
 	@if ! type -P twine; then echo "Please install twine"; exit 1; fi
 	git pull
-	git clean -x --force $$(python setup.py --name)
+	git clean -x --force argcomplete
 	TAG_MSG=$$(mktemp); \
 	    echo "# Changes for ${TAG} ($$(date +%Y-%m-%d))" > $$TAG_MSG; \
 	    git log --pretty=format:%s $$(git describe --abbrev=0)..HEAD >> $$TAG_MSG; \
