@@ -40,8 +40,8 @@ follows:
     args = parser.parse_args()
     ...
 
-If using `pyproject.toml` `project.scripts` entry points, the `PYTHON_ARGCOMPLETE_OK` should appear at the beginning of the
-file that contains the entry point.
+If using ``pyproject.toml`` ``[project.scripts]`` entry points, the ``PYTHON_ARGCOMPLETE_OK`` marker should appear
+at the beginning of the file that contains the entry point.
 
 Register your Python application with your shell's completion framework by running ``register-python-argcomplete``::
 
