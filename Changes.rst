@@ -1,3 +1,9 @@
+Changes for v3.5.3 (2024-12-31)
+===============================
+
+-  Use interactive shells and bind to make environment variable name
+   completions work in older Bash versions (#506)
+
 Changes for v3.5.2 (2024-12-06)
 ===============================
 
