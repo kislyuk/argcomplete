@@ -14,7 +14,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
       - run: pip install build
       - run: python -m build
       - name: Publish package distributions to PyPI

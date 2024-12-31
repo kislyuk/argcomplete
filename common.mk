@@ -18,7 +18,6 @@ release:
 	@if ! type -P pandoc; then echo "Please install pandoc"; exit 1; fi
 	@if ! type -P sponge; then echo "Please install moreutils"; exit 1; fi
 	@if ! type -P gh; then echo "Please install gh"; exit 1; fi
-	@if ! type -P twine; then echo "Please install twine"; exit 1; fi
 	git pull
 	git clean -x --force argcomplete
 	TAG_MSG=$$(mktemp); \
