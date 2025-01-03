@@ -5,7 +5,7 @@ readme = "README.rst"
 requires-python = ">=3.8"
 license = { text = "Apache Software License" }
 authors = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
-maintainers = []
+maintainers = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
 dynamic = ["version"]
 classifiers = [
   "Environment :: Console",
