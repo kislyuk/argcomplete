@@ -64,6 +64,8 @@ skip = ".*/version.py"
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
 per-file-ignores = {"argcomplete/__init__.py" = ["F401"]}
 
 [tool.ruff.format]
