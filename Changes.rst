@@ -1,3 +1,13 @@
+Changes for v3.6.0 (2025-03-05)
+===============================
+
+- Support namespace package traversal when completing Python entry
+  points
+
+- zsh: skip repeat Python runs in the same completion run
+
+- Make \_parse_known_args signature more general for future API changes
+
 Changes for v3.5.3 (2024-12-31)
 ===============================
 
