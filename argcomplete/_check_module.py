@@ -21,7 +21,7 @@ def find(name, return_package=False):
     names = name.split(".")
     # Look for the first importlib ModuleSpec that has `origin` set, indicating it's not a namespace package.
     for package_name_boundary in range(len(names)):
-        spec = find_spec(".".join(names[:package_name_boundary+1]))
+        spec = find_spec(".".join(names[: package_name_boundary + 1]))
         if spec is not None and spec.origin is not None:
             break
 
@@ -35,7 +35,7 @@ def find(name, return_package=False):
         return spec.origin
     if len(spec.submodule_search_locations) != 1:
         raise ArgcompleteMarkerNotFound("expecting one search location")
-    path = os.path.join(spec.submodule_search_locations[0], *names[package_name_boundary+1:])
+    path = os.path.join(spec.submodule_search_locations[0], *names[package_name_boundary + 1 :])
     if os.path.isdir(path):
         filename = "__main__.py"
         if return_package:
