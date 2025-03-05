@@ -21,7 +21,7 @@ autodoc_member_order = "bysource"
 autodoc_typehints = "description"
 autodoc_typehints_description_target = "documented_params"
 intersphinx_mapping = {
-    "https://docs.python.org/3": None,
+    "python": ("https://docs.python.org/3", None),
 }
 templates_path = [""]
 ogp_site_url = "https://kislyuk.github.io/" + project
