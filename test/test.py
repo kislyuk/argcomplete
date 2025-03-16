@@ -1041,10 +1041,12 @@ class TestSplitLine(unittest.TestCase):
 
     def test_last_wordbreak_pos(self):
         self.assertEqual(self.wordbreak("a"), None)
+        self.assertEqual(self.wordbreak("a :b"), 0)
         self.assertEqual(self.wordbreak("a b:c"), 1)
         self.assertEqual(self.wordbreak("a b:c=d"), 3)
         self.assertEqual(self.wordbreak("a b:c=d "), None)
         self.assertEqual(self.wordbreak("a b:c=d e"), None)
+        self.assertEqual(self.wordbreak('":b'), None)
         self.assertEqual(self.wordbreak('"b:c'), None)
         self.assertEqual(self.wordbreak('"b:c=d'), None)
         self.assertEqual(self.wordbreak('"b:c=d"'), None)
