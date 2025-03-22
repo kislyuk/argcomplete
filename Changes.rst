@@ -1,3 +1,14 @@
+Changes for v3.6.1 (2025-03-22)
+===============================
+
+- zsh: add global completion system install dir to user fpath if not
+  present
+
+- Update shell_integration.py to support spaces in script file path.
+  (#525)
+
+- Fix completion when wordbreak is first character (#526)
+
 Changes for v3.6.0 (2025-03-05)
 ===============================
 
