@@ -136,7 +136,7 @@ def link_user_rcfiles():
     link_bash_user_rcfile()
 
 def add_zsh_system_dir_to_fpath_for_user():
-    if "zsh" not in os.environ.get("SHELL"):
+    if "zsh" not in os.environ.get("SHELL", ""):
         return
     try:
         zsh_system_dir = get_zsh_system_dir()
