@@ -1,3 +1,10 @@
+Changes for v3.6.2 (2025-04-02)
+===============================
+
+- Revert “zsh: skip repeat Python runs in the same completion run” This
+  reverts a regression introduced in zsh tab completion configurations
+  utilizing multiple matchers.
+
 Changes for v3.6.1 (2025-03-22)
 ===============================
 
