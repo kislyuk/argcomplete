@@ -101,6 +101,10 @@ class _FilteredFilesCompleter(BaseCompleter):
         """
         Provide completions on prefix
         """
+         expand_user = prefix.startswith('~/')
+        if expand_user:
+            user_home = os.path.expanduser('~/')
+            prefix = user_home + prefix.removeprefix("~/")
         target_dir = os.path.dirname(prefix)
         try:
             names = os.listdir(target_dir or ".")
@@ -114,6 +118,8 @@ class _FilteredFilesCompleter(BaseCompleter):
             candidate = os.path.join(target_dir, name)
             if not self.predicate(candidate):
                 continue
+            if expand_user:
+                candidate = "~/" + candidate.removeprefix(user_home)
             yield candidate + "/" if os.path.isdir(candidate) else candidate
 
 
