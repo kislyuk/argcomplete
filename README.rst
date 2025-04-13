@@ -1,17 +1,18 @@
-argcomplete - Bash/zsh tab completion for argparse
+argcomplete - shell tab completion for argparse
 ==================================================
 *Tab complete all the things!*
 
 Argcomplete provides easy, extensible command line tab completion of arguments for your Python application.
-
-It makes two assumptions:
-
-* You're using bash or zsh as your shell
-* You're using `argparse <http://docs.python.org/3/library/argparse.html>`_ to manage your command line arguments/options
+At least if you're using `argparse <https://docs.python.org/3/library/argparse.html>`_ to manage your command line arguments/options.
 
 Argcomplete is particularly useful if your program has lots of options or subparsers, and if your program can
 dynamically suggest completions for your argument/option values (for example, if the user is browsing resources over
 the network).
+
+Official support is only provided for bash and zsh on Linux and MacOS.
+
+There is limited community-provided support in argcomplete for other shells and platforms, including fish, tcsh, xonsh, powershell, and Windows, please see the
+`contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_ directory.
 
 Installation
 ------------
@@ -254,12 +255,6 @@ work for zsh as well.
 Python Support
 --------------
 Argcomplete requires Python 3.9+.
-
-Support for other shells
-------------------------
-Argcomplete maintainers provide support only for the bash and zsh shells on Linux and MacOS. For resources related to
-other shells and platforms, including fish, tcsh, xonsh, powershell, and Windows, please see the
-`contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_ directory.
 
 Common Problems
 ---------------
