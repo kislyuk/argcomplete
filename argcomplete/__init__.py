@@ -11,3 +11,21 @@ from .shell_integration import shellcode
 
 autocomplete = CompletionFinder()
 autocomplete.__doc__ = """ Use this to access argcomplete. See :meth:`argcomplete.CompletionFinder.__call__()`. """
+
+__all__ = [
+    'completers',
+    'ChoicesCompleter',
+    'DirectoriesCompleter',
+    'EnvironCompleter',
+    'FilesCompleter',
+    'SuppressCompleter',
+    'ArgcompleteException',
+    'CompletionFinder',
+    'ExclusiveCompletionFinder',
+    'safe_actions',
+    'debug',
+    'mute_stderr',
+    'warn',
+    'split_line',
+    'shellcode',
+]
