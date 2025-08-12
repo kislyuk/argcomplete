@@ -16,6 +16,14 @@ or create new completion file, e.g::
 
     register-python-argcomplete --shell fish my-awesome-script > ~/.config/fish/completions/my-awesome-script.fish
 
+If the script is called using a path, such as ``./my-awesome-script``, it must be registered using the absolute path to the script. ::
+
+    register-python-argcomplete --shell fish $(realpath ./my-awesome-script) > ~/.config/fish/completions/my-awesome-script.fish
+
+The completions using a path will not be automatically loaded since the command name does not match the file name. To load the completions, ``source`` them. ::
+
+    source ~/.config/fish/completions/my-awesome-script.fish
+
 Completion Description For Fish
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 By default help string is added as completion description.
