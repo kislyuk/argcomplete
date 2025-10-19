@@ -415,7 +415,7 @@ class CompletionFinder(object):
                             if self.validator(completion, cword_prefix):
                                 completions.append(completion)
                                 if isinstance(completer, ChoicesCompleter):
-                                    self._display_completions[completion] = self._get_action_help(action)
+                                    self._display_completions[completion] = self._get_action_help(active_action)
                                 else:
                                     self._display_completions[completion] = ""
                 else:
