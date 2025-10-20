@@ -1,3 +1,15 @@
+Changes for v3.6.3 (2025-10-19)
+===============================
+
+- Make RE PCRE compatible. Fixes #539
+
+- Only execute Python interpreters (#536)
+
+- fish: set variable scope to local to avoid clobbering global or
+  universal variables (#534)
+
+- Documentation and help improvements
+
 Changes for v3.6.2 (2025-04-02)
 ===============================
 
