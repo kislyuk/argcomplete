@@ -1,0 +1,1026 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Release Notes" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kislyuk.github.io/changelog.html" />
+<meta property="og:site_name" content="argcomplete" />
+<meta property="og:description" content="Changes for v3.6.3 (2025-10-19): Make RE PCRE compatible. Fixes #539, Only execute Python interpreters (#536), fish: set variable scope to local to avoid clobbering global or universal variables (#..." />
+<meta name="description" content="Changes for v3.6.3 (2025-10-19): Make RE PCRE compatible. Fixes #539, Only execute Python interpreters (#536), fish: set variable scope to local to avoid clobbering global or universal variables (#..." />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="argcomplete - Bash/zsh tab completion for argparse" href="index.html" />
+
+    <!-- Generated with Sphinx 8.2.1 and Furo 2024.08.06 -->
+        <title>Release Notes - argcomplete documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">argcomplete  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">argcomplete  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><ul>
+<li><a class="reference internal" href="#">Release Notes</a></li>
+<li><a class="reference internal" href="#changes-for-v3-6-3-2025-10-19">Changes for v3.6.3 (2025-10-19)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-6-2-2025-04-02">Changes for v3.6.2 (2025-04-02)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-6-1-2025-03-22">Changes for v3.6.1 (2025-03-22)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-6-0-2025-03-05">Changes for v3.6.0 (2025-03-05)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-5-3-2024-12-31">Changes for v3.5.3 (2024-12-31)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-5-2-2024-12-06">Changes for v3.5.2 (2024-12-06)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-5-1-2024-10-06">Changes for v3.5.1 (2024-10-06)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-5-0-2024-08-06">Changes for v3.5.0 (2024-08-06)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-4-0-2024-06-16">Changes for v3.4.0 (2024-06-16)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-3-0-2024-04-14">Changes for v3.3.0 (2024-04-14)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-2-3-2024-03-07">Changes for v3.2.3 (2024-03-07)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-2-2-2024-01-23">Changes for v3.2.2 (2024-01-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-2-1-2023-12-10">Changes for v3.2.1 (2023-12-10)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-2-0-2023-12-09">Changes for v3.2.0 (2023-12-09)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-6-2023-11-12">Changes for v3.1.6 (2023-11-12)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-5-2023-11-12">Changes for v3.1.5 (2023-11-12)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-4-2023-11-01">Changes for v3.1.4 (2023-11-01)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-3-2023-11-01">Changes for v3.1.3 (2023-11-01)</a></li>
+<li><a class="reference internal" href="#id1">Changes for v3.1.3 (2023-11-01)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-2-2023-09-16">Changes for v3.1.2 (2023-09-16)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-1-2023-06-11">Changes for v3.1.1 (2023-06-11)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-1-0-2023-06-10">Changes for v3.1.0 (2023-06-10)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-8-2023-04-23">Changes for v3.0.8 (2023-04-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-7-2023-04-23">Changes for v3.0.7 (2023-04-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-6-2023-04-22">Changes for v3.0.6 (2023-04-22)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-5-2023-03-25">Changes for v3.0.5 (2023-03-25)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-4-2023-03-21">Changes for v3.0.4 (2023-03-21)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-3-2023-03-20">Changes for v3.0.3 (2023-03-20)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-2-2023-03-19">Changes for v3.0.2 (2023-03-19)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-1-2023-03-19">Changes for v3.0.1 (2023-03-19)</a></li>
+<li><a class="reference internal" href="#changes-for-v3-0-0-2023-03-19">Changes for v3.0.0 (2023-03-19)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-1-2-2023-03-17">Changes for v2.1.2 (2023-03-17)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-1-1-2023-03-06">Changes for v2.1.1 (2023-03-06)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-1-0-2023-03-06">Changes for v2.1.0 (2023-03-06)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-6-2023-03-06">Changes for v2.0.6 (2023-03-06)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-5-2023-03-04">Changes for v2.0.5 (2023-03-04)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-4-2023-03-04">Changes for v2.0.4 (2023-03-04)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-3-2023-03-04">Changes for v2.0.3 (2023-03-04)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-2-2023-03-04">Changes for v2.0.2 (2023-03-04)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-1-2023-03-04">Changes for v2.0.1 (2023-03-04)</a></li>
+<li><a class="reference internal" href="#changes-for-v2-0-0-2022-01-03">Changes for v2.0.0 (2022-01-03)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-12-3-2021-04-19">Changes for v1.12.3 (2021-04-19)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-12-2-2020-11-23">Changes for v1.12.2 (2020-11-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-12-1-2020-09-26">Changes for v1.12.1 (2020-09-26)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-11-1-2020-01-14">Changes for v1.11.1 (2020-01-14)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-11-0-2019-12-23">Changes for v1.11.0 (2019-12-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-10-3-2019-11-26">Changes for v1.10.3 (2019-11-26)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-10-2-2019-11-17">Changes for v1.10.2 (2019-11-17)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-10-1-2019-11-16">Changes for v1.10.1 (2019-11-16)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-10-0-2019-05-12">Changes for v1.10.0 (2019-05-12)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-9-5-2019-04-02">Changes for v1.9.5 (2019-04-02)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-9-4-2018-02-13">Changes for v1.9.4 (2018-02-13)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-9-3-2017-11-16">Changes for v1.9.3 (2017-11-16)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-9-2-2017-08-23">Changes for v1.9.2 (2017-08-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-9-1-2017-08-23">Changes for v1.9.1 (2017-08-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-9-0-2017-08-23">Changes for v1.9.0 (2017-08-23)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-8-2-2017-01-26">Changes for v1.8.2 (2017-01-26)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-8-1-2017-01-21">Changes for v1.8.1 (2017-01-21)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-8-0-2017-01-19">Changes for v1.8.0 (2017-01-19)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-7-0-2016-11-30">Changes for v1.7.0 (2016-11-30)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-6-0-2016-10-20">Changes for v1.6.0 (2016-10-20)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-5-1-2016-10-11">Changes for v1.5.1 (2016-10-11)</a></li>
+<li><a class="reference internal" href="#changes-for-v1-5-0-2016-10-11">Changes for v1.5.0 (2016-10-11)</a></li>
+<li><a class="reference internal" href="#version-1-4-1-2016-06-14">Version 1.4.1 (2016-06-14)</a></li>
+<li><a class="reference internal" href="#version-1-4-0-2016-06-10">Version 1.4.0 (2016-06-10)</a></li>
+<li><a class="reference internal" href="#version-1-3-0-2016-06-01">Version 1.3.0 (2016-06-01)</a></li>
+<li><a class="reference internal" href="#version-1-2-0-2016-05-25">Version 1.2.0 (2016-05-25)</a></li>
+<li><a class="reference internal" href="#version-1-1-1-2016-03-22">Version 1.1.1 (2016-03-22)</a></li>
+<li><a class="reference internal" href="#version-1-1-0-2016-02-21">Version 1.1.0 (2016-02-21)</a></li>
+<li><a class="reference internal" href="#version-1-0-0-2015-08-22">Version 1.0.0 (2015-08-22)</a></li>
+<li><a class="reference internal" href="#version-0-9-0-2015-07-03">Version 0.9.0 (2015-07-03)</a></li>
+<li><a class="reference internal" href="#version-0-8-9-2015-06-01">Version 0.8.9 (2015-06-01)</a></li>
+<li><a class="reference internal" href="#version-0-8-8-2015-05-01">Version 0.8.8 (2015-05-01)</a></li>
+<li><a class="reference internal" href="#version-0-8-7-2015-04-11">Version 0.8.7 (2015-04-11)</a></li>
+<li><a class="reference internal" href="#version-0-8-6-2015-04-11">Version 0.8.6 (2015-04-11)</a></li>
+<li><a class="reference internal" href="#version-0-8-5-2015-04-07">Version 0.8.5 (2015-04-07)</a></li>
+<li><a class="reference internal" href="#version-0-8-4-2014-12-11">Version 0.8.4 (2014-12-11)</a></li>
+<li><a class="reference internal" href="#version-0-8-3-2014-11-09">Version 0.8.3 (2014-11-09)</a></li>
+<li><a class="reference internal" href="#version-0-8-2-2014-11-03">Version 0.8.2 (2014-11-03)</a></li>
+<li><a class="reference internal" href="#version-0-8-1-2014-07-02">Version 0.8.1 (2014-07-02)</a></li>
+<li><a class="reference internal" href="#version-0-8-0-2014-04-07">Version 0.8.0 (2014-04-07)</a></li>
+<li><a class="reference internal" href="#version-0-7-1-2014-03-29">Version 0.7.1 (2014-03-29)</a></li>
+<li><a class="reference internal" href="#version-0-7-0-2014-01-19">Version 0.7.0 (2014-01-19)</a></li>
+<li><a class="reference internal" href="#version-0-6-9-2014-01-19">Version 0.6.9 (2014-01-19)</a></li>
+<li><a class="reference internal" href="#version-0-6-8-2014-01-18">Version 0.6.8 (2014-01-18)</a></li>
+</ul>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/changelog.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="release-notes">
+<h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
+</section>
+<section id="changes-for-v3-6-3-2025-10-19">
+<h1>Changes for v3.6.3 (2025-10-19)<a class="headerlink" href="#changes-for-v3-6-3-2025-10-19" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Make RE PCRE compatible. Fixes #539</p></li>
+<li><p>Only execute Python interpreters (#536)</p></li>
+<li><p>fish: set variable scope to local to avoid clobbering global or
+universal variables (#534)</p></li>
+<li><p>Documentation and help improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-6-2-2025-04-02">
+<h1>Changes for v3.6.2 (2025-04-02)<a class="headerlink" href="#changes-for-v3-6-2-2025-04-02" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Revert “zsh: skip repeat Python runs in the same completion run” This
+reverts a regression introduced in zsh tab completion configurations
+utilizing multiple matchers.</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-6-1-2025-03-22">
+<h1>Changes for v3.6.1 (2025-03-22)<a class="headerlink" href="#changes-for-v3-6-1-2025-03-22" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>zsh: add global completion system install dir to user fpath if not
+present</p></li>
+<li><p>Update shell_integration.py to support spaces in script file path.
+(#525)</p></li>
+<li><p>Fix completion when wordbreak is first character (#526)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-6-0-2025-03-05">
+<h1>Changes for v3.6.0 (2025-03-05)<a class="headerlink" href="#changes-for-v3-6-0-2025-03-05" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Support namespace package traversal when completing Python entry
+points</p></li>
+<li><p>zsh: skip repeat Python runs in the same completion run</p></li>
+<li><p>Make _parse_known_args signature more general for future API changes</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-5-3-2024-12-31">
+<h1>Changes for v3.5.3 (2024-12-31)<a class="headerlink" href="#changes-for-v3-5-3-2024-12-31" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use interactive shells and bind to make environment variable name
+completions work in older Bash versions (#506)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-5-2-2024-12-06">
+<h1>Changes for v3.5.2 (2024-12-06)<a class="headerlink" href="#changes-for-v3-5-2-2024-12-06" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix _parse_known_args monkeypatching</p>
+<ul>
+<li><p>Note: This fix is required to restore compatibility with Python 3.12.8 and 3.13.1.</p></li>
+</ul>
+</li>
+<li><p>CI improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-5-1-2024-10-06">
+<h1>Changes for v3.5.1 (2024-10-06)<a class="headerlink" href="#changes-for-v3-5-1-2024-10-06" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Restore compatibility with argparse in Python 3.12.7+ (#508)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-5-0-2024-08-06">
+<h1>Changes for v3.5.0 (2024-08-06)<a class="headerlink" href="#changes-for-v3-5-0-2024-08-06" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use project.scripts instead of setuptools scripts (#498)</p></li>
+<li><p>Test infrastructure improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-4-0-2024-06-16">
+<h1>Changes for v3.4.0 (2024-06-16)<a class="headerlink" href="#changes-for-v3-4-0-2024-06-16" title="Link to this heading">¶</a></h1>
+<ul>
+<li><p>No stdin for python calls from bash completion functions (#488)</p>
+<p>Prevents usage of stdin by (python) executables that are called
+during completion generation. This prevents the completion locking up
+the entire shell when the python script is broken i.e. it enters an
+interactive mode (REPL) instead of generating the completions, as
+expected.</p>
+</li>
+<li><p>Localize shell variable REPLY to avoid overwriting users’ value
+(#489)</p>
+<p>The variable REPLY is used by default by the <code class="docutils literal notranslate"><span class="pre">read</span></code> shell builtin
+to store the return value, and like all bash/zsh variables, is scoped
+globally. This change allows this variable to be used for other needs
+by appropriately scoping its internal use by an argcomplete utility
+function that uses <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
+</li>
+</ul>
+</section>
+<section id="changes-for-v3-3-0-2024-04-14">
+<h1>Changes for v3.3.0 (2024-04-14)<a class="headerlink" href="#changes-for-v3-3-0-2024-04-14" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Preserve compatibility with argparse option tuples of length 4. This
+update is required to use argcomplete on Python 3.11.9+ or 3.12.3+.</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-2-3-2024-03-07">
+<h1>Changes for v3.2.3 (2024-03-07)<a class="headerlink" href="#changes-for-v3-2-3-2024-03-07" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Allow register-python-argcomplete output to be used as lazy-loaded
+zsh completion module (#475)</p></li>
+<li><p>Move debug_stream initialization to helper method to allow fd 9
+behavior to be overridden in subclasses (#471)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-2-2-2024-01-23">
+<h1>Changes for v3.2.2 (2024-01-23)<a class="headerlink" href="#changes-for-v3-2-2-2024-01-23" title="Link to this heading">¶</a></h1>
+<p>Expand tilde in zsh</p>
+</section>
+<section id="changes-for-v3-2-1-2023-12-10">
+<h1>Changes for v3.2.1 (2023-12-10)<a class="headerlink" href="#changes-for-v3-2-1-2023-12-10" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Allow explicit zsh global completion activation (#467)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-2-0-2023-12-09">
+<h1>Changes for v3.2.0 (2023-12-09)<a class="headerlink" href="#changes-for-v3-2-0-2023-12-09" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix and test global completion in zsh (#463, #466)</p></li>
+<li><p>Add –yes option to activate-global-python-argcomplete (#461)</p></li>
+<li><p>Test suite improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-6-2023-11-12">
+<h1>Changes for v3.1.6 (2023-11-12)<a class="headerlink" href="#changes-for-v3-1-6-2023-11-12" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Respect user choice in activate-global-python-argcomplete</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-5-2023-11-12">
+<h1>Changes for v3.1.5 (2023-11-12)<a class="headerlink" href="#changes-for-v3-1-5-2023-11-12" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Escape colon in zsh completions. Fixes #456</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-4-2023-11-01">
+<h1>Changes for v3.1.4 (2023-11-01)<a class="headerlink" href="#changes-for-v3-1-4-2023-11-01" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Call _default as a fallback in zsh global completion</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-3-2023-11-01">
+<h1>Changes for v3.1.3 (2023-11-01)<a class="headerlink" href="#changes-for-v3-1-3-2023-11-01" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use homebrew prefix by default</p></li>
+<li><p>zsh: Allow to use external script (#453)</p></li>
+<li><p>Add support for Python 3.12 and drop EOL 3.6 and 3.7 (#449)</p></li>
+</ul>
+</section>
+<section id="id1">
+<h1>Changes for v3.1.3 (2023-11-01)<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use homebrew prefix by default</p></li>
+<li><p>zsh: Allow to use external script (#453)</p></li>
+<li><p>Add support for Python 3.12 and drop EOL 3.6 and 3.7 (#449)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-2-2023-09-16">
+<h1>Changes for v3.1.2 (2023-09-16)<a class="headerlink" href="#changes-for-v3-1-2-2023-09-16" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Ensure Python 3.12+ compatibility in check_console_script (#448)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-1-2023-06-11">
+<h1>Changes for v3.1.1 (2023-06-11)<a class="headerlink" href="#changes-for-v3-1-1-2023-06-11" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Search through asdf shims</p></li>
+<li><p>Use ` as escape character in PowerShell (#434)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-1-0-2023-06-10">
+<h1>Changes for v3.1.0 (2023-06-10)<a class="headerlink" href="#changes-for-v3-1-0-2023-06-10" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>setup.py -&gt; pyproject.toml migration start (#427)</p></li>
+<li><p>Improve user install logic in activate-global-python-argcomplete
+(#437)</p></li>
+<li><p>Ensure Python 3.7 compatibility in check_console_script (#436)</p></li>
+<li><p>ZSH implementation fixes (#431, #433)</p></li>
+<li><p>Documentation improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-8-2023-04-23">
+<h1>Changes for v3.0.8 (2023-04-23)<a class="headerlink" href="#changes-for-v3-0-8-2023-04-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Test suite shell wrapper: Accept OSError on exit</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-7-2023-04-23">
+<h1>Changes for v3.0.7 (2023-04-23)<a class="headerlink" href="#changes-for-v3-0-7-2023-04-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Test suite: Use general regex to cut zsh reset ANSI sequences (#425)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-6-2023-04-22">
+<h1>Changes for v3.0.6 (2023-04-22)<a class="headerlink" href="#changes-for-v3-0-6-2023-04-22" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Allow importlib-metadata 6.x; skip test failures on Python 3.7 (#420,
+#424)</p></li>
+<li><p>Note completers can return iterables of strings, not just lists
+(#422)</p></li>
+<li><p>Documentation and test improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-5-2023-03-25">
+<h1>Changes for v3.0.5 (2023-03-25)<a class="headerlink" href="#changes-for-v3-0-5-2023-03-25" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Call _default as fallback in zsh global completion hook</p></li>
+<li><p>Begin support for mapping-emitting completers</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-4-2023-03-21">
+<h1>Changes for v3.0.4 (2023-03-21)<a class="headerlink" href="#changes-for-v3-0-4-2023-03-21" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>activate-global-python-argcomplete: do not overwrite existing dotfile
+in user directory</p></li>
+<li><p>Add NOTICE file</p></li>
+<li><p>Establish long term name for split_line as
+argcomplete.lexers.split_line</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-3-2023-03-20">
+<h1>Changes for v3.0.3 (2023-03-20)<a class="headerlink" href="#changes-for-v3-0-3-2023-03-20" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Re-add split_line to API (#419)</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-2-2023-03-19">
+<h1>Changes for v3.0.2 (2023-03-19)<a class="headerlink" href="#changes-for-v3-0-2-2023-03-19" title="Link to this heading">¶</a></h1>
+<p>Fix zsh default completion issues</p>
+</section>
+<section id="changes-for-v3-0-1-2023-03-19">
+<h1>Changes for v3.0.1 (2023-03-19)<a class="headerlink" href="#changes-for-v3-0-1-2023-03-19" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix zsh autoload issues</p></li>
+</ul>
+</section>
+<section id="changes-for-v3-0-0-2023-03-19">
+<h1>Changes for v3.0.0 (2023-03-19)<a class="headerlink" href="#changes-for-v3-0-0-2023-03-19" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fully support zsh. Argcomplete now supports completion descriptions
+and global completion in zsh.</p></li>
+<li><p>Clean up top level namespace.</p></li>
+<li><p>Documentation and test improvements.</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-1-2-2023-03-17">
+<h1>Changes for v2.1.2 (2023-03-17)<a class="headerlink" href="#changes-for-v2-1-2-2023-03-17" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Test infrastructure improvements</p></li>
+<li><p>Indicate that there is no support commitment for fish and tcsh shells</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-1-1-2023-03-06">
+<h1>Changes for v2.1.1 (2023-03-06)<a class="headerlink" href="#changes-for-v2-1-1-2023-03-06" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Documentation and test improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-1-0-2023-03-06">
+<h1>Changes for v2.1.0 (2023-03-06)<a class="headerlink" href="#changes-for-v2-1-0-2023-03-06" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Remove scripts for contrib-supported shells from global namespace</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-6-2023-03-06">
+<h1>Changes for v2.0.6 (2023-03-06)<a class="headerlink" href="#changes-for-v2-0-6-2023-03-06" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>setup.py: exclude test.* subpackages from find_packages (#406)</p></li>
+<li><p>Support PowerShell (#405)</p></li>
+<li><p>CI updates</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-5-2023-03-04">
+<h1>Changes for v2.0.5 (2023-03-04)<a class="headerlink" href="#changes-for-v2-0-5-2023-03-04" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Revert “Support powershell (#392)”</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-4-2023-03-04">
+<h1>Changes for v2.0.4 (2023-03-04)<a class="headerlink" href="#changes-for-v2-0-4-2023-03-04" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix interrupted release (v2.0.1)</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-3-2023-03-04">
+<h1>Changes for v2.0.3 (2023-03-04)<a class="headerlink" href="#changes-for-v2-0-3-2023-03-04" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix interrupted release (v2.0.1)</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-2-2023-03-04">
+<h1>Changes for v2.0.2 (2023-03-04)<a class="headerlink" href="#changes-for-v2-0-2-2023-03-04" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix interrupted release (v2.0.1)</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-1-2023-03-04">
+<h1>Changes for v2.0.1 (2023-03-04)<a class="headerlink" href="#changes-for-v2-0-1-2023-03-04" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Support powershell (#392)</p></li>
+<li><p>Update importlib-metadata dependency to include versions 5.x (#389)</p></li>
+<li><p>Test and documentation improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v2-0-0-2022-01-03">
+<h1>Changes for v2.0.0 (2022-01-03)<a class="headerlink" href="#changes-for-v2-0-0-2022-01-03" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Truncate input after cursor. Fixes #351 (#352)</p></li>
+<li><p>Support of path completion in fish #327 (#359)</p></li>
+<li><p>Drop support for Python 2.7 and 3.5 (#361)</p></li>
+<li><p>Add support for Python 3.10 (#356)</p></li>
+<li><p>Test, documentation, and release infrastructure improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-12-3-2021-04-19">
+<h1>Changes for v1.12.3 (2021-04-19)<a class="headerlink" href="#changes-for-v1-12-3-2021-04-19" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Update importlib-metadata version pin (#345)</p></li>
+<li><p>Display script debug output in tcsh (#342)</p></li>
+<li><p>Fish support improvements (#338, #339)</p></li>
+<li><p>Print <code class="docutils literal notranslate"><span class="pre">warn()</span></code> message from beginning of line (#335)</p></li>
+<li><p>Test infrastructure improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-12-2-2020-11-23">
+<h1>Changes for v1.12.2 (2020-11-23)<a class="headerlink" href="#changes-for-v1-12-2-2020-11-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Update importlib-metadata dependency pin (#332)</p></li>
+<li><p>Add change log project URL (#312)</p></li>
+<li><p>Replace Travis CI with GitHub Actions (#323)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-12-1-2020-09-26">
+<h1>Changes for v1.12.1 (2020-09-26)<a class="headerlink" href="#changes-for-v1-12-1-2020-09-26" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Update importlib-metadata dependency version range</p></li>
+<li><p>Bash nounset mode fixes (#313)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-11-1-2020-01-14">
+<h1>Changes for v1.11.1 (2020-01-14)<a class="headerlink" href="#changes-for-v1-11-1-2020-01-14" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Add -o bashdefault to register-python-argcomplete’s output command
+(#284)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-11-0-2019-12-23">
+<h1>Changes for v1.11.0 (2019-12-23)<a class="headerlink" href="#changes-for-v1-11-0-2019-12-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use shell builtins where possible (#280)</p></li>
+<li><p>Switch from pkg_resources to importlib (#283)</p></li>
+<li><p>Remove .sh extension by bash-completion convention (#281)</p></li>
+<li><p>Catch exceptions in _check_module (#269)</p></li>
+<li><p>Documentation and test improvements</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-10-3-2019-11-26">
+<h1>Changes for v1.10.3 (2019-11-26)<a class="headerlink" href="#changes-for-v1-10-3-2019-11-26" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Do not suggest options after – (end-of-options delimiter)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-10-2-2019-11-17">
+<h1>Changes for v1.10.2 (2019-11-17)<a class="headerlink" href="#changes-for-v1-10-2-2019-11-17" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Include all test directory contents in source distribution</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-10-1-2019-11-16">
+<h1>Changes for v1.10.1 (2019-11-16)<a class="headerlink" href="#changes-for-v1-10-1-2019-11-16" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Trigger completers on –optional=PARTIAL_VALUE</p></li>
+<li><p>Complete console scripts installed from wheels (#241)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-10-0-2019-05-12">
+<h1>Changes for v1.10.0 (2019-05-12)<a class="headerlink" href="#changes-for-v1-10-0-2019-05-12" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fish support #68 (#260), thanks to &#64;volkov</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-9-5-2019-04-02">
+<h1>Changes for v1.9.5 (2019-04-02)<a class="headerlink" href="#changes-for-v1-9-5-2019-04-02" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>check_module: Don’t crash, exit with error instead (#261)</p></li>
+<li><p>Register completion for multiple commands (#246)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-9-4-2018-02-13">
+<h1>Changes for v1.9.4 (2018-02-13)<a class="headerlink" href="#changes-for-v1-9-4-2018-02-13" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use the correct interpreter when checking wrappers (#226)</p></li>
+<li><p>Provide shellcode as a module function (#237)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-9-3-2017-11-16">
+<h1>Changes for v1.9.3 (2017-11-16)<a class="headerlink" href="#changes-for-v1-9-3-2017-11-16" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix handling of COMP_POINT (#236)</p></li>
+<li><p>Fix crash when writing unicode to debug_stream in Python 2 (#230)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-9-2-2017-08-23">
+<h1>Changes for v1.9.2 (2017-08-23)<a class="headerlink" href="#changes-for-v1-9-2-2017-08-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix release</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-9-1-2017-08-23">
+<h1>Changes for v1.9.1 (2017-08-23)<a class="headerlink" href="#changes-for-v1-9-1-2017-08-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix release</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-9-0-2017-08-23">
+<h1>Changes for v1.9.0 (2017-08-23)<a class="headerlink" href="#changes-for-v1-9-0-2017-08-23" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Add SuppressCompleter to skip completion for specific arguments while
+allowing help text (#224)</p></li>
+<li><p>Redirect all output to debug stream in debug mode (#206)</p></li>
+<li><p>Complete python -m module (#204)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-8-2-2017-01-26">
+<h1>Changes for v1.8.2 (2017-01-26)<a class="headerlink" href="#changes-for-v1-8-2-2017-01-26" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix bug introduced in v0.7.1 where completers would not receive the
+parser keyword argument.</p></li>
+<li><p>Documentation improvements.</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-8-1-2017-01-21">
+<h1>Changes for v1.8.1 (2017-01-21)<a class="headerlink" href="#changes-for-v1-8-1-2017-01-21" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix completion after tokens with wordbreak chars (#197)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-8-0-2017-01-19">
+<h1>Changes for v1.8.0 (2017-01-19)<a class="headerlink" href="#changes-for-v1-8-0-2017-01-19" title="Link to this heading">¶</a></h1>
+<p>This release contains work by &#64;evanunderscore with numerous improvements
+to the handling of special characters in completions.</p>
+<ul class="simple">
+<li><p>Simplify nospace handling in global completion (#195)</p></li>
+<li><p>Specially handle all characters in COMP_WORDBREAKS (#187)</p></li>
+<li><p>Use setuptools tests-require directive, fixes #186</p></li>
+<li><p>Complete files using the specified interpreter (#192)</p></li>
+<li><p>Fix completion for scripts run via python (#191)</p></li>
+<li><p>Clarify argument to register-python-argcomplete (#190)</p></li>
+<li><p>Fix handling of commas and other special chars (#172); handle more
+special characters (#189)</p></li>
+<li><p>Fix handling of special characters in tcsh (#188)</p></li>
+<li><p>Update my_shlex to Python 3.6 version (#184)</p></li>
+<li><p>Fix additional trailing space in exact matches (#183)</p></li>
+<li><p>Adjust tests to handle development environments (#180)</p></li>
+<li><p>Fix tcsh tests on OSX (#177); Update bash on OSX (#176); Check output
+of test setup command (#179)</p></li>
+<li><p>Optionally disable duplicated flags (#143)</p></li>
+<li><p>Add default_completer option to CompletionFinder.<strong>call</strong> (#167)</p></li>
+<li><p>Let bash add or suppress trailing space (#159)</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-7-0-2016-11-30">
+<h1>Changes for v1.7.0 (2016-11-30)<a class="headerlink" href="#changes-for-v1-7-0-2016-11-30" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Restore parser to its original state to allow reuse after completion
+(#150).</p></li>
+<li><p>Expose COMP_TYPE environment variable (#157). Thanks to Matt Clay
+(&#64;mattclay).</p></li>
+<li><p>Test infrastructure and documentation improvements.</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-6-0-2016-10-20">
+<h1>Changes for v1.6.0 (2016-10-20)<a class="headerlink" href="#changes-for-v1-6-0-2016-10-20" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Add support for tcsh (#155)</p></li>
+<li><p>Fix handling of unquoted completions containing $ (#154)</p></li>
+<li><p>Don’t insert unnecessary leading quote char in completions (#152)</p></li>
+<li><p>Fix parser reuse with positional arguments (#149)</p></li>
+<li><p>Tests: Add simple pexpect tests for bash (#153); Add test case to
+verify #20 is fixed (#148)</p></li>
+<li><p>Thanks to &#64;davvid and &#64;evanunderscore for their work on this release.</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-5-1-2016-10-11">
+<h1>Changes for v1.5.1 (2016-10-11)<a class="headerlink" href="#changes-for-v1-5-1-2016-10-11" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Packaging fix</p></li>
+</ul>
+</section>
+<section id="changes-for-v1-5-0-2016-10-11">
+<h1>Changes for v1.5.0 (2016-10-11)<a class="headerlink" href="#changes-for-v1-5-0-2016-10-11" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Do not suggest options from mutually exclusive groups (#145).</p></li>
+</ul>
+</section>
+<section id="version-1-4-1-2016-06-14">
+<h1>Version 1.4.1 (2016-06-14)<a class="headerlink" href="#version-1-4-1-2016-06-14" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>activate-global-python-argcomplete runs on Homebrew out of the box</p></li>
+</ul>
+</section>
+<section id="version-1-4-0-2016-06-10">
+<h1>Version 1.4.0 (2016-06-10)<a class="headerlink" href="#version-1-4-0-2016-06-10" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Correctly handle suggestions for positionals with variable-length nargs. Thanks to &#64;evanunderscore (#132, #133).</p></li>
+</ul>
+</section>
+<section id="version-1-3-0-2016-06-01">
+<h1>Version 1.3.0 (2016-06-01)<a class="headerlink" href="#version-1-3-0-2016-06-01" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Correctly handle suggestions with custom nargs for optionals. Thanks to &#64;evanunderscore (#131).</p></li>
+</ul>
+</section>
+<section id="version-1-2-0-2016-05-25">
+<h1>Version 1.2.0 (2016-05-25)<a class="headerlink" href="#version-1-2-0-2016-05-25" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix propagation of partially parsed subparser namespace into parent parser namespace upon subparser failure due to
+partial args. This allows completers to access partial parse results for subparser optionals in parsed_args (#114).</p></li>
+<li><p>The default completer can now be specified when manually instantiating CompletionFinder. Thanks to &#64;avylove (#130).</p></li>
+</ul>
+</section>
+<section id="version-1-1-1-2016-03-22">
+<h1>Version 1.1.1 (2016-03-22)<a class="headerlink" href="#version-1-1-1-2016-03-22" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use FilesCompleter as default completer fallback (#120).</p></li>
+</ul>
+</section>
+<section id="version-1-1-0-2016-02-21">
+<h1>Version 1.1.0 (2016-02-21)<a class="headerlink" href="#version-1-1-0-2016-02-21" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Recognize subclasses of argparse._SubParsersAction. Thanks to Stephen Koo (#118).</p></li>
+<li><p>Support parsed_args in custom completers with missing args. Thanks to Dan Kilman (#124).</p></li>
+<li><p>Non-ASCII support in FilesCompleter.</p></li>
+<li><p>Automatically enable FilesCompleter for argparse.FileType arguments.</p></li>
+</ul>
+</section>
+<section id="version-1-0-0-2015-08-22">
+<h1>Version 1.0.0 (2015-08-22)<a class="headerlink" href="#version-1-0-0-2015-08-22" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Don’t print args with suppressed help by default; add
+<code class="docutils literal notranslate"><span class="pre">argcomplete.autocomplete(print_suppressed=True)</span></code> to control this
+behavior (#113).</p></li>
+</ul>
+</section>
+<section id="version-0-9-0-2015-07-03">
+<h1>Version 0.9.0 (2015-07-03)<a class="headerlink" href="#version-0-9-0-2015-07-03" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix always_complete_options=False support (#115).</p></li>
+</ul>
+</section>
+<section id="version-0-8-9-2015-06-01">
+<h1>Version 0.8.9 (2015-06-01)<a class="headerlink" href="#version-0-8-9-2015-06-01" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Correct doc filename in setup.cfg (fixes bdist_rpm failure, Issue 111).</p></li>
+<li><p>Make context managers exception-safe. Thanks to Mikołaj Siedlarek (pull request #110).</p></li>
+</ul>
+</section>
+<section id="version-0-8-8-2015-05-01">
+<h1>Version 0.8.8 (2015-05-01)<a class="headerlink" href="#version-0-8-8-2015-05-01" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Build and upload universal wheel packages in release.</p></li>
+<li><p>Fix issue with non-string choices for arguments. Thanks to &#64;neizod (pull request #107).</p></li>
+<li><p>Improve non-ascii argparse argument support on Python 2.7.</p></li>
+</ul>
+</section>
+<section id="version-0-8-7-2015-04-11">
+<h1>Version 0.8.7 (2015-04-11)<a class="headerlink" href="#version-0-8-7-2015-04-11" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>register-python-argcomplete: add option to avoid default readline completion. Thanks to &#64;drmalex07 (pull request #99).</p></li>
+</ul>
+</section>
+<section id="version-0-8-6-2015-04-11">
+<h1>Version 0.8.6 (2015-04-11)<a class="headerlink" href="#version-0-8-6-2015-04-11" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Expand tilde in script name, allowing argcomplete to work when invoking scripts from one’s home directory. Thanks to &#64;VorpalBlade (Issue 104).</p></li>
+</ul>
+</section>
+<section id="version-0-8-5-2015-04-07">
+<h1>Version 0.8.5 (2015-04-07)<a class="headerlink" href="#version-0-8-5-2015-04-07" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix issues related to using argcomplete in a REPL environment.</p></li>
+<li><p>New helper method for custom completion display.</p></li>
+<li><p>Expand test suite; formatting cleanup.</p></li>
+</ul>
+</section>
+<section id="version-0-8-4-2014-12-11">
+<h1>Version 0.8.4 (2014-12-11)<a class="headerlink" href="#version-0-8-4-2014-12-11" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix issue related to using argcomplete in a REPL environment. Thanks to &#64;wapiflapi (pull request #91).</p></li>
+</ul>
+</section>
+<section id="version-0-8-3-2014-11-09">
+<h1>Version 0.8.3 (2014-11-09)<a class="headerlink" href="#version-0-8-3-2014-11-09" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix multiple issues related to using argcomplete in a REPL environment. Thanks to &#64;wapiflapi (pull request #90).</p></li>
+</ul>
+</section>
+<section id="version-0-8-2-2014-11-03">
+<h1>Version 0.8.2 (2014-11-03)<a class="headerlink" href="#version-0-8-2-2014-11-03" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Don’t strip colon prefix in completion results if COMP_WORDBREAKS does not contain a colon. Thanks to &#64;berezv (pull request #88).</p></li>
+</ul>
+</section>
+<section id="version-0-8-1-2014-07-02">
+<h1>Version 0.8.1 (2014-07-02)<a class="headerlink" href="#version-0-8-1-2014-07-02" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Use complete –nospace to avoid issues with directory completion.</p></li>
+</ul>
+</section>
+<section id="version-0-8-0-2014-04-07">
+<h1>Version 0.8.0 (2014-04-07)<a class="headerlink" href="#version-0-8-0-2014-04-07" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Refactor main body of code into a class to enable subclassing and overriding of functionality (Issue #78).</p></li>
+</ul>
+</section>
+<section id="version-0-7-1-2014-03-29">
+<h1>Version 0.7.1 (2014-03-29)<a class="headerlink" href="#version-0-7-1-2014-03-29" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>New keyword option “argcomplete.autocomplete(validator=…)” to supply a custom validator or bypass default validation. Thanks to &#64;thijsdezoete (Issue #77).</p></li>
+<li><p>Document debug options.</p></li>
+</ul>
+</section>
+<section id="version-0-7-0-2014-01-19">
+<h1>Version 0.7.0 (2014-01-19)<a class="headerlink" href="#version-0-7-0-2014-01-19" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>New keyword option “argcomplete.autocomplete(exclude=[…])” to suppress options (Issue #74).</p></li>
+<li><p>More speedups to code path for global completion hook negative result.</p></li>
+</ul>
+</section>
+<section id="version-0-6-9-2014-01-19">
+<h1>Version 0.6.9 (2014-01-19)<a class="headerlink" href="#version-0-6-9-2014-01-19" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Fix handling of development mode script wrappers. Thanks to &#64;jmlopez-rod and &#64;dcosson (Issue #69).</p></li>
+<li><p>Speed up code path for global completion hook negative result by loading pkg_resources on demand.</p></li>
+</ul>
+</section>
+<section id="version-0-6-8-2014-01-18">
+<h1>Version 0.6.8 (2014-01-18)<a class="headerlink" href="#version-0-6-8-2014-01-18" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Begin tracking changes in changelog.</p></li>
+<li><p>Add completion support for PBR installed scripts (PR #71).</p></li>
+<li><p>Detect easy-install shims with shebang lines that contain Py instead of py (Issue #69).</p></li>
+</ul>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Andrey Kislyuk and argcomplete contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>
