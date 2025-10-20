@@ -216,7 +216,7 @@ _python_argcomplete_global() {
             if is-at-least 5.8; then
                 nosort=(-o nosort)
             fi
-            if [[ "${completions-}" =~ ([^\\]): && "${BASH_REMATCH[2]}" =~ [=/:] ]]; then
+            if [[ "${completions-}" =~ ([^\\\\]): && "${BASH_REMATCH[2]}" =~ [=/:] ]]; then
                 nospace=(-S '')
             fi
             _describe "$executable" completions "${nosort[@]}" "${nospace[@]}"
