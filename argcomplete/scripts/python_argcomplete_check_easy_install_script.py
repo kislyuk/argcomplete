@@ -33,24 +33,31 @@ def main():
             lines = head.split("\n", 12)
             for line in lines:
                 if line.startswith("# EASY-INSTALL-SCRIPT"):
-                    import pkg_resources  # type: ignore
+                    import importlib.metadata  # type: ignore
 
                     re_match = re.match("# EASY-INSTALL-SCRIPT: '(.+)','(.+)'", line)
                     assert re_match is not None
                     dist, script = re_match.groups()
-                    if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata(
-                        "scripts/" + script
-                    ):
-                        return 0
+                    for f in importlib.metadata.distribution(dist).files:
+                        if f.files:
+                            for p in f.files:
+                                if p.name == script and "scripts" in str(p):
+                                    if "PYTHON_ARGCOMPLETE_OK" in f.files[p].read_text():
+                                        return 0
+                                    break
                 elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
                     re_match = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line)
                     assert re_match is not None
                     dist, group, name = re_match.groups()
                     import pkgutil
 
-                    import pkg_resources  # type: ignore
+                    import importlib.metadata  # type: ignore
 
-                    entry_point_info = pkg_resources.get_distribution(dist).get_entry_info(group, name)
+                    entry_point_info = None
+                    for ep in importlib.metadata.distribution(dist).entry_points:
+                        if ep.group == group and ep.name == name:
+                            entry_point_info = ep
+                            break
                     assert entry_point_info is not None
                     module_name = entry_point_info.module_name
                     with open(pkgutil.get_loader(module_name).get_filename()) as mod_fh:  # type: ignore
