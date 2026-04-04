@@ -221,8 +221,8 @@ multiple Python versions on the same system, the version being used to run the s
 .. admonition:: Bash version compatibility
 
  When using bash, global completion requires bash support for ``complete -D``, which was introduced in bash 4.2. Since
- Mac OS ships with an outdated version of Bash (3.2), you can either use zsh or install a newer version of bash using
- `Homebrew <http://brew.sh/>`_ (``brew install bash`` - you will also need to add ``/opt/homebrew/bin/bash`` to
+ macOS ships with an outdated version of Bash (3.2), you can either use zsh or install a newer version of bash using
+ `Homebrew <http://brew.sh/>`_ (``brew install bash`` - you will also need to add ``$(brew --prefix)/bin/bash`` to
  ``/etc/shells``, and run ``chsh`` to change your shell). You can check the version of the running copy of bash with
  ``echo $BASH_VERSION``.
 
@@ -257,7 +257,7 @@ Argcomplete requires Python 3.9+.
 
 Support for other shells
 ------------------------
-Argcomplete maintainers provide support only for the bash and zsh shells on Linux and MacOS. For resources related to
+Argcomplete maintainers provide support only for the bash and zsh shells on Linux and macOS. For resources related to
 other shells and platforms, including fish, tcsh, xonsh, powershell, and Windows, please see the
 `contrib <https://github.com/kislyuk/argcomplete/tree/develop/contrib>`_ directory.
 
