@@ -3,17 +3,17 @@ name: Python package
 on: [push, pull_request]
 
 jobs:
-  build:
+  ci:
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, ubuntu-latest, macos-13, macos-latest]
+        os: [ubuntu-22.04, ubuntu-latest, macos-14, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v6
       with:
         python-version: ${{matrix.python-version}}
         allow-prereleases: true
@@ -31,15 +31,15 @@ jobs:
     - uses: codecov/codecov-action@v5
       if: ${{matrix.python-version == '3.12' && matrix.os == 'ubuntu-22.04'}}
   isort:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: isort/isort-action@v1.1.0
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v1
-      - uses: astral-sh/ruff-action@v1
+      - uses: actions/checkout@v7
+      - uses: astral-sh/ruff-action@v4.0.0
+      - uses: astral-sh/ruff-action@v4.0.0
         with:
           args: "format --check"
