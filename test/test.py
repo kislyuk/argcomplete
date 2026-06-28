@@ -356,6 +356,15 @@ class TestArgcomplete(unittest.TestCase):
                 fp.write("test")
             self.assertEqual(set(fc("a")), set(["abcdefж/", "abcaha/", "abcxyz"]))
 
+    def test_file_completion_quotes_prefix(self):
+        with TempDir(prefix="test_dir_fc_quote", dir="."):
+            marker = "should_not_exist"
+            prefix = "'; touch {0}; echo '".format(marker)
+
+            self.assertFalse(os.path.exists(marker))
+            self.assertEqual(FilesCompleter()(prefix), [])
+            self.assertFalse(os.path.exists(marker))
+
     def test_filescompleter_filetype_integration(self):
         def make_parser():
             parser = ArgumentParser()
