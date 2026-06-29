@@ -837,6 +837,7 @@ class TestArgcomplete(unittest.TestCase):
             parser.add_argument("-1", choices=["bar<$>baz"])
             parser.add_argument("-2", choices=[r"\* "])
             parser.add_argument("-3", choices=["\"'"])
+            parser.add_argument("-4", choices=["data?", "file[1]", "{x,--flag}"])
             return parser
 
         self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ")), {r"bar\<\$\>baz "})
@@ -844,6 +845,10 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ")), {r"\"\' "})
         self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "')), {r"\"'"})
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '")), {"\"'\\''"})
+        self.assertEqual(
+            set(self.run_completer(make_parser(), "prog -4 ")),
+            {r"data\?", r"file\[1\]", r"\{x,--flag\}"},
+        )
 
         self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ", shell="tcsh")), {"bar<$>baz "})
         # The trailing space won't actually work correctly in tcsh.
