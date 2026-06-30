@@ -1,3 +1,11 @@
+Changes for v3.7.0 (2026-06-30)
+===============================
+
+-  Escape glob and brace metacharacters in quote_completions (#552)
+-  Quote prefix passed to compgen in FilesCompleter (#551)
+-  Remove deprecated easy_install script detection
+-  Type hinting improvements
+
 Changes for v3.6.3 (2025-10-19)
 ===============================
 
