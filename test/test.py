@@ -414,6 +414,44 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(c("def/k"), set([]))
         return
 
+    def test_directory_completion_with_tilde(self):
+        # Regression test for https://github.com/kislyuk/argcomplete/issues/529
+        # "~/<TAB>" should expand the home directory instead of yielding nothing
+        # (os.listdir("~") would otherwise raise FileNotFoundError).
+        completer = DirectoriesCompleter()
+
+        def c(prefix):
+            return set(completer(prefix))
+
+        old_home = os.environ.get("HOME")
+        old_userprofile = os.environ.get("USERPROFILE")
+        with TempDir(prefix="test_dir_tilde", dir=".") as tmp_dir:
+            home = os.path.realpath(tmp_dir)
+            os.environ["HOME"] = home
+            os.environ["USERPROFILE"] = home
+            try:
+                # Create some directories and files (files must be ignored)
+                os.makedirs(os.path.join(home, "abc", "baz"))
+                os.makedirs(os.path.join(home, "abb"))
+                with open(os.path.join(home, "abc1"), "w") as fp:
+                    fp.write("A test")
+                # "~/" lists the home directory
+                self.assertEqual(c("~/"), set([os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"]))
+                # "~/ab" filters within the home directory
+                self.assertEqual(c("~/ab"), set([os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"]))
+                # "~/abc/" recurses into a subdirectory
+                self.assertEqual(c("~/abc/"), set([os.path.join(home, "abc", "baz") + "/"]))
+            finally:
+                if old_home is None:
+                    os.environ.pop("HOME", None)
+                else:
+                    os.environ["HOME"] = old_home
+                if old_userprofile is None:
+                    os.environ.pop("USERPROFILE", None)
+                else:
+                    os.environ["USERPROFILE"] = old_userprofile
+        return
+
     def test_default_completer(self):
         def make_parser():
             parser = ArgumentParser(add_help=False)
