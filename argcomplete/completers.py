@@ -8,7 +8,6 @@ from collections.abc import Callable, Generator, Iterable, Mapping
 from shlex import quote
 from typing import Final
 
-
 _Ignored = object
 
 
