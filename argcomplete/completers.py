@@ -115,12 +115,15 @@ class _FilteredFilesCompleter(BaseCompleter):
         """
         Provide completions on prefix
         """
-        target_dir = os.path.dirname(prefix)
+        # Expand a leading "~" so that filesystem operations below work on a
+        # real path (os.listdir("~") would otherwise raise FileNotFoundError).
+        expanded_prefix = os.path.expanduser(prefix)
+        target_dir = os.path.dirname(expanded_prefix)
         try:
             names = os.listdir(target_dir or ".")
         except Exception:
             return  # empty iterator
-        incomplete_part = os.path.basename(prefix)
+        incomplete_part = os.path.basename(expanded_prefix)
         # Iterate on target_dir entries and filter on given predicate
         for name in names:
             if not name.startswith(incomplete_part):
