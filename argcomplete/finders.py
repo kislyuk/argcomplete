@@ -160,7 +160,12 @@ class CompletionFinder:
             exit_method(1)
 
         comp_line = os.environ["COMP_LINE"]
-        comp_point = int(os.environ["COMP_POINT"])
+        try:
+            comp_point = int(os.environ["COMP_POINT"])
+        except ValueError:
+            debug("Invalid value for COMP_POINT, quitting [{v}]".format(v=os.environ["COMP_POINT"]))
+            exit_method(1)
+            return
 
         cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
 
