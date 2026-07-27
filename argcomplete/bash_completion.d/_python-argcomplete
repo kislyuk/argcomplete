@@ -151,7 +151,7 @@ _python_argcomplete_global() {
         local_words=( ${(z)BUFFER} )
         executable="${local_words[1]}"
         __python_argcomplete_expand_tilde_by_ref executable
-	req_argv=( "${local_words[@]:1}" )
+        req_argv=( "${local_words[@]:1}" )
     fi
 
     local ARGCOMPLETE=0
