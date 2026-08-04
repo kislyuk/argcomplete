@@ -1,3 +1,11 @@
+Changes for v3.7.1 (2026-08-04)
+===============================
+
+-  Fix for kislyuk#544 => TestZshGlobalExplicit tests are failing after
+   upgrade to zsh 5.9.0.1 (#557)
+
+-  Expand ~ in \_FilteredFilesCompleter (DirectoriesCompleter) (#553)
+
 Changes for v3.7.0 (2026-06-30)
 ===============================
 
