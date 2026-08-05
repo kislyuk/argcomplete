@@ -1,11 +1,12 @@
 import os
+from typing import Optional
 
 from .exceptions import ArgcompleteException
 from .io import debug
 from .packages import _shlex
 
 
-def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list[str], int | None]:
+def split_line(line: str, point: Optional[int] = None) -> tuple[str, str, str, list[str], Optional[int]]:
     if point is None:
         point = len(line)
     line = line[:point]
@@ -14,7 +15,7 @@ def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list
     lexer.wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
     words = []
 
-    def split_word(word: str) -> tuple[str, str, str, list[str], int | None]:
+    def split_word(word: str) -> tuple[str, str, str, list[str], Optional[int]]:
         # TODO: make this less ugly
         point_in_word = len(word) + point - lexer.instream.tell()
         if isinstance(lexer.state, (str, bytes)) and lexer.state in lexer.whitespace:

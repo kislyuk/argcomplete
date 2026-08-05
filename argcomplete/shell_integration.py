@@ -5,6 +5,7 @@
 
 from collections.abc import Iterable
 from shlex import quote
+from typing import Optional
 
 bashcode = r"""#compdef %(executables)s
 # Run something, muting output or redirecting it to the debug stream
@@ -140,8 +141,8 @@ def shellcode(
     executables: Iterable[str],
     use_defaults: bool = True,
     shell: str = "bash",
-    complete_arguments: Iterable[str] | None = None,
-    argcomplete_script: str | None = None,
+    complete_arguments: Optional[Iterable[str]] = None,
+    argcomplete_script: Optional[str] = None,
 ) -> str:
     """
     Provide the shell code required to register a python executable for use with the argcomplete module.

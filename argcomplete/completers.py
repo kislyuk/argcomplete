@@ -6,7 +6,7 @@ import os
 import subprocess
 from collections.abc import Callable, Generator, Iterable, Mapping
 from shlex import quote
-from typing import Final
+from typing import Final, Union
 
 _Ignored = object
 
@@ -32,9 +32,9 @@ class BaseCompleter:
 
 
 class ChoicesCompleter(BaseCompleter):
-    choices: Final[Mapping[str, str | bytes]]
+    choices: Final[Mapping[str, Union[str, bytes]]]
 
-    def __init__(self, choices: Mapping[str, str | bytes]) -> None:
+    def __init__(self, choices: Mapping[str, Union[str, bytes]]) -> None:
         self.choices = choices
 
     def _convert(self, choice):
@@ -57,7 +57,7 @@ class FilesCompleter(BaseCompleter):
     allowednames: Final[list[str]]
     directories: Final[bool]
 
-    def __init__(self, allowednames: Iterable[str] | str = (), directories: bool = True) -> None:
+    def __init__(self, allowednames: Union[Iterable[str], str] = (), directories: bool = True) -> None:
         # Fix if someone passes in a string instead of a list
         if isinstance(allowednames, (str, bytes)):
             allowednames = [allowednames]

@@ -14,6 +14,7 @@ import shutil
 import site
 import subprocess
 import sys
+from typing import Optional, Union
 
 import argcomplete
 
@@ -108,7 +109,7 @@ def get_consent() -> bool:
             return False
 
 
-def append_to_config_file(path: str | os.PathLike[str], shellcode: str) -> None:
+def append_to_config_file(path: Union[str, os.PathLike[str]], shellcode: str) -> None:
     if os.path.exists(path):
         with open(path, 'r') as fh:
             if shellcode in fh.read():
@@ -126,7 +127,7 @@ def append_to_config_file(path: str | os.PathLike[str], shellcode: str) -> None:
     print("Added.", file=sys.stderr)
 
 
-def link_zsh_user_rcfile(zsh_fpath: str | None = None) -> None:
+def link_zsh_user_rcfile(zsh_fpath: Optional[str] = None) -> None:
     zsh_rcfile = os.path.join(os.path.expanduser(os.environ.get("ZDOTDIR", "~")), ".zshenv")
     append_to_config_file(zsh_rcfile, zsh_shellcode.format(zsh_fpath=zsh_fpath or get_activator_dir()))
 

@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 from collections.abc import Container, Mapping
-from typing import Callable, Literal, TextIO
+from typing import Callable, Literal, Optional, TextIO, Union
 
 from . import io as _io
 from .completers import BaseCompleter, ChoicesCompleter, FilesCompleter, SuppressCompleter
@@ -37,10 +37,10 @@ class CompletionFinder:
     :meth:`CompletionFinder.__call__()`.
     """
 
-    _parser: argparse.ArgumentParser | None
-    _formatter: argparse.HelpFormatter | None
-    always_complete_options: bool | Literal["long", "short"]
-    exclude: Container[str] | None
+    _parser: Optional[argparse.ArgumentParser]
+    _formatter: Optional[argparse.HelpFormatter]
+    always_complete_options: Union[bool, Literal["long", "short"]]
+    exclude: Optional[Container[str]]
     validator: Callable[[str, str], bool]
     print_suppressed: bool
     completing: bool
@@ -53,13 +53,13 @@ class CompletionFinder:
 
     def __init__(
         self,
-        argument_parser: argparse.ArgumentParser | None = None,
-        always_complete_options: bool | Literal["long", "short"] = True,
-        exclude: Container[str] | None = None,
-        validator: Callable[[str, str], bool] | None = None,
+        argument_parser: Optional[argparse.ArgumentParser] = None,
+        always_complete_options: Union[bool, Literal["long", "short"]] = True,
+        exclude: Optional[Container[str]] = None,
+        validator: Optional[Callable[[str, str], bool]] = None,
         print_suppressed: bool = False,
         default_completer: BaseCompleter = FilesCompleter(),
-        append_space: bool | None = None,
+        append_space: Optional[bool] = None,
     ) -> None:
         self._parser = argument_parser  # type: ignore[assignment]
         self._formatter = None
@@ -79,13 +79,13 @@ class CompletionFinder:
     def __call__(
         self,
         argument_parser: argparse.ArgumentParser,
-        always_complete_options: bool | str = True,
+        always_complete_options: Union[bool, str] = True,
         exit_method: Callable = os._exit,
-        output_stream: TextIO | None = None,
-        exclude: Container[str] | None = None,
-        validator: Callable[[str, str], bool] | None = None,
+        output_stream: Optional[TextIO] = None,
+        exclude: Optional[Container[str]] = None,
+        validator: Optional[Callable[[str, str], bool]] = None,
         print_suppressed: bool = False,
-        append_space: bool | None = None,
+        append_space: Optional[bool] = None,
         default_completer: BaseCompleter = FilesCompleter(),
     ) -> None:
         """
@@ -523,7 +523,7 @@ class CompletionFinder:
         return filtered_completions
 
     def quote_completions(
-        self, completions: list[str], cword_prequote: str, last_wordbreak_pos: int | None
+        self, completions: list[str], cword_prequote: str, last_wordbreak_pos: Optional[int]
     ) -> list[str]:
         """
         If the word under the cursor started with a quote (as indicated by a nonempty ``cword_prequote``), escapes
@@ -588,7 +588,7 @@ class CompletionFinder:
 
         return escaped_completions
 
-    def rl_complete(self, text: str, state: int) -> str | None:
+    def rl_complete(self, text: str, state: int) -> Optional[str]:
         """
         Alternate entry point for using the argcomplete completer in a readline-based REPL. See also
         `rlcompleter <https://docs.python.org/3/library/rlcompleter.html#completer-objects>`_.
