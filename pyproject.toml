@@ -2,7 +2,7 @@
 name = "argcomplete"
 description = "Bash tab completion for argparse"
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { text = "Apache Software License" }
 authors = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
 maintainers = [{ name = "Andrey Kislyuk"}, {email = "kislyuk@gmail.com" }]
@@ -15,7 +15,6 @@ classifiers = [
   "Operating System :: POSIX",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
