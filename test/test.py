@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import contextlib
 import os
@@ -19,11 +21,11 @@ TEST_DIR = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = os.path.dirname(TEST_DIR)
 sys.path.insert(0, BASE_DIR)
 
-from argparse import SUPPRESS, ArgumentParser  # noqa: E402
+from argparse import SUPPRESS, ArgumentParser
 
-import argcomplete  # noqa: E402
-import argcomplete.io  # noqa: E402
-from argcomplete import (  # noqa: E402
+import argcomplete
+import argcomplete.io
+from argcomplete import (
     CompletionFinder,
     ExclusiveCompletionFinder,
     _check_module,
@@ -31,8 +33,8 @@ from argcomplete import (  # noqa: E402
     shellcode,
     warn,
 )
-from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter  # noqa: E402
-from argcomplete.lexers import split_line  # noqa: E402
+from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter
+from argcomplete.lexers import split_line
 
 # Default max length is insufficient for troubleshooting.
 unittest.util._MAX_LENGTH = 1000
@@ -52,7 +54,7 @@ class ArgcompleteREPLWrapper(REPLWrapper):
         if self.child.command.split("/")[-1] == "zsh":
             if "\n" not in res:
                 raise Exception("Expected to see a newline in command response")
-            echo_cmd, actual_res = res.split("\n", 1)
+            _echo_cmd, actual_res = res.split("\n", 1)
             res_without_ansi_seqs = re.sub(r"\x1b\[0m.+\x1b\[J", "", actual_res)
             # Unsure why some environments produce trailing null characters,
             # but they break tests and trimming them seems to be harmless.
@@ -148,16 +150,16 @@ class TestArgcomplete(unittest.TestCase):
         p.add_argument("--bar")
 
         completions = self.run_completer(p, "prog ")
-        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
         completions = self.run_completer(p, "prog -")
-        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
         completions = self.run_completer(p, "prog ", always_complete_options=False)
-        self.assertEqual(set(completions), set([""]))
+        self.assertEqual(set(completions), {""})
 
         completions = self.run_completer(p, "prog -", always_complete_options=False)
-        self.assertEqual(set(completions), set(["-h", "--help", "--foo", "--bar"]))
+        self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
     def test_choices(self):
         def make_parser():
@@ -354,12 +356,12 @@ class TestArgcomplete(unittest.TestCase):
             os.makedirs(os.path.join("abcaha", "klm"))
             with open("abcxyz", "w") as fp:
                 fp.write("test")
-            self.assertEqual(set(fc("a")), set(["abcdefж/", "abcaha/", "abcxyz"]))
+            self.assertEqual(set(fc("a")), {"abcdefж/", "abcaha/", "abcxyz"})
 
     def test_file_completion_quotes_prefix(self):
         with TempDir(prefix="test_dir_fc_quote", dir="."):
             marker = "should_not_exist"
-            prefix = "'; touch {0}; echo '".format(marker)
+            prefix = f"'; touch {marker}; echo '"
 
             self.assertFalse(os.path.exists(marker))
             self.assertEqual(FilesCompleter()(prefix), [])
@@ -399,20 +401,18 @@ class TestArgcomplete(unittest.TestCase):
             os.makedirs(os.path.join("abb", "baz"))
             os.makedirs(os.path.join("abc", "faz"))
             os.makedirs(os.path.join("def", "baz"))
-            with open("abc1", "w") as fp1:
-                with open("def1", "w") as fp2:
-                    fp1.write("A test")
-                    fp2.write("Another test")
+            with open("abc1", "w") as fp1, open("def1", "w") as fp2:
+                fp1.write("A test")
+                fp2.write("Another test")
             # Test completions
-            self.assertEqual(c("a"), set(["abb/", "abc/"]))
-            self.assertEqual(c("ab"), set(["abc/", "abb/"]))
-            self.assertEqual(c("abc"), set(["abc/"]))
-            self.assertEqual(c("abc/"), set(["abc/baz/", "abc/faz/"]))
-            self.assertEqual(c("d"), set(["def/"]))
-            self.assertEqual(c("def/"), set(["def/baz/"]))
-            self.assertEqual(c("e"), set([]))
-            self.assertEqual(c("def/k"), set([]))
-        return
+            self.assertEqual(c("a"), {"abb/", "abc/"})
+            self.assertEqual(c("ab"), {"abc/", "abb/"})
+            self.assertEqual(c("abc"), {"abc/"})
+            self.assertEqual(c("abc/"), {"abc/baz/", "abc/faz/"})
+            self.assertEqual(c("d"), {"def/"})
+            self.assertEqual(c("def/"), {"def/baz/"})
+            self.assertEqual(c("e"), set())
+            self.assertEqual(c("def/k"), set())
 
     def test_directory_completion_with_tilde(self):
         # Regression test for https://github.com/kislyuk/argcomplete/issues/529
@@ -436,11 +436,11 @@ class TestArgcomplete(unittest.TestCase):
                 with open(os.path.join(home, "abc1"), "w") as fp:
                     fp.write("A test")
                 # "~/" lists the home directory
-                self.assertEqual(c("~/"), set([os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"]))
+                self.assertEqual(c("~/"), {os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"})
                 # "~/ab" filters within the home directory
-                self.assertEqual(c("~/ab"), set([os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"]))
+                self.assertEqual(c("~/ab"), {os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"})
                 # "~/abc/" recurses into a subdirectory
-                self.assertEqual(c("~/abc/"), set([os.path.join(home, "abc", "baz") + "/"]))
+                self.assertEqual(c("~/abc/"), {os.path.join(home, "abc", "baz") + "/"})
             finally:
                 if old_home is None:
                     os.environ.pop("HOME", None)
@@ -450,7 +450,6 @@ class TestArgcomplete(unittest.TestCase):
                     os.environ.pop("USERPROFILE", None)
                 else:
                     os.environ["USERPROFILE"] = old_userprofile
-        return
 
     def test_default_completer(self):
         def make_parser():
@@ -497,10 +496,10 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
-            self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=["-h"])), set(output) - set(["-h"]))
+            self.assertEqual(set(self.run_completer(make_parser(), cmd, exclude=["-h"])), set(output) - {"-h"})
             self.assertEqual(
                 set(self.run_completer(make_parser(), cmd, exclude=["-h", "--help"])),
-                set(output) - set(["-h", "--help"]),
+                set(output) - {"-h", "--help"},
             )
 
     def test_non_ascii(self):
@@ -780,8 +779,8 @@ class TestArgcomplete(unittest.TestCase):
             parser.add_argument("-x")
             return parser
 
-        long_opts = "--foo --bar --baz --xyz --zzz --help -x -t".split()
-        short_opts = "-b -t -x -z -h --foo --baz --xyz".split()
+        long_opts = ["--foo", "--bar", "--baz", "--xyz", "--zzz", "--help", "-x", "-t"]
+        short_opts = ["-b", "-t", "-x", "-z", "-h", "--foo", "--baz", "--xyz"]
         expected_outputs = (
             ("prog ", {"long": long_opts, "short": short_opts, True: long_opts + short_opts, False: [""]}),
             ("prog --foo", {"long": ["--foo "], "short": ["--foo "], True: ["--foo "], False: ["--foo "]}),
@@ -955,7 +954,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         pass
 
     def run_completer(self, parser, completer, command, point=None, **kwargs):
-        cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(command)
+        cword_prequote, cword_prefix, _cword_suffix, comp_words, first_colon_pos = split_line(command)
 
         completions = completer._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
 
@@ -969,10 +968,10 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog ")
-        assert set(completions) == set(["-h", "--help", "--foo", "--bar"])
+        assert set(completions) == {"-h", "--help", "--foo", "--bar"}
 
         completions = self.run_completer(p, c, "prog --")
-        assert set(completions) == set(["--help", "--foo", "--bar"])
+        assert set(completions) == {"--help", "--foo", "--bar"}
 
     def test_repl_parse_after_complete(self):
         p = ArgumentParser()
@@ -982,7 +981,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog ")
-        assert set(completions) == set(["-h", "--help", "--foo", "bar"])
+        assert set(completions) == {"-h", "--help", "--foo", "bar"}
 
         args = p.parse_args(["--foo", "spam", "bar"])
         assert args.foo == "spam"
@@ -1002,7 +1001,7 @@ class TestArgcompleteREPL(unittest.TestCase):
         c = CompletionFinder(p, always_complete_options=True)
 
         completions = self.run_completer(p, c, "prog foo ")
-        assert set(completions) == set(["-h", "--help", "bar"])
+        assert set(completions) == {"-h", "--help", "bar"}
 
         args = p.parse_args(["foo", "bar"])
         assert args.bar == "bar"
@@ -1050,11 +1049,11 @@ class TestArgcompleteREPL(unittest.TestCase):
 
         c = CompletionFinder(p, always_complete_options=True)
 
-        self.assertEqual(set(self.run_completer(p, c, "prog ")), set(["-h", "--help", "aa", "bb", "cc"]))
+        self.assertEqual(set(self.run_completer(p, c, "prog ")), {"-h", "--help", "aa", "bb", "cc"})
 
-        self.assertEqual(set(self.run_completer(p, c, "prog aa ")), set(["-h", "--help", "d", "e"]))
+        self.assertEqual(set(self.run_completer(p, c, "prog aa ")), {"-h", "--help", "d", "e"})
 
-        self.assertEqual(set(self.run_completer(p, c, "prog ")), set(["-h", "--help", "aa", "bb", "cc"]))
+        self.assertEqual(set(self.run_completer(p, c, "prog ")), {"-h", "--help", "aa", "bb", "cc"})
 
 
 class TestSplitLine(unittest.TestCase):
@@ -1315,8 +1314,8 @@ class TestBashZshBase(TestShellBase):
         output = sh.run_command("echo ready")
         self.assertEqual(output, "ready\r\n")
         path = ":".join([os.path.join(BASE_DIR, "scripts"), TEST_DIR, "$PATH"])
-        sh.run_command("export PATH={0}".format(path))
-        sh.run_command("export PYTHONPATH={0}".format(BASE_DIR))
+        sh.run_command(f"export PATH={path}")
+        sh.run_command(f"export PYTHONPATH={BASE_DIR}")
         if self.init_cmd is not None:
             output = sh.run_command(self.init_cmd)
             self.assertEqual(output, "")
@@ -1435,7 +1434,7 @@ class TestBashZshGlobalBase(TestBashZshBase):
             self.sh.run_command("export PATH=$PATH:./bin")
             self.sh.run_command("export PYTHONPATH=.:$PYTHONPATH")
             test_package = os.path.join(TEST_DIR, "test_package")
-            command = "pip install {} --target .".format(test_package)
+            command = f"pip install {test_package} --target ."
             if not wheel:
                 command += " --no-binary :all:"
             install_output = self.sh.run_command(command)
@@ -1486,7 +1485,7 @@ class Shell:
 
     def run_command(self, command):
         try:
-            self.child.sendline(r"echo -n \#\#\#; {0}; echo -n \#\#\#".format(command))
+            self.child.sendline(rf"echo -n \#\#\#; {command}; echo -n \#\#\#")
             self.child.expect_exact("###", timeout=5)
             self.child.expect_exact("###", timeout=5)
             return self.child.before

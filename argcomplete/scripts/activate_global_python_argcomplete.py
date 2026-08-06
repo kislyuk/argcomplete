@@ -8,6 +8,8 @@
 Activate the generic bash-completion script or zsh completion autoload function for the argcomplete module.
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import shutil
@@ -102,10 +104,8 @@ def get_consent() -> bool:
         res = input("OK to proceed? [y/n] ")
         if res.lower() not in {"y", "n", "yes", "no"}:
             print('Please answer "yes" or "no".', file=sys.stderr)
-        elif res.lower() in {"y", "yes"}:
-            return True
-        else:
-            return False
+            continue
+        return res.lower() in {"y", "yes"}
 
 
 def append_to_config_file(path: str | os.PathLike[str], shellcode: str) -> None:

@@ -7,6 +7,8 @@ The module name should be specified in a form usable with `python -m`.
 Intended to be invoked by argcomplete's global completion function.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import tokenize
@@ -26,12 +28,12 @@ def find(name, return_package=False):
             break
 
     if spec is None:
-        raise ArgcompleteMarkerNotFound('no module named "{}"'.format(names[0]))
+        raise ArgcompleteMarkerNotFound(f'no module named "{names[0]}"')
     if not spec.has_location:
         raise ArgcompleteMarkerNotFound("cannot locate file")
     if spec.submodule_search_locations is None:
         if len(names) != 1:
-            raise ArgcompleteMarkerNotFound("{} is not a package".format(names[0]))
+            raise ArgcompleteMarkerNotFound(f"{names[0]} is not a package")
         return spec.origin
     if len(spec.submodule_search_locations) != 1:
         raise ArgcompleteMarkerNotFound("expecting one search location")

@@ -1,6 +1,8 @@
 # Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+from __future__ import annotations
+
 import argparse
 import os
 import subprocess
@@ -74,21 +76,21 @@ class FilesCompleter(BaseCompleter):
                 # correctly in older versions and calling bind makes them available. For details, see
                 # https://savannah.gnu.org/support/index.php?111125
                 files = _call(
-                    ["bash", "-c", "bind; compgen -A directory -- {p}".format(p=quote(prefix))],
+                    ["bash", "-c", f"bind; compgen -A directory -- {quote(prefix)}"],
                     stderr=subprocess.DEVNULL,
                 )
                 completion += [f + "/" for f in files]
             for x in self.allowednames:
                 completion += _call(
-                    ["bash", "-c", "bind; compgen -A file -X '!*.{0}' -- {p}".format(x, p=quote(prefix))],
+                    ["bash", "-c", f"bind; compgen -A file -X '!*.{x}' -- {quote(prefix)}"],
                     stderr=subprocess.DEVNULL,
                 )
         else:
             completion += _call(
-                ["bash", "-c", "bind; compgen -A file -- {p}".format(p=quote(prefix))], stderr=subprocess.DEVNULL
+                ["bash", "-c", f"bind; compgen -A file -- {quote(prefix)}"], stderr=subprocess.DEVNULL
             )
             anticomp = _call(
-                ["bash", "-c", "bind; compgen -A directory -- {p}".format(p=quote(prefix))],
+                ["bash", "-c", f"bind; compgen -A directory -- {quote(prefix)}"],
                 stderr=subprocess.DEVNULL,
             )
             completion = list(set(completion) - set(anticomp))

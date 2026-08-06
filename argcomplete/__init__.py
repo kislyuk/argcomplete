@@ -1,6 +1,8 @@
 # Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+from __future__ import annotations
+
 from . import completers
 from .completers import ChoicesCompleter, DirectoriesCompleter, EnvironCompleter, FilesCompleter, SuppressCompleter
 from .exceptions import ArgcompleteException

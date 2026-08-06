@@ -3,11 +3,13 @@
 # files with source copies of this package and derivative works is **REQUIRED** as specified by the Apache License.
 # See https://github.com/kislyuk/argcomplete for more info.
 
+from __future__ import annotations
+
 import argparse
 import os
 import sys
-from collections.abc import Container, Mapping
-from typing import Callable, Literal, TextIO
+from collections.abc import Callable, Container, Mapping
+from typing import Literal, TextIO
 
 from . import io as _io
 from .completers import BaseCompleter, ChoicesCompleter, FilesCompleter, SuppressCompleter
@@ -137,7 +139,7 @@ class CompletionFinder:
         if output_stream is None:
             filename = os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
             if filename is not None:
-                debug("Using output file {}".format(filename))
+                debug(f"Using output file {filename}")
                 output_stream = open(filename, "w")
 
         if output_stream is None:
@@ -151,12 +153,12 @@ class CompletionFinder:
 
         ifs = os.environ.get("_ARGCOMPLETE_IFS", "\013")
         if len(ifs) != 1:
-            debug("Invalid value for IFS, quitting [{v}]".format(v=ifs))
+            debug(f"Invalid value for IFS, quitting [{ifs}]")
             exit_method(1)
 
         dfs = os.environ.get("_ARGCOMPLETE_DFS")
         if dfs and len(dfs) != 1:
-            debug("Invalid value for DFS, quitting [{v}]".format(v=dfs))
+            debug(f"Invalid value for DFS, quitting [{dfs}]")
             exit_method(1)
 
         comp_line = os.environ["COMP_LINE"]
@@ -178,11 +180,11 @@ class CompletionFinder:
             comp_words.append(cword_prefix.split("=", 1)[0])
 
         debug(
-            "\nLINE: {!r}".format(comp_line),
-            "\nPOINT: {!r}".format(comp_point),
-            "\nPREQUOTE: {!r}".format(cword_prequote),
-            "\nPREFIX: {!r}".format(cword_prefix),
-            "\nSUFFIX: {!r}".format(cword_suffix),
+            f"\nLINE: {comp_line!r}",
+            f"\nPOINT: {comp_point!r}",
+            f"\nPREQUOTE: {cword_prequote!r}",
+            f"\nPREFIX: {cword_prefix!r}",
+            f"\nSUFFIX: {cword_suffix!r}",
             "\nWORDS:",
             comp_words,
         )
@@ -313,7 +315,7 @@ class CompletionFinder:
 
     def _get_subparser_completions(self, parser, cword_prefix):
         aliases_by_parser: dict[argparse.ArgumentParser, list[str]] = {}
-        for key in parser.choices.keys():
+        for key in parser.choices:
             p = parser.choices[key]
             aliases_by_parser.setdefault(p, []).append(key)
 
@@ -322,7 +324,7 @@ class CompletionFinder:
                 if alias.startswith(cword_prefix):
                     self._display_completions[alias] = self._get_action_help(action)
 
-        completions = [subcmd for subcmd in parser.choices.keys() if subcmd.startswith(cword_prefix)]
+        completions = [subcmd for subcmd in parser.choices if subcmd.startswith(cword_prefix)]
         return completions
 
     def _include_options(self, action, cword_prefix):
@@ -367,7 +369,7 @@ class CompletionFinder:
         return True
 
     def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
-        debug("Active actions (L={l}): {a}".format(l=len(parser.active_actions), a=parser.active_actions))
+        debug(f"Active actions (L={len(parser.active_actions)}): {parser.active_actions}")
 
         isoptional = cword_prefix and cword_prefix[0] in parser.prefix_chars
         optional_prefix = ""
@@ -515,9 +517,8 @@ class CompletionFinder:
         """
         filtered_completions = []
         for completion in completions:
-            if self.exclude is not None:
-                if completion in self.exclude:
-                    continue
+            if self.exclude is not None and completion in self.exclude:
+                continue
             if completion not in filtered_completions:
                 filtered_completions.append(completion)
         return filtered_completions
@@ -606,7 +607,7 @@ class CompletionFinder:
             result = input("prompt> ")
         """
         if state == 0:
-            cword_prequote, cword_prefix, cword_suffix, comp_words, first_colon_pos = split_line(text)
+            cword_prequote, cword_prefix, _cword_suffix, comp_words, first_colon_pos = split_line(text)
             comp_words.insert(0, sys.argv[0])
             matches = self._get_completions(comp_words, cword_prefix, cword_prequote, first_colon_pos)
             self._rl_matches = [text + match[len(cword_prefix) :] for match in matches]
@@ -633,7 +634,4 @@ class ExclusiveCompletionFinder(CompletionFinder):
         if action._orig_class in append_classes:
             return True
 
-        if action not in parser._seen_non_default_actions:
-            return True
-
-        return False
+        return action not in parser._seen_non_default_actions

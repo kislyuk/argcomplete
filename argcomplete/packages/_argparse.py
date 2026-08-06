@@ -5,6 +5,8 @@
 
 # This file contains argparse introspection utilities used in the course of argcomplete execution.
 
+from __future__ import annotations
+
 from argparse import (
     ONE_OR_MORE,
     OPTIONAL,
@@ -19,15 +21,14 @@ from argparse import (
     _SubParsersAction,
 )
 from gettext import gettext
-from typing import Dict, List, Optional, Set, Tuple, Union, cast
+from typing import cast
 
-_OptionTuple = Union[
-    Tuple[Optional[Action], str, Optional[str]],
-    Tuple[Optional[Action], str, Optional[str], Optional[str]],
-]
-_OptionTupleEntry = Union[_OptionTuple, List[_OptionTuple]]
+_OptionTuple = (
+    tuple[Action | None, str, str | None] | tuple[Action | None, str, str | None, str | None]
+)
+_OptionTupleEntry = _OptionTuple | list[_OptionTuple]
 
-_num_consumed_args: Dict[Action, int] = {}
+_num_consumed_args: dict[Action, int] = {}
 
 
 def action_is_satisfied(action):
@@ -45,7 +46,7 @@ def action_is_satisfied(action):
     if action.nargs is None:
         return num_consumed_args == 1
 
-    assert isinstance(action.nargs, int), 'failed to handle a possible nargs value: %r' % action.nargs
+    assert isinstance(action.nargs, int), f'failed to handle a possible nargs value: {action.nargs!r}'
     return num_consumed_args == action.nargs
 
 
@@ -58,7 +59,7 @@ def action_is_open(action):
     if action.nargs == OPTIONAL or action.nargs is None:
         return num_consumed_args == 0
 
-    assert isinstance(action.nargs, int), 'failed to handle a possible nargs value: %r' % action.nargs
+    assert isinstance(action.nargs, int), f'failed to handle a possible nargs value: {action.nargs!r}'
     return num_consumed_args < action.nargs
 
 
@@ -84,14 +85,14 @@ class IntrospectiveArgumentParser(ArgumentParser):
     def _parse_known_args(self, arg_strings, namespace, intermixed=False, **kwargs):
         _num_consumed_args.clear()  # Added by argcomplete
         self._argcomplete_namespace = namespace
-        self.active_actions: List[Action] = []  # Added by argcomplete
+        self.active_actions: list[Action] = []  # Added by argcomplete
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
             arg_strings = self._read_args_from_files(arg_strings)
 
         # map all mutually exclusive arguments to the other arguments
         # they can't occur with
-        action_conflicts: Dict[Action, List[Action]] = {}
+        action_conflicts: dict[Action, list[Action]] = {}
         self._action_conflicts = action_conflicts  # Added by argcomplete
         for mutex_group in self._mutually_exclusive_groups:
             group_actions = mutex_group._group_actions
@@ -103,7 +104,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         # find all option indices, and determine the arg_string_pattern
         # which has an 'O' if there is an option at an index,
         # an 'A' if there is an argument, or a '-' if there is a '--'
-        option_string_indices: Dict[int, _OptionTupleEntry] = {}
+        option_string_indices: dict[int, _OptionTupleEntry] = {}
         arg_string_pattern_parts = []
         arg_strings_iter = iter(arg_strings)
         for i, arg_string in enumerate(arg_strings_iter):
@@ -128,8 +129,8 @@ class IntrospectiveArgumentParser(ArgumentParser):
         arg_strings_pattern = ''.join(arg_string_pattern_parts)
 
         # converts arg strings to the appropriate and then takes the action
-        seen_actions: Set[Action] = set()
-        seen_non_default_actions: Set[Action] = set()
+        seen_actions: set[Action] = set()
+        seen_non_default_actions: set[Action] = set()
         self._seen_non_default_actions = seen_non_default_actions  # Added by argcomplete
 
         def take_action(action, argument_strings, option_string=None):
@@ -180,7 +181,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
             # identify additional optionals in the same arg string
             # (e.g. -xyz is the same as -x -y -z if no args are required)
             match_argument = self._match_argument
-            action_tuples: List[Tuple[Action, List[str], str]] = []
+            action_tuples: list[tuple[Action, list[str], str]] = []
             while True:
                 # if we found no optional action, skip it
                 if action is None:
@@ -326,10 +327,9 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
         # make sure all required actions were present
         for action in self._actions:
-            if action.required:
-                if action not in seen_actions:
-                    name = _get_action_name(action)
-                    self.error(gettext('argument %s is required') % name)
+            if action.required and action not in seen_actions:
+                name = _get_action_name(action)
+                self.error(gettext('argument %s is required') % name)
 
         # make sure all required groups had one option present
         for group in self._mutually_exclusive_groups:

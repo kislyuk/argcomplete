@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from .exceptions import ArgcompleteException
@@ -42,11 +44,11 @@ def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list
                 # raise ArgcompleteException("Unexpected end of input")
                 return "", "", "", words, None
             if lexer.instream.tell() >= point:
-                debug("word", word, "split, lexer state: '{s}'".format(s=lexer.state))
+                debug("word", word, f"split, lexer state: '{lexer.state}'")
                 return split_word(word)
             words.append(word)
         except ValueError:
-            debug("word", lexer.token, "split (lexer stopped, state: '{s}')".format(s=lexer.state))
+            debug("word", lexer.token, f"split (lexer stopped, state: '{lexer.state}')")
             if lexer.instream.tell() >= point:
                 return split_word(lexer.token)
             else:

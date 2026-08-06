@@ -12,11 +12,13 @@ https://setuptools.readthedocs.io/en/latest/setuptools.html#automatic-script-cre
 Intended to be invoked by argcomplete's global completion function.
 """
 
+from __future__ import annotations
+
 import os
 import sys
+from collections.abc import Iterable
 from importlib.metadata import EntryPoint
 from importlib.metadata import entry_points as importlib_entry_points
-from typing import Iterable
 
 from ._check_module import ArgcompleteMarkerNotFound, find
 
@@ -46,9 +48,9 @@ def main():
     # Check this looks like the script we really expected.
     with open(script_path) as f:
         script = f.read()
-    if "from {} import {}".format(module_name, function_name) not in script:
+    if f"from {module_name} import {function_name}" not in script:
         raise ArgcompleteMarkerNotFound("does not appear to be a console script")
-    if "sys.exit({}())".format(function_name) not in script:
+    if f"sys.exit({function_name}())" not in script:
         raise ArgcompleteMarkerNotFound("does not appear to be a console script")
 
     # Look for the argcomplete marker in the script it imports.

@@ -23,6 +23,8 @@ For Fish
     $ register-python-argcomplete --shell fish my-favourite-script.py > ~/.config/fish/my-favourite-script.py.fish
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 

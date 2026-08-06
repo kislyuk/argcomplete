@@ -64,6 +64,18 @@ skip = ".*/version.py"
 line-length = 120
 
 [tool.ruff.lint]
+ignore = [
+  "B003",
+  "B008",
+  "B017",
+  "B026",
+  "BLE001",
+  "RUF012",
+  "SIM102",
+  "SIM115",
+  "TRY002",
+  "UP031",
+]
 per-file-ignores = {"argcomplete/__init__.py" = ["F401"]}
 
 [tool.ruff.format]
