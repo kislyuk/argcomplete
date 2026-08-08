@@ -86,9 +86,7 @@ class FilesCompleter(BaseCompleter):
                     stderr=subprocess.DEVNULL,
                 )
         else:
-            completion += _call(
-                ["bash", "-c", f"bind; compgen -A file -- {quote(prefix)}"], stderr=subprocess.DEVNULL
-            )
+            completion += _call(["bash", "-c", f"bind; compgen -A file -- {quote(prefix)}"], stderr=subprocess.DEVNULL)
             anticomp = _call(
                 ["bash", "-c", f"bind; compgen -A directory -- {quote(prefix)}"],
                 stderr=subprocess.DEVNULL,

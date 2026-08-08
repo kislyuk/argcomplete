@@ -23,9 +23,7 @@ from argparse import (
 from gettext import gettext
 from typing import cast
 
-_OptionTuple = (
-    tuple[Action | None, str, str | None] | tuple[Action | None, str, str | None, str | None]
-)
+_OptionTuple = tuple[Action | None, str, str | None] | tuple[Action | None, str, str | None, str | None]
 _OptionTupleEntry = _OptionTuple | list[_OptionTuple]
 
 _num_consumed_args: dict[Action, int] = {}
