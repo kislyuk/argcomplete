@@ -161,6 +161,17 @@ class TestArgcomplete(unittest.TestCase):
         completions = self.run_completer(p, "prog -", always_complete_options=False)
         self.assertEqual(set(completions), {"-h", "--help", "--foo", "--bar"})
 
+    def test_invalid_comp_point(self):
+        p = ArgumentParser()
+        p.add_argument("--foo")
+
+        with TemporaryFile(mode="w+") as t:
+            os.environ["COMP_LINE"] = "prog "
+            os.environ["COMP_POINT"] = ""
+            with self.assertRaises(SystemExit) as cm:
+                autocomplete(p, output_stream=t, exit_method=sys.exit)
+            self.assertEqual(cm.exception.code, 1)
+
     def test_choices(self):
         def make_parser():
             parser = ArgumentParser()
