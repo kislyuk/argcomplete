@@ -181,6 +181,162 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_attached_short_option_choices(self):
+        for word, expected in (
+            ("-o o", ["one "]),
+            ("-oo", ["-oone "]),
+            ("-ot", ["-otwo", "-othree"]),
+            ("-bo", ["-boone", "-botwo", "-bothree"]),
+            ("-boo", ["-boone "]),
+        ):
+            with self.subTest(word=word):
+                parser = ArgumentParser()
+                parser.add_argument("--option", "-o", choices=["one", "two", "three"])
+                parser.add_argument("--bool", "-b", action="store_true")
+                self.assertEqual(self.run_completer(parser, "prog " + word), expected)
+                for completion in expected:
+                    args = ["-o", completion.strip()] if word == "-o o" else [completion.strip()]
+                    self.assertIn(parser.parse_args(args).option, ["one", "two", "three"])
+
+    def test_attached_short_option_nargs(self):
+        for nargs in (None, 1, "?", "*", "+"):
+            with self.subTest(nargs=nargs):
+                parser = ArgumentParser()
+                parser.add_argument("-o", nargs=nargs, choices=["one"])
+                self.assertEqual(self.run_completer(parser, "prog -oo"), ["-oone "])
+                parser.parse_args(["-oone"])
+        parser = ArgumentParser()
+        parser.add_argument("-o", nargs=2, choices=["one"])
+        self.assertEqual(self.run_completer(parser, "prog -oo"), [""])
+
+    def test_attached_short_option_boundaries(self):
+        for word, expected in (
+            ("--option o", ["one "]),
+            ("--option=o", ["one "]),
+            ("-o", ["-o", "-output"]),
+            ("-out", ["-output "]),
+            ("-output", ["-output "]),
+            ("-bb", [""]),
+            ("-bxo", [""]),
+            ("-o'o", [""]),
+            ("-- -oo", [""]),
+            ("position", ["position "]),
+        ):
+            with self.subTest(word=word):
+                parser = ArgumentParser()
+                parser.add_argument("--option", "-o", choices=["one"])
+                parser.add_argument("-output", action="store_true")
+                parser.add_argument("-b", action="store_true")
+                parser.add_argument("pos", nargs="?", choices=["position"])
+                self.assertEqual(self.run_completer(parser, "prog " + word), expected)
+
+    def test_attached_short_option_custom_completer(self):
+        class UnsafeAction(argparse.Action):
+            def __call__(self, *args, **kwargs):
+                raise AssertionError("Completion must not execute this action")
+
+        def complete(prefix, **kwargs):
+            self.assertEqual(prefix, "o")
+            self.assertEqual(kwargs["parsed_args"].previous, "value")
+            return {"one": "first choice", "other": "another choice"}
+
+        parser = ArgumentParser()
+        parser.add_argument("--previous")
+        parser.add_argument("-o", action=UnsafeAction).completer = complete
+        finder = CompletionFinder()
+        self.assertEqual(
+            self.run_completer(parser, "prog --previous value -oo", completer=finder), ["-oone", "-oother"]
+        )
+        self.assertEqual(finder.get_display_completions(), {"-oone": "first choice", "-oother": "another choice"})
+
+    def test_attached_short_option_subparser(self):
+        parser = ArgumentParser()
+        subparser = parser.add_subparsers().add_parser("sub")
+        subparser.add_argument("-o", choices=["one"])
+        self.assertEqual(self.run_completer(parser, "prog sub -oo"), ["-oone "])
+
+    def test_attached_short_option_cluster_context(self):
+        def complete(prefix, parsed_args, **kwargs):
+            self.assertTrue(parsed_args.b)
+            self.assertEqual(parsed_args.v, 2)
+            return ["one"]
+
+        parser = ArgumentParser()
+        parser.add_argument("-b", action="store_true")
+        parser.add_argument("-v", action="count", default=0)
+        parser.add_argument("-o").completer = complete
+        self.assertEqual(self.run_completer(parser, "prog -bvvoo"), ["-bvvoone "])
+
+    def test_attached_short_option_mutually_exclusive(self):
+        for word in ("-boo", "-b -oo"):
+            with self.subTest(word=word):
+                parser = ArgumentParser()
+                group = parser.add_mutually_exclusive_group()
+                group.add_argument("-b", action="store_true")
+                group.add_argument("-o", choices=["one"])
+                self.assertEqual(self.run_completer(parser, "prog " + word), [""])
+
+    def test_attached_short_option_exclusive(self):
+        for finder_class in (CompletionFinder, ExclusiveCompletionFinder):
+            for word, expected, count in (
+                ("-oo", "-oone ", 0),
+                ("-o one -oo", "-oone ", 0),
+                ("-o one -o o", "one ", 0),
+                ("-bvvoo", "-bvvoone ", 2),
+                ("-v -bvvoo", "-bvvoone ", 3),
+                ("-v -bvv -o o", "one ", 3),
+            ):
+                with self.subTest(finder=finder_class, word=word):
+
+                    def complete(prefix, parsed_args, count=count, word=word, **kwargs):
+                        self.assertEqual(parsed_args.v, count)
+                        self.assertEqual(parsed_args.b, "b" in word)
+                        return ["one"]
+
+                    parser = ArgumentParser()
+                    parser.add_argument("-b", action="store_true")
+                    parser.add_argument("-v", action="count", default=0)
+                    parser.add_argument("-o").completer = complete
+                    finder = finder_class()
+                    self.assertEqual(self.run_completer(parser, "prog " + word, completer=finder), [expected])
+                    if finder_class is ExclusiveCompletionFinder:
+                        self.assertNotIn("-o", self.run_completer(parser, "prog -o one -", completer=finder))
+
+    def test_attached_short_option_exclusive_constraints(self):
+        class RestrictedFinder(ExclusiveCompletionFinder):
+            @staticmethod
+            def _action_allowed(action, parser):
+                return ExclusiveCompletionFinder._action_allowed(action, parser) and action.dest != "o"
+
+        parser = ArgumentParser()
+        parser.add_argument("-o", choices=["one"])
+        self.assertEqual(self.run_completer(parser, "prog -oo", completer=RestrictedFinder()), [""])
+        for word in ("-boo", "-b -oo"):
+            with self.subTest(word=word):
+                parser = ArgumentParser()
+                group = parser.add_mutually_exclusive_group()
+                group.add_argument("-b", action="store_true")
+                group.add_argument("-o", choices=["one"])
+                self.assertEqual(
+                    self.run_completer(parser, "prog " + word, completer=ExclusiveCompletionFinder()), [""]
+                )
+
+    def test_attached_short_option_negative_value(self):
+        parser = ArgumentParser()
+        parser.add_argument("-o", choices=["-one"])
+        self.assertEqual(self.run_completer(parser, "prog -o-o"), ["-o-one "])
+        self.assertEqual(parser.parse_args(["-o-one"]).o, "-one")
+
+    def test_attached_short_option_unsafe_switch(self):
+        class UnsafeSwitch(argparse.Action):
+            def __call__(self, *args, **kwargs):
+                raise AssertionError("Completion must not execute this switch")
+
+        parser = ArgumentParser()
+        parser.add_argument("-b", action=UnsafeSwitch, nargs=0)
+        parser.add_argument("-o", choices=["one"])
+        self.assertEqual(self.run_completer(parser, "prog -boo"), ["-boone "])
+
     def test_non_str_choices(self):
         def make_parser():
             parser = ArgumentParser()

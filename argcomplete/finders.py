@@ -72,6 +72,7 @@ class CompletionFinder:
         self.validator = validator
         self.print_suppressed = print_suppressed
         self.completing = False
+        self._complete_attached_options = True
         self._display_completions = {}
         self.default_completer = default_completer
         if append_space is None:
@@ -236,6 +237,9 @@ class CompletionFinder:
 
         self.completing = False
 
+        # An open quote can change which part of the word the shell replaces.
+        # Keep that case on the existing completion path.
+        self._complete_attached_options = "--" not in comp_words and not cword_prequote
         if "--" in comp_words:
             self.always_complete_options = False
 
@@ -368,11 +372,54 @@ class CompletionFinder:
                 return False
         return True
 
+    def _attached_action_allowed(self, action, parser):
+        # Keep dynamic dispatch so custom finders can impose their own rules.
+        previous = getattr(parser, "_completing_attached_value", False)
+        parser._completing_attached_value = True
+        try:
+            return self._action_allowed(action, parser)
+        finally:
+            parser._completing_attached_value = previous
+
+    def _get_attached_short_option(self, parser, word):
+        # Let argparse resolve exact option names and ambiguous abbreviations before
+        # interpreting the remainder as a chain of short options and an argument.
+        if len(word) < 3 or word[0] not in parser.prefix_chars or word[1] in parser.prefix_chars:
+            return None
+        if word in parser._option_string_actions:
+            return None
+        try:
+            with mute_stderr():
+                option_tuple = parser._parse_optional(word)
+            if isinstance(option_tuple, list):
+                if len(option_tuple) != 1:
+                    return None
+                option_tuple = option_tuple[0]
+            if option_tuple is None:
+                return None
+            action, option_string = option_tuple[:2]
+            explicit_arg = option_tuple[-1]
+            leading_options: list[tuple[argparse.Action, str]] = []
+            while action is not None and explicit_arg is not None:
+                count = parser._match_argument(action, "A")
+                if count == 1:
+                    return action, word[: len(word) - len(explicit_arg)], explicit_arg, leading_options
+                if count != 0 or not explicit_arg or len(option_string) != 2:
+                    return None
+                leading_options.append((action, option_string))
+                option_string = word[0] + explicit_arg[0]
+                action = parser._option_string_actions.get(option_string)
+                explicit_arg = explicit_arg[1:]
+        except (argparse.ArgumentError, SystemExit):
+            return None
+        return None
+
     def _complete_active_option(self, parser, next_positional, cword_prefix, parsed_args, completions):
         debug(f"Active actions (L={len(parser.active_actions)}): {parser.active_actions}")
 
         isoptional = cword_prefix and cword_prefix[0] in parser.prefix_chars
         optional_prefix = ""
+        attached_action = None
         greedy_actions = [x for x in parser.active_actions if action_is_greedy(x, isoptional)]
         if greedy_actions:
             assert len(greedy_actions) == 1, "expect at most 1 greedy action"
@@ -388,12 +435,34 @@ class CompletionFinder:
                 # (and chopped back off later in quote_completions() by the COMP_WORDBREAKS logic).
                 optional_prefix, _, cword_prefix = cword_prefix.partition("=")
             else:
-                # Only run completers if current word does not start with - (is not an optional)
-                return completions
+                attached = (
+                    self._get_attached_short_option(parser, cword_prefix) if self._complete_attached_options else None
+                )
+                if attached is None:
+                    return completions
+                attached_action, optional_prefix, cword_prefix, leading_options = attached
+                seen_actions = set()
+                for action in [item[0] for item in leading_options] + [attached_action]:
+                    if not self._attached_action_allowed(action, parser) or any(
+                        conflict in seen_actions for conflict in parser._action_conflicts.get(action, [])
+                    ):
+                        return completions
+                    seen_actions.add(action)
+                # The preceding switches belong to the current word, so the parser
+                # has not consumed them yet. Apply only the same safe actions used
+                # by the parser hooks, on a local namespace for the value completer.
+                parsed_args = argparse.Namespace(**vars(parsed_args))
+                for action, option_string in leading_options:
+                    if action._orig_class in safe_actions:
+                        action._orig_callable(parser, parsed_args, [], option_string=option_string)
+                completions = []
+                self._display_completions = {}
 
         complete_remaining_positionals = False
         # Use the single greedy action (if there is one) or all active actions.
-        for active_action in greedy_actions or parser.active_actions:
+        for active_action in (
+            [attached_action] if attached_action is not None else greedy_actions or parser.active_actions
+        ):
             if not active_action.option_strings:  # action is a positional
                 if action_is_open(active_action):
                     # Any positional arguments after this may slide down into this action
@@ -448,7 +517,13 @@ class CompletionFinder:
                             self._display_completions[next_completion] = ""
                             completions.append(next_completion)
                 if optional_prefix:
-                    completions = [optional_prefix + "=" + completion for completion in completions]
+                    prefix = optional_prefix if attached_action is not None else optional_prefix + "="
+                    if attached_action is not None:
+                        self._display_completions = {
+                            prefix + completion: description
+                            for completion, description in self._display_completions.items()
+                        }
+                    completions = [prefix + completion for completion in completions]
                 debug("Completions:", completions)
         return completions
 
@@ -629,6 +704,11 @@ class ExclusiveCompletionFinder(CompletionFinder):
     def _action_allowed(action, parser):
         if not CompletionFinder._action_allowed(action, parser):
             return False
+
+        # An explicitly typed option may need a value even when its name would
+        # be omitted from the suggestions for the next option.
+        if getattr(parser, "_completing_attached_value", False):
+            return True
 
         append_classes = (argparse._AppendAction, argparse._AppendConstAction)
         if action._orig_class in append_classes:
