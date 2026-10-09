@@ -198,7 +198,7 @@ class CompletionFinder:
             completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
 
         if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
-            completions = [f"{c}:{self._display_completions.get(c)}" for c in completions]
+            completions = [f"{c}:{(self._display_completions.get(c) or '').replace(ifs, ' ')}" for c in completions]
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions))
