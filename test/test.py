@@ -894,6 +894,19 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "', shell="tcsh")), {"\"'"})
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '", shell="tcsh")), {"\"'"})
 
+    def test_zsh_completion_description_field_separator(self):
+        # A completer-supplied description must not be able to break out of its field by
+        # embedding the IFS byte used to frame completions for zsh, which would otherwise
+        # turn the trailing text into an extra, unescaped completion.
+        def c_desc(prefix, parsed_args, **kwargs):
+            return {"value": "desc" + IFS + "injected"}
+
+        parser = ArgumentParser(add_help=False)
+        parser.add_argument("--opt").completer = c_desc
+
+        completions = self.run_completer(parser, "prog --opt ", shell="zsh", append_space=False)
+        self.assertEqual(completions, ["value:desc injected"])
+
     def test_shellcode_utility(self):
         with NamedTemporaryFile() as fh:
             sc = shellcode(["prog"], use_defaults=True, shell="bash", complete_arguments=None)
