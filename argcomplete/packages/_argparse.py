@@ -29,6 +29,16 @@ _OptionTupleEntry = _OptionTuple | list[_OptionTuple]
 _num_consumed_args: dict[Action, int] = {}
 
 
+def get_num_consumed_args(action: Action) -> int:
+    """Return the number of completed values assigned to an action during completion.
+
+    Call this from a completer with its ``action`` argument. The word being
+    completed is excluded. For repeated options, the count refers to the current
+    occurrence, not the total number of values from earlier occurrences.
+    """
+    return _num_consumed_args.get(action, 0)
+
+
 def action_is_satisfied(action):
     '''Returns False if the parse would raise an error if no more arguments are given to this action, True otherwise.'''
     num_consumed_args = _num_consumed_args.get(action, 0)
@@ -230,7 +240,13 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     selected_patterns = arg_strings_pattern[start:]
                     self.active_actions = [action]  # Added by argcomplete
                     _num_consumed_args[action] = 0  # Added by argcomplete
-                    arg_count = match_argument(action, selected_patterns)
+                    try:
+                        arg_count = match_argument(action, selected_patterns)
+                    except ArgumentError:
+                        # Fixed nargs can be incomplete at the cursor. Preserve
+                        # the already entered values even though parsing stops.
+                        _num_consumed_args[action] = len(selected_patterns) - len(selected_patterns.lstrip("A"))
+                        raise
                     stop = start + arg_count
                     args = arg_strings[start:stop]
 

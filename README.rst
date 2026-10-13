@@ -106,6 +106,27 @@ way to do this at definition time is:
     parser.add_argument("--env-var2").completer = EnvironCompleter
     argcomplete.autocomplete(parser)
 
+For an action that accepts several values, a completer can call
+``argcomplete.get_num_consumed_args(action)`` to distinguish their positions.
+For example, the following completes ``--foobar KEY OP NAME`` differently at
+each position, without changing the callable completer signature:
+
+.. code-block:: python
+
+    def complete_foobar(prefix, action, **kwargs):
+        choices = (("owner", "status"), ("eq", "ne"), ("alice", "bob"))
+        return choices[argcomplete.get_num_consumed_args(action)]
+
+    parser.add_argument("--foobar", nargs=3).completer = complete_foobar
+
+The count excludes the word currently being completed: it is zero for
+``--foobar o<TAB>``, one for ``--foobar owner e<TAB>``, and two for
+``--foobar owner eq a<TAB>``. It resets at each occurrence of a repeated option.
+Call this helper while the completer runs; the count describes the current
+completion parse, not a later ``parse_args()`` call. For variable-length
+positional actions, values can be reassigned as more words are entered, so the
+count reflects the current assignment rather than a final parse.
+
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions.
 
