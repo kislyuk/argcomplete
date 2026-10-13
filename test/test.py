@@ -875,6 +875,7 @@ class TestArgcomplete(unittest.TestCase):
             parser.add_argument("-2", choices=[r"\* "])
             parser.add_argument("-3", choices=["\"'"])
             parser.add_argument("-4", choices=["data?", "file[1]", "{x,--flag}"])
+            parser.add_argument("-5", choices=["cmd`ncalc"])
             return parser
 
         self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ")), {r"bar\<\$\>baz "})
@@ -893,6 +894,12 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 ", shell="tcsh")), {"\"' "})
         self.assertEqual(set(self.run_completer(make_parser(), 'prog -3 "', shell="tcsh")), {"\"'"})
         self.assertEqual(set(self.run_completer(make_parser(), "prog -3 '", shell="tcsh")), {"\"'"})
+
+        # PowerShell escapes with a backtick, so a literal backtick in a completion has to be
+        # escaped too; otherwise it turns the next character into an escape sequence (`n -> newline)
+        # when the completed command runs.
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -1 ", shell="powershell")), {"bar`<`$`>baz "})
+        self.assertEqual(set(self.run_completer(make_parser(), "prog -5 ", shell="powershell")), {"cmd``ncalc "})
 
     def test_shellcode_utility(self):
         with NamedTemporaryFile() as fh:

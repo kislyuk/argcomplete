@@ -562,7 +562,12 @@ class CompletionFinder:
         # PowerShell uses ` as escape character.
         if os.environ.get("_ARGCOMPLETE_SHELL") == "powershell":
             escape_char = '`'
-            special_chars = special_chars.replace('`', '')
+            if "`" in special_chars:
+                # The backtick is PowerShell's escape character, so it must be escaped before the
+                # others. Moving it to the front (instead of dropping it) keeps a literal backtick in
+                # a completion from going through unescaped and turning the next character into an
+                # escape sequence (e.g. `n -> newline) when the completed command is run.
+                special_chars = "`" + special_chars.replace("`", "")
         else:
             escape_char = "\\"
             if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
