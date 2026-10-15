@@ -1010,6 +1010,20 @@ class TestArgcompleteREPL(unittest.TestCase):
         with self.assertRaises(SystemExit):
             p.parse_args(["foo"])
 
+    def test_repl_invalid_subparser_parse_after_parent_complete(self):
+        p = ArgumentParser()
+        sp = p.add_subparsers().add_parser("foo")
+        sp.add_argument("bar", choices=["bar"])
+
+        c = CompletionFinder(p, always_complete_options=True)
+        self.assertEqual(c.rl_complete("fo", 0), "foo ")
+
+        # Completion at the parent does not patch the child parser. Parsing
+        # still needs to report argparse's normal invalid-choice error.
+        with contextlib.redirect_stderr(StringIO()), self.assertRaises(SystemExit) as error:
+            p.parse_args(["foo", "invalid"])
+        self.assertEqual(error.exception.code, 2)
+
     def test_repl_subcommand(self):
         p = ArgumentParser()
         p.add_argument("--foo")
