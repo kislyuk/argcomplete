@@ -367,6 +367,35 @@ class TestArgcomplete(unittest.TestCase):
             self.assertEqual(FilesCompleter()(prefix), [])
             self.assertFalse(os.path.exists(marker))
 
+    def test_file_completion_extensions(self):
+        with TempDir(prefix="test_dir_fc_extensions", dir="."):
+            os.mkdir("folder.txt")
+            os.mkdir("folder")
+            for name in ("report.txt", "notes.md", "image.png"):
+                with open(name, "w") as fp:
+                    fp.write("test")
+            for allowednames, files in (
+                ("txt", {"report.txt"}),
+                (["*.txt"], {"report.txt"}),
+                (["txt", "md"], {"report.txt", "notes.md"}),
+            ):
+                for directories in (False, True):
+                    with self.subTest(allowednames=allowednames, directories=directories):
+                        expected = files | {"folder/", "folder.txt/"} if directories else files
+                        self.assertCountEqual(FilesCompleter(allowednames, directories=directories)(""), expected)
+
+    def test_file_completion_extensions_integration(self):
+        with TempDir(prefix="test_dir_fc_extensions_parser", dir="."):
+            os.mkdir("folder.txt")
+            for directories in (False, True):
+                with self.subTest(directories=directories):
+                    parser = ArgumentParser()
+                    parser.add_argument("--file").completer = FilesCompleter("txt", directories=directories)
+                    self.assertEqual(
+                        self.run_completer(parser, "prog --file folder"),
+                        ["folder.txt/"] if directories else [""],
+                    )
+
     def test_filescompleter_filetype_integration(self):
         def make_parser():
             parser = ArgumentParser()
