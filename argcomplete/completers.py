@@ -81,10 +81,11 @@ class FilesCompleter(BaseCompleter):
                 )
                 completion += [f + "/" for f in files]
             for x in self.allowednames:
-                completion += _call(
+                files = _call(
                     ["bash", "-c", f"bind; compgen -A file -X '!*.{x}' -- {quote(prefix)}"],
                     stderr=subprocess.DEVNULL,
                 )
+                completion += [f for f in files if not os.path.isdir(os.path.expanduser(f))]
         else:
             completion += _call(["bash", "-c", f"bind; compgen -A file -- {quote(prefix)}"], stderr=subprocess.DEVNULL)
             anticomp = _call(
