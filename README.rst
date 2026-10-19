@@ -295,15 +295,6 @@ Please report bugs, issues, feature requests, etc. on `GitHub <https://github.co
 
 License
 -------
-Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors. Licensed under the terms of the
+Copyright 2012-2026, Andrey Kislyuk and argcomplete contributors. Licensed under the terms of the
 `Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_. Distribution of the LICENSE and NOTICE
 files with source copies of this package and derivative works is **REQUIRED** as specified by the Apache License.
-
-.. image:: https://github.com/kislyuk/argcomplete/workflows/Python%20package/badge.svg
-        :target: https://github.com/kislyuk/argcomplete/actions
-.. image:: https://codecov.io/github/kislyuk/argcomplete/coverage.svg?branch=master
-        :target: https://codecov.io/github/kislyuk/argcomplete?branch=master
-.. image:: https://img.shields.io/pypi/v/argcomplete.svg
-        :target: https://pypi.python.org/pypi/argcomplete
-.. image:: https://img.shields.io/pypi/l/argcomplete.svg
-        :target: https://pypi.python.org/pypi/argcomplete
