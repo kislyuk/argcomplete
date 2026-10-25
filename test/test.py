@@ -921,6 +921,24 @@ class TestArgcomplete(unittest.TestCase):
         sc = shellcode(["prog"], shell="fish")
         sc = shellcode(["prog"], shell="fish", argcomplete_script="~/.bash_completion.d/prog.py")
 
+    def test_shellcode_no_defaults_has_no_fallback_options(self):
+        # With use_defaults=False (--no-defaults), the generated compspec
+        # must not request any fallback completion: -o bashdefault made
+        # bash perform its default completions whenever the completer
+        # produced no matches, defeating the option (issue #482).
+        sc = shellcode(["prog"], use_defaults=False, shell="bash", complete_arguments=None)
+        complete_lines = [line for line in sc.splitlines() if line.strip().startswith("complete ")]
+        self.assertEqual(len(complete_lines), 1)
+        self.assertIn("-o nospace", complete_lines[0])
+        self.assertNotIn("default", complete_lines[0])
+
+    def test_shellcode_defaults_keep_fallback_options(self):
+        sc = shellcode(["prog"], use_defaults=True, shell="bash", complete_arguments=None)
+        complete_lines = [line for line in sc.splitlines() if line.strip().startswith("complete ")]
+        self.assertEqual(len(complete_lines), 1)
+        self.assertIn("-o default", complete_lines[0])
+        self.assertIn("-o bashdefault", complete_lines[0])
+
     def test_option_help(self):
         os.environ["_ARGCOMPLETE_DFS"] = "\t"
         os.environ["_ARGCOMPLETE_SUPPRESS_SPACE"] = "1"
@@ -1327,6 +1345,70 @@ class TestBashZshBase(TestShellBase):
         output = sh.run_command('eval "$(register-python-argcomplete dummy --external-argcomplete-script dummy)"')
         self.assertEqual(output, "")
         self.sh = sh
+
+
+class TestBashNoDefaults(unittest.TestCase):
+    """End-to-end check of register-python-argcomplete --no-defaults.
+
+    The completed script takes an option whose completer never
+    produces matches. In a directory whose files share a common
+    prefix, bash's fallback completion would insert that prefix into
+    the command line; --no-defaults must prevent any fallback when
+    the completer generates no matches (issue #482).
+    """
+
+    def setUp(self):
+        self.tmp_dir = mkdtemp(prefix="test_no_defaults")
+        self.addCleanup(shutil.rmtree, self.tmp_dir, True)
+        work_dir = os.path.join(self.tmp_dir, "work")
+        os.mkdir(work_dir)
+        script = os.path.join(self.tmp_dir, "mytest")
+        with open(script, "w") as fh:
+            fh.write(
+                "#!/usr/bin/env python3\n"
+                "# PYTHON_ARGCOMPLETE_OK\n"
+                "import argparse, argcomplete\n"
+                "parser = argparse.ArgumentParser()\n"
+                "action = parser.add_argument('-s', '--string')\n"
+                "action.completer = lambda **kwargs: []\n"
+                "argcomplete.autocomplete(parser)\n"
+                "args = parser.parse_args()\n"
+                "print('GOT:' + str(args.string))\n"
+            )
+        os.chmod(script, 0o755)
+        for name in ("marker_a.txt", "marker_b.txt"):
+            open(os.path.join(work_dir, name), "w").close()
+        self.sh = bash_repl()
+        self.sh.run_command("echo ready")
+        path = ":".join([self.tmp_dir, os.path.join(BASE_DIR, "scripts"), "$PATH"])
+        self.sh.run_command(f"export PATH={path}")
+        self.sh.run_command(f"export PYTHONPATH={BASE_DIR}")
+        self.sh.run_command(f"cd {work_dir}")
+
+    def tearDown(self):
+        with self.assertRaises((pexpect.EOF, OSError)):
+            self.sh.run_command("exit")
+
+    def test_no_fallback_with_no_defaults(self):
+        self.sh.run_command('eval "$(register-python-argcomplete --no-defaults mytest)"')
+        # The registered compspec must not request any fallback
+        # completion option (issue #482).
+        result = self.sh.run_command("complete -p mytest")
+        self.assertIn("-o nospace", result)
+        self.assertNotIn("default", result)
+        # And behaviorally: with no fallback requested, an empty
+        # completer result leaves the line empty, so argparse errors
+        # out instead of receiving the files' common prefix.
+        result = self.sh.run_command("mytest --string \t")
+        self.assertNotIn("GOT:", result)
+        self.assertIn("expected one argument", result)
+
+    def test_fallback_with_defaults(self):
+        self.sh.run_command('eval "$(register-python-argcomplete mytest)"')
+        result = self.sh.run_command("mytest --string \t")
+        # Control case: with defaults, fallback filename completion
+        # inserts the common prefix of the directory's files.
+        self.assertIn("GOT:marker_", result)
 
 
 class TestBash(TestBashZshBase, unittest.TestCase):

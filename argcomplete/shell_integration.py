@@ -160,7 +160,7 @@ def shellcode(
     """
 
     if complete_arguments is None:
-        complete_options = "-o nospace -o default -o bashdefault" if use_defaults else "-o nospace -o bashdefault"
+        complete_options = "-o nospace -o default -o bashdefault" if use_defaults else "-o nospace"
     else:
         complete_options = " ".join(complete_arguments)
 
