@@ -119,18 +119,6 @@ each position, without changing the callable completer signature:
 
     parser.add_argument("--foobar", nargs=3).completer = complete_foobar
 
-The count excludes the word currently being completed: it is zero for
-``--foobar o<TAB>``, one for ``--foobar owner e<TAB>``, and two for
-``--foobar owner eq a<TAB>``. It resets at each occurrence of a repeated option.
-Call this helper while the completer runs; the count describes the current
-completion parse, not a later ``parse_args()`` call. For variable-length
-positional actions, values can be reassigned as more words are entered, so the
-count reflects the current assignment rather than a final parse.
-Fixed-length positionals also report their partial count. For ordinary
-positionals, the ``--`` option separator does not count as a value; a later
-literal ``--`` does. ``argparse.REMAINDER`` and ``argparse.PARSER`` retain
-``--`` when it belongs to their argument list.
-
 If you specify the ``choices`` keyword for an argparse option or argument (and don't specify a completer), it will be
 used for completions.
 
