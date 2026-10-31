@@ -320,6 +320,54 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in zsh_expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd, shell="zsh")), set(output))
 
+    def test_completer_consumed_arguments(self):
+        parser = ArgumentParser()
+
+        class TripleAction(argparse.Action):
+            def __call__(self, parser, namespace, values, option_string=None):
+                setattr(namespace, self.dest, ":".join(values))
+
+        # Keep the existing four-keyword callable signature working.
+        def complete(prefix, action, parser, parsed_args):
+            return [str(argcomplete.get_num_consumed_args(action))]
+
+        parser.add_argument("--foobar", "-f", nargs=3, action=TripleAction).completer = complete
+        for command, expected in (
+            ("prog --foobar ", "0 "),
+            ("prog --foobar key ", "1 "),
+            ("prog --foobar key op ", "2 "),
+            ("prog --foobar 0", "0 "),
+            ("prog --foobar key 1", "1 "),
+            ("prog --foobar key op 2", "2 "),
+            ("prog -f key op ", "2 "),
+            ('prog --foobar "a key" op ', "2 "),
+            ("prog --foobar key op name --foobar ", "0 "),
+            ("prog --foobar key op name --foobar new ", "1 "),
+            ("prog --foobar ", "0 "),
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(self.run_completer(parser, command), [expected])
+
+    def test_completer_consumed_arguments_subparser(self):
+        parser = ArgumentParser()
+        child = parser.add_subparsers().add_parser("child")
+        action = child.add_argument("--foobar", nargs=3)
+        action.completer = lambda action, **kwargs: [str(argcomplete.get_num_consumed_args(action))]
+        self.assertEqual(self.run_completer(parser, "prog child --foobar one two "), ["2 "])
+        self.assertEqual(self.run_completer(parser, "prog child --foobar "), ["0 "])
+
+    def test_completer_consumed_arguments_variadic(self):
+        for name in ("values", "--values"):
+            parser = ArgumentParser()
+            action = parser.add_argument(name, nargs="+")
+            action.completer = lambda action, **kwargs: [str(argcomplete.get_num_consumed_args(action))]
+            command = "prog " + ("--values " if name.startswith("--") else "")
+            for count in range(3):
+                with self.subTest(name=name, count=count):
+                    result = self.run_completer(parser, command, always_complete_options=False)
+                    self.assertEqual(result, [str(count) + " "])
+                    command += "value "
+
     def test_subparser_completers(self):
         def c_depends_on_positional_arg1(prefix, parsed_args, **kwargs):
             return [parsed_args.arg1]

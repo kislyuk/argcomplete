@@ -9,6 +9,7 @@ from .exceptions import ArgcompleteException
 from .finders import CompletionFinder, ExclusiveCompletionFinder, safe_actions
 from .io import debug, mute_stderr, warn
 from .lexers import split_line
+from .packages._argparse import get_num_consumed_args
 from .shell_integration import shellcode
 
 autocomplete: CompletionFinder = CompletionFinder()
