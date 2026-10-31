@@ -1,6 +1,8 @@
 # Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors.
 # Licensed under the Apache License. See https://github.com/kislyuk/argcomplete for more info.
 
+# mypy: implicit-reexport=True
+
 from __future__ import annotations
 
 from . import completers
