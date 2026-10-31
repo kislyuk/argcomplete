@@ -20,6 +20,7 @@ from argparse import (
     _get_action_name,
     _SubParsersAction,
 )
+from copy import copy
 from gettext import gettext
 from typing import cast
 
@@ -89,6 +90,14 @@ class IntrospectiveArgumentParser(ArgumentParser):
     '''The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),
     except for the lines that contain the string "Added by argcomplete".
     '''
+
+    def _get_partial_num_consumed_args(self, action: Action, arg_strings_pattern: str) -> int:
+        # Let argparse match the unfinished action without requiring all its
+        # values. Copy it so its declared nargs and normal parsing stay intact.
+        partial_action = copy(action)
+        partial_action.nargs = ZERO_OR_MORE
+        arg_count = self._match_argument(partial_action, arg_strings_pattern)
+        return arg_strings_pattern[:arg_count].count("A")
 
     def _parse_known_args(self, arg_strings, namespace, intermixed=False, **kwargs):
         _num_consumed_args.clear()  # Added by argcomplete
@@ -245,7 +254,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     except ArgumentError:
                         # Fixed nargs can be incomplete at the cursor. Preserve
                         # the already entered values even though parsing stops.
-                        _num_consumed_args[action] = len(selected_patterns) - len(selected_patterns.lstrip("A"))
+                        _num_consumed_args[action] = self._get_partial_num_consumed_args(action, selected_patterns)
                         raise
                     stop = start + arg_count
                     args = arg_strings[start:stop]
@@ -285,8 +294,16 @@ class IntrospectiveArgumentParser(ArgumentParser):
                 self.active_actions.append(action)  # Added by argcomplete
             for action, arg_count in zip(positionals, arg_counts):
                 args = arg_strings[start_index : start_index + arg_count]
+                # Begin added by argcomplete
+                # The matcher includes the '--' separator in its token count.
+                # Ordinary positionals only receive values; PARSER/REMAINDER
+                # can retain '--' as part of their arguments.
+                if action.nargs in (PARSER, REMAINDER):
+                    _num_consumed_args[action] = arg_count
+                else:
+                    _num_consumed_args[action] = arg_strings_pattern[start_index : start_index + arg_count].count("A")
+                # End added by argcomplete
                 start_index += arg_count
-                _num_consumed_args[action] = len(args)  # Added by argcomplete
                 take_action(action, args)
 
             # slice off the Positionals that we just parsed and return the
@@ -337,6 +354,13 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
         if positionals:
             self.active_actions.append(positionals[0])  # Added by argcomplete
+            # Begin added by argcomplete
+            action = positionals[0]
+            if isinstance(action.nargs, int):
+                _num_consumed_args[action] = self._get_partial_num_consumed_args(
+                    action, arg_strings_pattern[stop_index:]
+                )
+            # End added by argcomplete
             self.error(gettext('too few arguments'))
 
         # make sure all required actions were present
