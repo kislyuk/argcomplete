@@ -48,10 +48,6 @@ To activate this completions file, add the below line in ``$PROFILE``. The simpl
 
     Import-Module  "~/my-awesome-script.psm1"
 
-After upgrading argcomplete, regenerate saved PowerShell completion modules and reload them with
-``Import-Module -Force`` or restart PowerShell. The generated module handles quoting completion values
-and must match the installed argcomplete version.
-
 Xonsh support
 -------------
 The third-party `xontrib-argcomplete <https://github.com/anki-code/xontrib-argcomplete>`_ project provides support for
