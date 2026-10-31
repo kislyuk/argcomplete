@@ -36,6 +36,9 @@ from argcomplete import (
 from argcomplete.completers import DirectoriesCompleter, FilesCompleter, SuppressCompleter
 from argcomplete.lexers import split_line
 
+# isort: split
+from test.test_powershell import TestPowerShell  # noqa: F401
+
 # Default max length is insufficient for troubleshooting.
 unittest.util._MAX_LENGTH = 1000
 

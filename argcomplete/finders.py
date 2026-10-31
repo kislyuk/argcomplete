@@ -140,7 +140,8 @@ class CompletionFinder:
             filename = os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
             if filename is not None:
                 debug(f"Using output file {filename}")
-                output_stream = open(filename, "w")
+                encoding = "utf-8" if os.environ.get("_ARGCOMPLETE_SHELL") == "powershell" else None
+                output_stream = open(filename, "w", encoding=encoding)
 
         if output_stream is None:
             try:
@@ -537,6 +538,11 @@ class CompletionFinder:
 
         This method is exposed for overriding in subclasses; there is no need to use it directly.
         """
+        if os.environ.get("_ARGCOMPLETE_SHELL") == "powershell":
+            # PowerShell replaces the whole token, including any opening quote.
+            # Its shell integration quotes these raw values with PowerShell's own escaping API.
+            return completions
+
         special_chars = "\\"
         # If the word under the cursor was quoted, escape the quote char.
         # Otherwise, escape all special characters and specially handle all COMP_WORDBREAKS chars.
@@ -559,15 +565,10 @@ class CompletionFinder:
             special_chars = ""
             completions = [c.replace("'", r"'\''") for c in completions]
 
-        # PowerShell uses ` as escape character.
-        if os.environ.get("_ARGCOMPLETE_SHELL") == "powershell":
-            escape_char = '`'
-            special_chars = special_chars.replace('`', '')
-        else:
-            escape_char = "\\"
-            if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
-                # zsh uses colon as a separator between a completion and its description.
-                special_chars += ":"
+        escape_char = "\\"
+        if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
+            # zsh uses colon as a separator between a completion and its description.
+            special_chars += ":"
 
         escaped_completions = []
         for completion in completions:
