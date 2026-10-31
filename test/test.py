@@ -322,13 +322,20 @@ class TestArgcomplete(unittest.TestCase):
 
     def test_completer_consumed_arguments(self):
         parser = ArgumentParser()
+        action_calls = []
 
         class TripleAction(argparse.Action):
             def __call__(self, parser, namespace, values, option_string=None):
+                action_calls.append(values)
                 setattr(namespace, self.dest, ":".join(values))
+
+        argcomplete.safe_actions.add(TripleAction)
+        self.addCleanup(argcomplete.safe_actions.remove, TripleAction)
 
         # Keep the existing four-keyword callable signature working.
         def complete(prefix, action, parser, parsed_args):
+            if action_calls:
+                self.assertEqual(parsed_args.foobar, ":".join(action_calls[-1]))
             return [str(argcomplete.get_num_consumed_args(action))]
 
         parser.add_argument("--foobar", "-f", nargs=3, action=TripleAction).completer = complete
@@ -346,7 +353,82 @@ class TestArgcomplete(unittest.TestCase):
             ("prog --foobar ", "0 "),
         ):
             with self.subTest(command=command):
+                action_calls.clear()
                 self.assertEqual(self.run_completer(parser, command), [expected])
+                self.assertEqual(action_calls, [["key", "op", "name"]] if "name" in command else [])
+
+    def test_completer_consumed_arguments_fixed_positional(self):
+        for subparser in (False, True):
+            parser = ArgumentParser()
+            active_parser = parser.add_subparsers().add_parser("child") if subparser else parser
+            action = active_parser.add_argument("values", nargs=3)
+            action.completer = lambda action, **kwargs: [str(argcomplete.get_num_consumed_args(action))]
+            active_parser.add_argument("tail").completer = lambda **kwargs: ["tail"]
+            command_prefix = "prog child " if subparser else "prog "
+            for suffix, expected in (
+                ("", "0 "),
+                ("one ", "1 "),
+                ("one two ", "2 "),
+                ("0", "0 "),
+                ("one 1", "1 "),
+                ("one two 2", "2 "),
+                ('"one value" two ', "2 "),
+                ("-- ", "0 "),
+                ("-- one ", "1 "),
+                ("one -- two ", "2 "),
+                ("-- -- ", "1 "),
+                ("-- -- two ", "2 "),
+                ("one two three ", "tail "),
+                ("-- one two three ", "tail "),
+                ("", "0 "),
+            ):
+                with self.subTest(subparser=subparser, suffix=suffix):
+                    result = self.run_completer(parser, command_prefix + suffix, always_complete_options=False)
+                    self.assertEqual(result, [expected])
+                    self.assertEqual(action.nargs, 3)
+
+    def test_completer_consumed_arguments_after_positional_and_option(self):
+        parser = ArgumentParser()
+        parser.add_argument("head", nargs=2)
+        parser.add_argument("--flag", action="store_true")
+        action = parser.add_argument("values", nargs=3)
+        action.completer = lambda action, **kwargs: [str(argcomplete.get_num_consumed_args(action))]
+        for command, count in (
+            ("prog head first ", 0),
+            ("prog head first one ", 1),
+            ("prog head first --flag one two ", 2),
+            ("prog -- head first one two ", 2),
+        ):
+            with self.subTest(command=command):
+                result = self.run_completer(parser, command, always_complete_options=False)
+                self.assertEqual(result, [f"{count} "])
+
+    def test_completer_consumed_arguments_separator(self):
+        for nargs in ("*", "+"):
+            parser = ArgumentParser()
+            action = parser.add_argument("values", nargs=nargs)
+            action.completer = lambda action, **kwargs: [str(argcomplete.get_num_consumed_args(action))]
+            for command, count in (
+                ("prog -- ", 0),
+                ("prog -- one ", 1),
+                ("prog -- one two ", 2),
+                ("prog one -- ", 1),
+                ("prog -- -- ", 1),
+                ("prog -- -- two ", 2),
+            ):
+                with self.subTest(nargs=nargs, command=command):
+                    result = self.run_completer(parser, command, always_complete_options=False)
+                    self.assertEqual(result, [f"{count} "])
+
+    def test_completer_consumed_arguments_remainder(self):
+        for nargs in (argparse.REMAINDER, argparse.PARSER):
+            parser = ArgumentParser()
+            action = parser.add_argument("values", nargs=nargs)
+            action.completer = lambda action, **kwargs: [str(argcomplete.get_num_consumed_args(action))]
+            for command, count in (("prog one ", 1), ("prog one -- ", 2), ("prog one -- -- ", 3)):
+                with self.subTest(nargs=nargs, command=command):
+                    result = self.run_completer(parser, command, always_complete_options=False)
+                    self.assertEqual(result, [f"{count} "])
 
     def test_completer_consumed_arguments_subparser(self):
         parser = ArgumentParser()
