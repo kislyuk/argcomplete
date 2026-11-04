@@ -32,6 +32,43 @@ def default_validator(completion: str, prefix: str) -> bool:
     return completion.startswith(prefix)
 
 
+def _split_short_option_aggregate(parser: argparse.ArgumentParser, word: str) -> tuple[str, str] | None:
+    """
+    Split an aggregated short option word such as ``-boone`` into the option string the value at the end of the word
+    belongs to and that value, so that ``-boone`` yields ``("-bo", "one")`` and ``-oone`` yields ``("-o", "one")``.
+
+    ``argparse`` accepts short options joined with the value of the last one, so ``-oone`` means ``-o one`` and
+    ``-boone`` means ``-b -o one``. The word under the cursor is not passed to the parser, so it has to be split here
+    for the same reason the parser splits it later: without this, the word resolves to no active action at all and
+    nothing is completed.
+
+    Returns None if the word does not end on an option that takes a value, in which case the caller treats it as an
+    ordinary option word. An option written with an explicit ``=`` is not an aggregate: the value is a separate
+    shell word there.
+    """
+    prefix_char = word[:1]
+    if len(word) < 3 or prefix_char not in parser.prefix_chars or word[1] in parser.prefix_chars or "=" in word:
+        return None
+
+    index = 1
+    while index < len(word) - 1:
+        # argparse reads the value attached to an option as soon as it finds that option, so the first option in the
+        # word that takes a value is the one the text after it is a value for.
+        action = parser._option_string_actions.get(prefix_char + word[index])
+        if action is None:
+            return None
+        if action.nargs != 0:
+            if action.nargs not in (None, argparse.OPTIONAL):
+                return None
+            return word[: index + 1], word[index + 1 :]
+        if index + 1 == len(word) - 1:
+            # A flag is not given the rest of the word as a value here, and there is no option taking a value.
+            return None
+        index += 1
+
+    return None
+
+
 class CompletionFinder:
     """
     Inherit from this class if you wish to override any of the stages below. Otherwise, use
@@ -52,6 +89,7 @@ class CompletionFinder:
 
     active_parsers: list[argparse.ArgumentParser]
     visited_positionals: list[argparse.Action]
+    _value_option_prefix: str | None
 
     def __init__(
         self,
@@ -73,6 +111,7 @@ class CompletionFinder:
         self.print_suppressed = print_suppressed
         self.completing = False
         self._display_completions = {}
+        self._value_option_prefix = None
         self.default_completer = default_completer
         if append_space is None:
             append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
@@ -227,6 +266,15 @@ class CompletionFinder:
 
     def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
         active_parsers = self._patch_argument_parser()
+
+        self._value_option_prefix = None
+        split = _split_short_option_aggregate(self._parser, cword_prefix) if self._parser is not None else None
+        if split is not None:
+            # The word under the cursor is an aggregated short option with the value being typed attached to it, for
+            # example "-boone" for "-b -o one". The parser never sees the value being typed, so hand it the options
+            # the word starts with, and complete the value against the action of the last option.
+            self._value_option_prefix, cword_prefix = split
+            comp_words = [*comp_words, self._value_option_prefix]
 
         parsed_args = argparse.Namespace()
         self.completing = True
@@ -395,7 +443,12 @@ class CompletionFinder:
                 optional_prefix, _, cword_prefix = cword_prefix.partition("=")
             else:
                 # Only run completers if current word does not start with - (is not an optional)
-                return completions
+                if not self._value_option_prefix:
+                    return completions
+        if self._value_option_prefix:
+            # The value being completed is attached to the end of an aggregated short option word, so the completions
+            # have to be joined back to the options the word starts with.
+            optional_prefix = self._value_option_prefix
 
         complete_remaining_positionals = False
         # Use the single greedy action (if there is one) or all active actions.
@@ -454,7 +507,10 @@ class CompletionFinder:
                             self._display_completions[next_completion] = ""
                             completions.append(next_completion)
                 if optional_prefix:
-                    completions = [optional_prefix + "=" + completion for completion in completions]
+                    # An aggregated short option is completed as one token ("-oone"), so its value is joined to the
+                    # option string the same way the user wrote it. A long option is completed as "--option=value".
+                    joiner = "" if self._value_option_prefix else "="
+                    completions = [optional_prefix + joiner + completion for completion in completions]
                 debug("Completions:", completions)
         return completions
 

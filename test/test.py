@@ -195,6 +195,48 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_short_option_aggregates(self):
+        # argparse accepts short options joined with the value of the last one, so "-oone" means "-o one" and
+        # "-boone" means "-b -o one". Completions for the value have to be joined back onto the options the word
+        # starts with, because the shell replaces the whole word.
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("--option", "-o", choices=["one", "two", "three"])
+            parser.add_argument("--bool", "-b", action="store_true")
+            return parser
+
+        expected_outputs = (
+            ("prog -oo", ["-oone "]),
+            ("prog -oone", ["-oone "]),
+            ("prog -o't", ["-otwo", "-othree"]),
+            ("prog -o'one", ["-oone"]),
+            ("prog -boo", ["-boone "]),
+            # "-b" takes no value, so the text after it belongs to a new option word.
+            ("prog -bfoo", [""]),
+            ("prog -bo", [""]),
+        )
+
+        for cmd, output in expected_outputs:
+            self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_short_option_aggregates_agree_with_argparse(self):
+        # The same line, completed, must be read by argparse as the value that was completed.
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("--option", "-o", choices=["one", "two", "three"])
+            parser.add_argument("--bool", "-b", action="store_true")
+            return parser
+
+        for cmd in ("prog -oo", "prog -oone", "prog -boo", "prog -boone"):
+            completion = self.run_completer(make_parser(), cmd)[0]
+            args = make_parser().parse_args([completion.rstrip()])
+            self.assertEqual(args.option, "one")
+
+        for cmd in ("prog -ot", "prog -bot"):
+            for completion in self.run_completer(make_parser(), cmd):
+                args = make_parser().parse_args([completion.rstrip()])
+                self.assertIn(args.option, ("two", "three"))
+
     def test_non_str_choices(self):
         def make_parser():
             parser = ArgumentParser()
