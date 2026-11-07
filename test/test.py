@@ -147,6 +147,23 @@ class TestArgcomplete(unittest.TestCase):
             t.seek(0)
             return t.read().split(IFS)
 
+    def test_empty_completion_after_wordbreak(self):
+        for value in ("name:", "name="):
+            for quote in ("", "'", '"'):
+                with self.subTest(value=value, quote=quote):
+                    parser = ArgumentParser()
+                    parser.add_argument("--value", choices=[value])
+                    command = "prog --value " + (value if not quote else quote + value)
+                    expected = "" if not quote else value
+                    self.assertEqual(self.run_completer(parser, command), [expected])
+
+    def test_empty_completion(self):
+        for quote in ("", "'", '"'):
+            with self.subTest(quote=quote):
+                parser = ArgumentParser()
+                parser.add_argument("--value", choices=[""])
+                self.assertEqual(self.run_completer(parser, "prog --value " + quote), [""])
+
     def test_basic_completion(self):
         p = ArgumentParser()
         p.add_argument("--foo")
