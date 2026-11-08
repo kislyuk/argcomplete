@@ -73,6 +73,31 @@ default), and exits. Otherwise, it returns to the caller immediately.
  of the program up to that point (for example, by deferring initialization or importing of large modules until after
  parsing options).
 
+Choosing when to suggest options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+By default, argcomplete suggests option names even before the user types ``-``. To suggest option names only after an
+option prefix is typed, pass ``always_complete_options=False`` to ``argcomplete.autocomplete()``:
+
+.. code-block:: python
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--color", choices=("blue", "green"))
+    parser.add_argument("item", choices=("apple", "banana"))
+    argcomplete.autocomplete(parser, always_complete_options=False)
+    args = parser.parse_args()
+
+With this setting, ``my-app <TAB>`` suggests ``apple`` and ``banana``, while ``my-app --<TAB>`` suggests long option
+names. Completing ``my-app --color <TAB>`` still suggests ``blue`` and ``green``; this setting controls option names,
+not their values or positional argument completions.
+
+Other values select which option names to suggest before an option prefix is typed:
+
+* ``True`` (the default): suggest both short and long option names.
+* ``"long"``: prefer long names, but also suggest short names for options without a long name.
+* ``"short"``: prefer short names, but also suggest long names for options without a short name.
+
+Once an option prefix is typed, all these settings suggest matching option names.
+
 Specifying completers
 ---------------------
 You can specify custom completion functions for your options and arguments. Two styles are supported: callable and
