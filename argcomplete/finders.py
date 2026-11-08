@@ -589,7 +589,11 @@ class CompletionFinder:
             # Now it is conditionally disabled using "compopt -o nospace" if the match ends in a continuation character.
             # This code is retained for environments where this isn't done natively.
             continuation_chars = "=/:"
-            if len(escaped_completions) == 1 and escaped_completions[0][-1] not in continuation_chars:
+            if (
+                len(escaped_completions) == 1
+                and escaped_completions[0]
+                and escaped_completions[0][-1] not in continuation_chars
+            ):
                 if cword_prequote == "":
                     escaped_completions[0] += " "
 
