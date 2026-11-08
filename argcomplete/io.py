@@ -22,6 +22,7 @@ def mute_stdout() -> Generator[None]:
     try:
         yield
     finally:
+        sys.stdout.close()
         sys.stdout = stdout
 
 
