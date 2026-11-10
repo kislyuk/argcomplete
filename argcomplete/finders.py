@@ -145,7 +145,9 @@ class CompletionFinder:
 
         if output_stream is None:
             try:
-                output_stream = os.fdopen(8, "w")
+                # closefd=False: fds 8/9 belong to the invoking shell (or to
+                # whoever opened them); never close them as a side effect.
+                output_stream = os.fdopen(8, "w", closefd=False)
             except Exception:
                 debug("Unable to open fd 8 for writing, quitting")
                 exit_method(1)
@@ -220,7 +222,10 @@ class CompletionFinder:
         clashes with file descriptors being used elsewhere (such as in pytest).
         """
         try:
-            _io.debug_stream = os.fdopen(9, "w")
+            # closefd=False: fd 9 belongs to the invoking shell (or to whoever
+            # opened it); wrapping it must not close it when the wrapper is
+            # garbage collected (this used to kill pytest's faulthandler dup).
+            _io.debug_stream = os.fdopen(9, "w", closefd=False)
         except Exception:
             _io.debug_stream = sys.stderr
         debug()
