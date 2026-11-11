@@ -597,11 +597,24 @@ class TestArgcomplete(unittest.TestCase):
                 with open(os.path.join(home, "abc1"), "w") as fp:
                     fp.write("A test")
                 # "~/" lists the home directory
-                self.assertEqual(c("~/"), {os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"})
+                self.assertEqual(c("~/"), {"~/abb/", "~/abc/"})
                 # "~/ab" filters within the home directory
-                self.assertEqual(c("~/ab"), {os.path.join(home, "abb") + "/", os.path.join(home, "abc") + "/"})
+                self.assertEqual(c("~/ab"), {"~/abb/", "~/abc/"})
                 # "~/abc/" recurses into a subdirectory
-                self.assertEqual(c("~/abc/"), {os.path.join(home, "abc", "baz") + "/"})
+                self.assertEqual(c("~/abc/"), {"~/abc/baz/"})
+                # "~" on its own is not a complete home directory reference
+                self.assertEqual(c("~"), set())
+
+                # The completions keep the "~" as typed, so the default validator
+                # (which requires completions to start with the prefix) keeps them.
+                def make_parser():
+                    parser = ArgumentParser(add_help=False)
+                    parser.add_argument("directory").completer = completer
+                    return parser
+
+                self.assertEqual(set(self.run_completer(make_parser(), "prog ~/")), {"~/abb/", "~/abc/"})
+                self.assertEqual(set(self.run_completer(make_parser(), "prog ~/ab")), {"~/abb/", "~/abc/"})
+                self.assertEqual(self.run_completer(make_parser(), "prog ~/abc/"), ["~/abc/baz/"])
             finally:
                 if old_home is None:
                     os.environ.pop("HOME", None)
