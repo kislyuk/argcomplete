@@ -71,6 +71,7 @@ class shlex:
         # Modified by argcomplete: Record last wordbreak position
         self.last_wordbreak_pos = None
         self.wordbreaks = ''
+        self.last_quote_start = 0
 
     def push_token(self, tok):
         "Push a token onto the stack popped by the get_token method"
@@ -172,6 +173,7 @@ class shlex:
                     self.token = nextchar
                     self.state = 'c'
                 elif nextchar in self.quotes:
+                    self.last_quote_start = len(self.token)
                     if not self.posix:
                         self.token = nextchar
                     self.state = nextchar
@@ -240,6 +242,7 @@ class shlex:
                         else:
                             continue
                 elif self.posix and nextchar in self.quotes:
+                    self.last_quote_start = len(self.token)
                     self.state = nextchar
                 elif self.posix and nextchar in self.escape:
                     escapedstate = 'a'

@@ -548,6 +548,14 @@ class CompletionFinder:
             # Its shell integration quotes these raw values with PowerShell's own escaping API.
             return completions
 
+        if cword_prequote and last_wordbreak_pos is not None and os.environ.get("_ARGCOMPLETE_SHELL") == "bash":
+            for completion in completions:
+                if completion in self._display_completions:
+                    self._display_completions[completion[last_wordbreak_pos + 1 :]] = self._display_completions[
+                        completion
+                    ]
+            completions = [c[last_wordbreak_pos + 1 :] for c in completions]
+
         special_chars = "\\"
         # If the word under the cursor was quoted, escape the quote char.
         # Otherwise, escape all special characters and specially handle all COMP_WORDBREAKS chars.

@@ -164,6 +164,42 @@ class TestArgcomplete(unittest.TestCase):
                 parser.add_argument("--value", choices=[""])
                 self.assertEqual(self.run_completer(parser, "prog --value " + quote), [""])
 
+    def test_quoted_word_prefix(self):
+        for quote in ("'", '"'):
+            for command, expected in (
+                ("prog -o" + quote, [""]),
+                ("prog --option foo" + quote + "b", ["bar"]),
+                ("prog foo" + quote + "b", ["bar"]),
+                ("prog --option=foo" + quote + "b", ["bar"]),
+                ("prog --option foo" + quote + " ", [" bar"]),
+                ("prog --option " + quote + "foob", ["foobar"]),
+                ("prog --option=" + quote + "foob", ["foobar"]),
+                ("prog --option " + quote + "foo:b", ["foo:bar"]),
+                ("prog --option 'foo'" + quote + "b", ["bar"]),
+                ("prog --option foo" + quote + "bar" + quote, ["foobar "]),
+                ("prog -ofoo", [""]),
+                ("prog -o foo", ["foobar", "foo\\ bar", "foo:bar"]),
+            ):
+                with self.subTest(command=command):
+                    parser = ArgumentParser()
+                    parser.add_argument("--option", "-o", choices=["foobar", "foo bar", "foo:bar"])
+                    parser.add_argument("arg", nargs="?", choices=["foobar"])
+                    self.assertEqual(self.run_completer(parser, command), expected)
+
+    def test_quoted_word_prefix_preserves_descriptions(self):
+        os.environ["_ARGCOMPLETE_DFS"] = "\t"
+        for command in ("prog foo'b", 'prog --option foo"b'):
+            with self.subTest(command=command):
+                parser = ArgumentParser()
+                if "--option" in command:
+                    action = parser.add_argument("--option")
+                else:
+                    action = parser.add_argument("arg")
+                action.completer = lambda **kwargs: {"foobar": "description"}
+                completer = CompletionFinder()
+                self.assertEqual(self.run_completer(parser, command, completer=completer), ["bar\tdescription"])
+                self.assertEqual(completer.get_display_completions()["bar"], "description")
+
     def test_basic_completion(self):
         p = ArgumentParser()
         p.add_argument("--foo")
@@ -1527,6 +1563,20 @@ class TestBash(TestBashZshBase, unittest.TestCase):
 
     def repl_provider(self):
         return bash_repl()
+
+    def test_midword_quoted_completion(self):
+        for quote in ("'", '"'):
+            with self.subTest(quote=quote):
+                self.assertEqual(self.sh.run_command("prog basic f" + quote + "o\t"), "foo\r\n")
+
+    def test_quoted_short_option_does_not_duplicate_prefix(self):
+        self.assertEqual(self.sh.run_command("prog short -o o\t"), "one\r\n")
+        for quote in ("'", '"'):
+            with self.subTest(quote=quote):
+                command = "prog short -o" + quote
+                # Echo the completed command line instead of trying to execute an incomplete argument.
+                wrapper = '"' if quote == "'" else "'"
+                self.assertEqual(self.sh.run_command(command + "\t" + wrapper + "\1echo " + wrapper), command + "\r\n")
 
     def test_one_space_after_exact(self):
         """Test exactly one space is appended after an exact match."""
