@@ -27,14 +27,17 @@ def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list
             word = ""
         prefix, suffix = word[:point_in_word], word[point_in_word:]
         prequote = ""
+        last_wordbreak_pos = lexer.last_wordbreak_pos
         # posix
         if lexer.state is not None and lexer.state in lexer.quotes:
             prequote = lexer.state
+            # Bash replaces only the part after an opening quote, even in the middle of a word.
+            last_wordbreak_pos = lexer.last_quote_start - 1 if lexer.last_quote_start else None
         # non-posix
         # if len(prefix) > 0 and prefix[0] in lexer.quotes:
         #    prequote, prefix = prefix[0], prefix[1:]
 
-        return prequote, prefix, suffix, words, lexer.last_wordbreak_pos
+        return prequote, prefix, suffix, words, last_wordbreak_pos
 
     while True:
         try:
