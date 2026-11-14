@@ -1349,6 +1349,31 @@ class TestCheckModule(unittest.TestCase):
         open(path, "w").close()
 
 
+class TestActivateGlobalScript(unittest.TestCase):
+    def test_dest_with_tilde(self):
+        with TempDir(prefix="test_dir_home", dir="."):
+            home = os.getcwd()
+            os.mkdir("completions")
+            environment = os.environ.copy()
+            # A non-zsh SHELL keeps the script away from the zsh startup files.
+            environment.update(HOME=home, PYTHONPATH=BASE_DIR, SHELL="/bin/sh")
+            # Shells do not expand the tilde in "--dest=~/dir", so the script receives it as typed.
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "argcomplete.scripts.activate_global_python_argcomplete",
+                    "--dest=~/completions",
+                ],
+                env=environment,
+                check=False,
+                capture_output=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(os.path.isfile(os.path.join(home, "completions", "_python-argcomplete")))
+
+
 class TestShellBase:
     """
     Contains tests which should work in any shell using argcomplete.
