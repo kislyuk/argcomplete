@@ -50,6 +50,13 @@ Register your Python application with your shell's completion framework by runni
 Quotes are significant; the registration will fail without them. See `Global completion`_ below for a way to enable
 argcomplete generally without registering each application individually.
 
+This command enables completion only in the current shell; opening a new terminal does not preserve the registration.
+To enable completion in future interactive shells, add the same ``eval`` command to your shell's startup file:
+``~/.bashrc`` for Bash or, normally, ``~/.zshrc`` for zsh. Place it after any virtual environment activation or ``PATH`` setup
+needed to find ``register-python-argcomplete`` and your application (and after ``compinit`` in zsh).
+For Bash login shells, ensure that your login startup file sources ``~/.bashrc``.
+Start a new shell to load the updated startup file, or run the ``eval`` command in your current shell to enable it now.
+
 argcomplete.autocomplete(*parser*)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This method is the entry point to the module. It must be called **after** ArgumentParser construction is complete, but
