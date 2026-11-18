@@ -261,6 +261,7 @@ class CompletionFinder:
         self.visited_positionals = []
 
         completer = self
+        introspect_classes: dict[type[argparse.Action], type[argparse.Action]] = {}
 
         def patch(parser):
             completer.visited_positionals.append(parser)
@@ -277,29 +278,33 @@ class CompletionFinder:
                 if hasattr(action, "_orig_class"):
                     continue
 
-                # TODO: accomplish this with super
-                class IntrospectAction(action.__class__):  # type: ignore
-                    def __call__(self, parser, namespace, values, option_string=None):
-                        debug("Action stub called on", self)
-                        debug("\targs:", parser, namespace, values, option_string)
-                        debug("\torig class:", self._orig_class)
-                        debug("\torig callable:", self._orig_callable)
+                action_class = action.__class__
+                if action_class not in introspect_classes:
+                    # TODO: accomplish this with super
+                    class IntrospectAction(action_class):  # type: ignore
+                        def __call__(self, parser, namespace, values, option_string=None):
+                            debug("Action stub called on", self)
+                            debug("\targs:", parser, namespace, values, option_string)
+                            debug("\torig class:", self._orig_class)
+                            debug("\torig callable:", self._orig_callable)
 
-                        if not completer.completing:
-                            self._orig_callable(parser, namespace, values, option_string=option_string)
-                        elif issubclass(self._orig_class, argparse._SubParsersAction):
-                            debug("orig class is a subparsers action: patching and running it")
-                            patch(self._name_parser_map[values[0]])
-                            self._orig_callable(parser, namespace, values, option_string=option_string)
-                        elif self._orig_class in safe_actions:
-                            if not self.option_strings:
-                                completer.visited_positionals.append(self)
+                            if not completer.completing:
+                                self._orig_callable(parser, namespace, values, option_string=option_string)
+                            elif issubclass(self._orig_class, argparse._SubParsersAction):
+                                debug("orig class is a subparsers action: patching and running it")
+                                patch(self._name_parser_map[values[0]])
+                                self._orig_callable(parser, namespace, values, option_string=option_string)
+                            elif self._orig_class in safe_actions:
+                                if not self.option_strings:
+                                    completer.visited_positionals.append(self)
 
-                            self._orig_callable(parser, namespace, values, option_string=option_string)
+                                self._orig_callable(parser, namespace, values, option_string=option_string)
 
-                action._orig_class = action.__class__
+                    introspect_classes[action_class] = IntrospectAction
+
+                action._orig_class = action_class
                 action._orig_callable = action.__call__
-                action.__class__ = IntrospectAction
+                action.__class__ = introspect_classes[action_class]
 
         patch(self._parser)
 
