@@ -1665,15 +1665,16 @@ class TestBashZshGlobalBase(TestBashZshBase):
 
     def _test_console_script(self, package=False, wheel=False):
         with TempDir(prefix="test_dir_py", dir="."):
+            # Install the fixture outside the interactive shell so pip cannot change its terminal settings.
+            test_package = os.path.join(TEST_DIR, "test_package")
+            install_command = [sys.executable, "-m", "pip", "install", test_package, "--target", "."]
+            if not wheel:
+                install_command.extend(["--no-binary", ":all:"])
+            subprocess.run(install_command, check=True)
+
             self.sh.run_command("cd " + os.getcwd())
             self.sh.run_command("export PATH=$PATH:./bin")
             self.sh.run_command("export PYTHONPATH=.:$PYTHONPATH")
-            test_package = os.path.join(TEST_DIR, "test_package")
-            command = f"pip install {test_package} --target ."
-            if not wheel:
-                command += " --no-binary :all:"
-            install_output = self.sh.run_command(command)
-            self.assertEqual(self.sh.run_command("echo $?"), "0\r\n", install_output)
             command = "test-module"
             if package:
                 command = "test-package"
