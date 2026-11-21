@@ -212,6 +212,54 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_attached_optional_value(self):
+        for nargs in ("?", "*"):
+            with self.subTest(nargs=nargs):
+                parser = ArgumentParser()
+                sub = parser.add_subparsers().add_parser("run")
+                sub.add_argument("-x", "--how", nargs=nargs, choices=["fetch", "merge"])
+                sub.add_argument("path", nargs="*", choices=["my-file"])
+
+                self.assertCountEqual(self.run_completer(parser, "prog run --how="), ["fetch", "merge"])
+                self.assertEqual(self.run_completer(parser, "prog run --ho=m"), ["merge "])
+                self.assertEqual(self.run_completer(parser, "prog run -x=m"), ["merge "])
+                self.assertCountEqual(self.run_completer(parser, "prog run --how m"), ["merge", "my-file"])
+
+    def test_attached_value_descriptions(self):
+        parser = ArgumentParser()
+        parser.add_argument("--how", nargs="?", choices=["fetch", "merge"], help="update method")
+        parser.add_argument("path", nargs="*", choices=["my-file"])
+
+        self.run_completer(parser, "prog --how=")
+        self.assertEqual(autocomplete.get_display_completions()["merge"], "update method")
+
+        os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = ""
+        self.assertCountEqual(
+            self.run_completer(parser, "prog --how=", shell="zsh"),
+            ["--how=fetch:update method", "--how=merge:update method"],
+        )
+        self.assertEqual(self.run_completer(parser, "prog --how=m", shell="zsh"), ["--how=merge :update method"])
+        os.environ["_ARGCOMPLETE_DFS"] = "\t"
+        self.assertCountEqual(
+            self.run_completer(parser, "prog --how=", shell="fish"),
+            ["--how=fetch\tupdate method", "--how=merge\tupdate method"],
+        )
+
+    def test_unrecognized_attached_option_after_open_option(self):
+        parser = ArgumentParser()
+        parser.add_argument("--how", nargs="?", choices=["merge"])
+        parser.add_argument("path", nargs="*", choices=["my-file"])
+        self.assertIn("my-file", self.run_completer(parser, "prog --how --unknown=m"))
+
+    def test_readline_attached_value(self):
+        os.environ.pop("_ARGCOMPLETE_COMP_WORDBREAKS")
+        parser = ArgumentParser()
+        parser.add_argument("--how", nargs="?", choices=["merge"])
+        parser.add_argument("path", nargs="*", choices=["my-file"])
+        finder = CompletionFinder(parser, append_space=False)
+        self.assertEqual(finder.rl_complete("--how=m", 0), "--how=merge")
+        self.assertIsNone(finder.rl_complete("--how=m", 1))
+
     def test_non_str_choices(self):
         def make_parser():
             parser = ArgumentParser()

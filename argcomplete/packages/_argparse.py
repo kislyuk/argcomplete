@@ -103,6 +103,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         _num_consumed_args.clear()  # Added by argcomplete
         self._argcomplete_namespace = namespace
         self.active_actions: list[Action] = []  # Added by argcomplete
+        self.final_option: Action | None = None  # Value-taking option in the final token, if any.
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
             arg_strings = self._read_args_from_files(arg_strings)
@@ -248,6 +249,8 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     start = start_index + 1
                     selected_patterns = arg_strings_pattern[start:]
                     self.active_actions = [action]  # Added by argcomplete
+                    if not selected_patterns and action.nargs != 0:
+                        self.final_option = action
                     _num_consumed_args[action] = 0  # Added by argcomplete
                     try:
                         arg_count = match_argument(action, selected_patterns)
