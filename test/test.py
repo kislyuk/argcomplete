@@ -6,13 +6,15 @@ import contextlib
 import os
 import os.path
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import unittest
 import unittest.util
 from io import StringIO
-from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
+from pathlib import Path
+from tempfile import NamedTemporaryFile, TemporaryDirectory, TemporaryFile, mkdtemp
 
 import pexpect
 from pexpect.replwrap import PEXPECT_CONTINUATION_PROMPT, PEXPECT_PROMPT, REPLWrapper
@@ -1671,6 +1673,44 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
 
     def repl_provider(self):
         return zsh_repl()
+
+    def test_tilde_path_completion(self):
+        import pwd
+
+        with TemporaryDirectory() as home:
+            (Path(home) / "report: file").touch()
+            (Path(home) / "project").mkdir()
+            self.sh.run_command(f"export HOME={shlex.quote(home)}")
+            self.sh.run_command(
+                'capture_line() { print -r -- "$BUFFER" > "$HOME/completed-line"; }; '
+                "zle -N capture_line; bindkey '^Xg' capture_line"
+            )
+
+            def check(typed, completed, value):
+                with self.subTest(typed=typed, value=value):
+                    output = self.sh.run_command(typed + "\t\x18g")
+                    self.assertEqual((Path(home) / "completed-line").read_text(), completed + "\n")
+                    self.assertEqual(output, value + "\r\n")
+
+            check("prog file ~/rep", r"prog file ~/report:\ file ", os.path.join(home, "report: file"))
+            user = pwd.getpwuid(os.getuid())
+            relative_dir = os.path.relpath(home, user.pw_dir)
+            quoted_dir = self.sh.run_command(f"printf '%q\\n' {shlex.quote(relative_dir)}").rstrip("\r\n")
+            prefix = f"~{user.pw_name}/{quoted_dir}/"
+            check(
+                f"prog file {prefix}rep",
+                rf"prog file {prefix}report:\ file ",
+                os.path.join(user.pw_dir, relative_dir, "report: file"),
+            )
+            check("prog tilde ~/lit", "prog tilde ~/literal ", os.path.join(home, "literal"))
+            check(r"prog tilde \~/lit", r"prog tilde \~/literal ", "~/literal")
+
+            # zsh normally expands a tilde after '=' only with MAGIC_EQUAL_SUBST.
+            self.sh.run_command("unsetopt MAGIC_EQUAL_SUBST")
+            check("prog directory --path=~/pro", "prog directory --path=~/project/", "~/project/")
+            self.sh.run_command("setopt MAGIC_EQUAL_SUBST")
+            check("prog directory --path=~/pro", "prog directory --path=~/project/", home + "/project/")
+            check(r"prog directory --path=\~/pro", r"prog directory --path=\~/project/", "~/project/")
 
 
 class TestBashZshGlobalBase(TestBashZshBase):
