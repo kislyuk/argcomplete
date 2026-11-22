@@ -578,6 +578,26 @@ class TestArgcomplete(unittest.TestCase):
                 fp.write("test")
             self.assertEqual(set(fc("a")), {"abcdefж/", "abcaha/", "abcxyz"})
 
+    def test_file_completion_extensions_exclude_directories(self):
+        with TempDir(prefix="test_dir_fc_extensions", dir="."):
+            os.mkdir("package.py")
+            os.mkdir("package.txt")
+            os.mkdir("package")
+            for filename in ("module.py", "notes.txt", "README"):
+                with open(filename, "w"):
+                    pass
+            for allowednames in ("py", ".py", "*.py", ["py", "txt"]):
+                for directories in (False, True):
+                    with self.subTest(allowednames=allowednames, directories=directories):
+                        expected = {"module.py"}
+                        if isinstance(allowednames, list):
+                            expected.add("notes.txt")
+                        if directories:
+                            expected.update({"package.py/", "package.txt/", "package/"})
+                        result = FilesCompleter(allowednames, directories)("")
+                        self.assertEqual(set(result), expected)
+                        self.assertEqual(len(result), len(expected))
+
     def test_file_completion_quotes_prefix(self):
         with TempDir(prefix="test_dir_fc_quote", dir="."):
             marker = "should_not_exist"
