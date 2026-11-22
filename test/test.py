@@ -14,8 +14,8 @@ import unittest
 import unittest.util
 from io import StringIO
 from pathlib import Path
-from unittest.mock import patch
 from tempfile import NamedTemporaryFile, TemporaryDirectory, TemporaryFile, mkdtemp
+from unittest.mock import patch
 
 import pexpect
 from pexpect.replwrap import PEXPECT_CONTINUATION_PROMPT, PEXPECT_PROMPT, REPLWrapper
