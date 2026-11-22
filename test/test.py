@@ -251,6 +251,17 @@ class TestArgcomplete(unittest.TestCase):
         parser.add_argument("path", nargs="*", choices=["my-file"])
         self.assertIn("my-file", self.run_completer(parser, "prog --how --unknown=m"))
 
+    def test_open_option_before_terminator(self):
+        for nargs in ("?", "*"):
+            with self.subTest(nargs=nargs):
+                parser = ArgumentParser()
+                how = parser.add_argument("--how", nargs=nargs)
+                how.completer = lambda **kwargs: self.fail("--how completer called after --")
+                parser.add_argument("path", nargs="*", choices=["README.md"])
+
+                self.assertEqual(self.run_completer(parser, "prog --how -- --format=m"), [""])
+                self.assertEqual(self.run_completer(parser, "prog --how -- R"), ["README.md "])
+
     def test_readline_attached_value(self):
         os.environ.pop("_ARGCOMPLETE_COMP_WORDBREAKS")
         parser = ArgumentParser()
