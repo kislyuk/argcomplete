@@ -134,6 +134,8 @@ class shlex:
         return raw
 
     def read_token(self):
+        # Modified by argcomplete: Remember the parsed prefix before a mid-word quote.
+        self.word_before_quote = ''
         quoted = False
         escapedstate = ' '
         while True:
@@ -240,6 +242,7 @@ class shlex:
                         else:
                             continue
                 elif self.posix and nextchar in self.quotes:
+                    self.word_before_quote = self.token
                     self.state = nextchar
                 elif self.posix and nextchar in self.escape:
                     escapedstate = 'a'

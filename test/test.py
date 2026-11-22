@@ -212,6 +212,33 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_bash_midword_quote(self):
+        parser = ArgumentParser()
+        parser.add_argument("-p", "--path", choices=["folder"])
+        for command, expected in (
+            ('prog --path="fo', "folder"),
+            ("prog --path fo'l", "lder"),
+            ('prog --path "fo', "folder"),
+            ("prog -p'", "-p"),
+            ('prog -p="fo', "-p=folder"),
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(self.run_completer(parser, command), [expected])
+        self.assertEqual(self.run_completer(parser, 'prog --path="fo', shell="zsh"), ["--path=folder:"])
+
+    def test_bash_quoted_suffix_descriptions(self):
+        parser = ArgumentParser()
+        parser.add_argument("path").completer = lambda **_: {
+            "src/src/main": "nested",
+            "src/main": "top",
+            "lib/src/main": "other",
+        }
+        os.environ["_ARGCOMPLETE_DFS"] = "\t"
+        self.assertEqual(
+            self.run_completer(parser, "prog src/'", validator=lambda candidate, prefix: prefix in candidate),
+            ["src/main\tnested", "main\ttop"],
+        )
+
     def test_attached_optional_value(self):
         for nargs in ("?", "*"):
             with self.subTest(nargs=nargs):
@@ -1631,6 +1658,16 @@ class TestBash(TestBashZshBase, unittest.TestCase):
 
     def repl_provider(self):
         return bash_repl()
+
+    def test_midword_quote(self):
+        for command, expected in (
+            ("prog basic f'o\t", "foo"),
+            ('prog basic "f"o"o\t', "foo"),
+            ("prog basic foo'\t", "foo"),
+            ("prog quote 1'\t", "1'1"),
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(self.sh.run_command(command), expected + "\r\n")
 
     def test_one_space_after_exact(self):
         """Test exactly one space is appended after an exact match."""
