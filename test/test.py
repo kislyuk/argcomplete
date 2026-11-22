@@ -12,7 +12,8 @@ import sys
 import unittest
 import unittest.util
 from io import StringIO
-from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
+from tempfile import NamedTemporaryFile, TemporaryDirectory, TemporaryFile, mkdtemp
+from unittest.mock import patch
 
 import pexpect
 from pexpect.replwrap import PEXPECT_CONTINUATION_PROMPT, PEXPECT_PROMPT, REPLWrapper
@@ -1210,6 +1211,18 @@ class TestArgcomplete(unittest.TestCase):
 
         os.environ["_ARGCOMPLETE_DFS"] = "invalid"
         self.assertRaises(Exception, self.run_completer, p, "prog --b", shell="fish")
+
+
+class TestFilesCompleter(unittest.TestCase):
+    def test_extension_filter_with_tilde(self):
+        with TemporaryDirectory() as home, patch.dict(os.environ, HOME=home, USERPROFILE=home):
+            os.mkdir(os.path.join(home, "folder.txt"))
+            with open(os.path.join(home, "file.txt"), "w"):
+                pass
+
+            for directories, expected in ((False, ["~/file.txt"]), (True, ["~/file.txt", "~/folder.txt/"])):
+                with self.subTest(directories=directories):
+                    self.assertCountEqual(FilesCompleter(["txt"], directories=directories)("~/"), expected)
 
 
 class TestArgcompleteREPL(unittest.TestCase):
