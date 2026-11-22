@@ -6,14 +6,16 @@ import contextlib
 import os
 import os.path
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import unittest
 import unittest.util
 from io import StringIO
-from tempfile import NamedTemporaryFile, TemporaryDirectory, TemporaryFile, mkdtemp
+from pathlib import Path
 from unittest.mock import patch
+from tempfile import NamedTemporaryFile, TemporaryDirectory, TemporaryFile, mkdtemp
 
 import pexpect
 from pexpect.replwrap import PEXPECT_CONTINUATION_PROMPT, PEXPECT_PROMPT, REPLWrapper
@@ -212,6 +214,33 @@ class TestArgcomplete(unittest.TestCase):
 
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
+    def test_bash_midword_quote(self):
+        parser = ArgumentParser()
+        parser.add_argument("-p", "--path", choices=["folder"])
+        for command, expected in (
+            ('prog --path="fo', "folder"),
+            ("prog --path fo'l", "lder"),
+            ('prog --path "fo', "folder"),
+            ("prog -p'", "-p"),
+            ('prog -p="fo', "-p=folder"),
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(self.run_completer(parser, command), [expected])
+        self.assertEqual(self.run_completer(parser, 'prog --path="fo', shell="zsh"), ["--path=folder:"])
+
+    def test_bash_quoted_suffix_descriptions(self):
+        parser = ArgumentParser()
+        parser.add_argument("path").completer = lambda **_: {
+            "src/src/main": "nested",
+            "src/main": "top",
+            "lib/src/main": "other",
+        }
+        os.environ["_ARGCOMPLETE_DFS"] = "\t"
+        self.assertEqual(
+            self.run_completer(parser, "prog src/'", validator=lambda candidate, prefix: prefix in candidate),
+            ["src/main\tnested", "main\ttop"],
+        )
 
     def test_attached_optional_value(self):
         for nargs in ("?", "*"):
@@ -1645,6 +1674,16 @@ class TestBash(TestBashZshBase, unittest.TestCase):
     def repl_provider(self):
         return bash_repl()
 
+    def test_midword_quote(self):
+        for command, expected in (
+            ("prog basic f'o\t", "foo"),
+            ('prog basic "f"o"o\t', "foo"),
+            ("prog basic foo'\t", "foo"),
+            ("prog quote 1'\t", "1'1"),
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(self.sh.run_command(command), expected + "\r\n")
+
     def test_one_space_after_exact(self):
         """Test exactly one space is appended after an exact match."""
         # Actual command run is 'echo "prog basic foo "'.
@@ -1684,6 +1723,44 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
 
     def repl_provider(self):
         return zsh_repl()
+
+    def test_tilde_path_completion(self):
+        import pwd
+
+        with TemporaryDirectory() as home:
+            (Path(home) / "report: file").touch()
+            (Path(home) / "project").mkdir()
+            self.sh.run_command(f"export HOME={shlex.quote(home)}")
+            self.sh.run_command(
+                'capture_line() { print -r -- "$BUFFER" > "$HOME/completed-line"; }; '
+                "zle -N capture_line; bindkey '^Xg' capture_line"
+            )
+
+            def check(typed, completed, value):
+                with self.subTest(typed=typed, value=value):
+                    output = self.sh.run_command(typed + "\t\x18g")
+                    self.assertEqual((Path(home) / "completed-line").read_text(), completed + "\n")
+                    self.assertEqual(output, value + "\r\n")
+
+            check("prog file ~/rep", r"prog file ~/report:\ file ", os.path.join(home, "report: file"))
+            user = pwd.getpwuid(os.getuid())
+            relative_dir = os.path.relpath(home, user.pw_dir)
+            quoted_dir = self.sh.run_command(f"printf '%q\\n' {shlex.quote(relative_dir)}").rstrip("\r\n")
+            prefix = f"~{user.pw_name}/{quoted_dir}/"
+            check(
+                f"prog file {prefix}rep",
+                rf"prog file {prefix}report:\ file ",
+                os.path.join(user.pw_dir, relative_dir, "report: file"),
+            )
+            check("prog tilde ~/lit", "prog tilde ~/literal ", os.path.join(home, "literal"))
+            check(r"prog tilde \~/lit", r"prog tilde \~/literal ", "~/literal")
+
+            # zsh normally expands a tilde after '=' only with MAGIC_EQUAL_SUBST.
+            self.sh.run_command("unsetopt MAGIC_EQUAL_SUBST")
+            check("prog directory --path=~/pro", "prog directory --path=~/project/", "~/project/")
+            self.sh.run_command("setopt MAGIC_EQUAL_SUBST")
+            check("prog directory --path=~/pro", "prog directory --path=~/project/", home + "/project/")
+            check(r"prog directory --path=\~/pro", r"prog directory --path=\~/project/", "~/project/")
 
 
 class TestBashZshGlobalBase(TestBashZshBase):

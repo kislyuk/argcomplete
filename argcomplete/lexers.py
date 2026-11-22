@@ -8,6 +8,10 @@ from .packages import _shlex
 
 
 def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list[str], int | None]:
+    return _split_line(line, point)[:5]
+
+
+def _split_line(line: str, point: int | None) -> tuple[str, str, str, list[str], int | None, str]:
     if point is None:
         point = len(line)
     line = line[:point]
@@ -16,7 +20,7 @@ def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list
     lexer.wordbreaks = os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
     words = []
 
-    def split_word(word: str) -> tuple[str, str, str, list[str], int | None]:
+    def split_word(word: str) -> tuple[str, str, str, list[str], int | None, str]:
         # TODO: make this less ugly
         point_in_word = len(word) + point - lexer.instream.tell()
         if isinstance(lexer.state, (str, bytes)) and lexer.state in lexer.whitespace:
@@ -34,7 +38,7 @@ def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list
         # if len(prefix) > 0 and prefix[0] in lexer.quotes:
         #    prequote, prefix = prefix[0], prefix[1:]
 
-        return prequote, prefix, suffix, words, lexer.last_wordbreak_pos
+        return prequote, prefix, suffix, words, lexer.last_wordbreak_pos, lexer.word_before_quote if prequote else ""
 
     while True:
         try:
@@ -42,7 +46,7 @@ def split_line(line: str, point: int | None = None) -> tuple[str, str, str, list
             if word == lexer.eof:
                 # TODO: check if this is ever unsafe
                 # raise ArgcompleteException("Unexpected end of input")
-                return "", "", "", words, None
+                return "", "", "", words, None, ""
             if lexer.instream.tell() >= point:
                 debug("word", word, f"split, lexer state: '{lexer.state}'")
                 return split_word(word)

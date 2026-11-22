@@ -45,6 +45,14 @@ _python_argcomplete%(function_suffix)s() {
             _ARGCOMPLETE_SHELL="zsh" \
             _ARGCOMPLETE_SUPPRESS_SPACE=1 \
             __python_argcomplete_run ${script:-${words[1]}}))
+        # Keep the typed tilde in the word and let _describe quote the rest.
+        local tilde_prefix='~'
+        [[ $PREFIX != '~'* && $PREFIX == *'=~'* ]] && tilde_prefix="${PREFIX%%%%=*}=~"
+        if [[ -z ${compstate[quote]} && $PREFIX == "$tilde_prefix"* && ${words[CURRENT]} == "$tilde_prefix"* &&
+              -z "${completions[@]:#"$tilde_prefix"*}" ]]; then
+            compset -p "${#tilde_prefix}"
+            completions=("${completions[@]#"$tilde_prefix"}")
+        fi
         local nosort=()
         local nospace=()
         if is-at-least 5.8; then

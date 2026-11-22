@@ -14,7 +14,7 @@ from typing import Literal, TextIO
 from . import io as _io
 from .completers import BaseCompleter, ChoicesCompleter, FilesCompleter, SuppressCompleter
 from .io import debug, mute_stderr
-from .lexers import split_line
+from .lexers import _split_line, split_line
 from .packages._argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
 
 safe_actions = {
@@ -170,7 +170,9 @@ class CompletionFinder:
             exit_method(1)
             return
 
-        cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos = split_line(comp_line, comp_point)
+        cword_prequote, cword_prefix, cword_suffix, comp_words, last_wordbreak_pos, word_before_quote = _split_line(
+            comp_line, comp_point
+        )
 
         # _ARGCOMPLETE is set by the shell script to tell us where comp_words
         # should start, based on what we're completing.
@@ -190,7 +192,9 @@ class CompletionFinder:
             comp_words,
         )
 
-        completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
+        completions = self._get_completions(
+            comp_words, cword_prefix, cword_prequote, last_wordbreak_pos, word_before_quote
+        )
 
         def description(completion: str) -> str:
             help_text = self._display_completions.get(completion)
@@ -223,7 +227,7 @@ class CompletionFinder:
             _io.debug_stream = sys.stderr
         debug()
 
-    def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
+    def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos, word_before_quote=""):
         active_parsers = self._patch_argument_parser()
 
         assert self._parser is not None
@@ -249,8 +253,31 @@ class CompletionFinder:
 
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix)
         completions = self.filter_completions(completions)
-        completions = self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
-        return completions
+        if (
+            word_before_quote
+            and os.environ.get("_ARGCOMPLETE_SHELL") == "bash"
+            and (cword_prefix[0] not in active_parsers[-1].prefix_chars or cword_prefix.startswith(cword_prefix[0] * 2))
+        ):
+            # Bash keeps the part of the word before its open quote. Only matching suffixes can be inserted.
+            suffixes = {
+                c[len(word_before_quote) :]: self._display_completions.get(c, "")
+                for c in completions
+                if c.startswith(word_before_quote)
+            }
+            self._display_completions.update(suffixes)
+            completions = self.quote_completions(list(suffixes), cword_prequote, last_wordbreak_pos)
+            # Readline supplies the outer quotes unless the reply already starts or ends with that quote.
+            # An empty suffix needs both quotes to survive the shell's reply splitting.
+            replies = {}
+            for suffix in completions:
+                reply = (cword_prequote if not suffix or suffix.startswith(cword_prequote) else "") + suffix
+                if reply.endswith(cword_prequote):
+                    reply += cword_prequote
+                replies[reply] = self._display_completions.get(suffix, "")
+            self._display_completions.update(replies)
+            return list(replies)
+
+        return self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
 
     def _patch_argument_parser(self):
         """
