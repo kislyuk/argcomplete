@@ -12,7 +12,7 @@ from collections.abc import Callable, Container, Mapping
 from typing import Literal, TextIO
 
 from . import io as _io
-from .completers import BaseCompleter, ChoicesCompleter, FilesCompleter, SuppressCompleter
+from .completers import BaseCompleter, ChoicesCompleter, DirectoriesCompleter, FilesCompleter, SuppressCompleter
 from .io import debug, mute_stderr
 from .lexers import split_line
 from .packages._argparse import IntrospectiveArgumentParser, action_is_greedy, action_is_open, action_is_satisfied
@@ -73,6 +73,7 @@ class CompletionFinder:
         self.print_suppressed = print_suppressed
         self.completing = False
         self._display_completions = {}
+        self._zsh_tilde_matches: tuple[str, set[str]] | None = None
         self.default_completer = default_completer
         if append_space is None:
             append_space = os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE") != "1"
@@ -202,7 +203,14 @@ class CompletionFinder:
             completions = [dfs.join((c, description(c))) for c in completions]
 
         if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
-            completions = [f"{c}:{description(c)}" for c in completions]
+            records = [f"{c}:{description(c)}" for c in completions]
+            if self._zsh_tilde_matches and completions:
+                prefix, paths = self._zsh_tilde_matches
+                if all(c in paths and c.startswith(prefix) for c in completions):
+                    # An empty record cannot be a value:description pair. New zsh registrations
+                    # request this header so they can leave the already-typed tilde unquoted.
+                    records[:0] = ["", prefix]
+            completions = records
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions))
@@ -247,6 +255,7 @@ class CompletionFinder:
         if "--" in comp_words:
             self.always_complete_options = False
 
+        self._zsh_tilde_matches = None
         completions = self.collect_completions(active_parsers, parsed_args, cword_prefix)
         completions = self.filter_completions(completions)
         completions = self.quote_completions(completions, cword_prequote, last_wordbreak_pos)
@@ -404,7 +413,20 @@ class CompletionFinder:
                 # Only run completers if current word does not start with - (is not an optional)
                 return completions
 
+        preserve_tilde = (
+            not completions
+            and cword_prefix.startswith("~")
+            and "/" in cword_prefix
+            and os.environ.get("_ARGCOMPLETE_ZSH_TILDE") == "1"
+        )
+
         def add_completion(value: str, description: str) -> None:
+            nonlocal preserve_tilde
+            # A subclass can replace filesystem lookup with its own literal completions.
+            preserve_tilde = preserve_tilde and type(completer).__call__ in (
+                FilesCompleter.__call__,
+                DirectoriesCompleter.__call__,
+            )
             candidate = f"{optional_prefix}={value}" if optional_prefix else value
             completions.append(candidate)
             self._display_completions[candidate] = description
@@ -462,6 +484,9 @@ class CompletionFinder:
                         if self.validator(next_completion, cword_prefix):
                             add_completion(next_completion, "")
                 debug("Completions:", completions)
+        if preserve_tilde and completions and os.path.expanduser(cword_prefix) != cword_prefix:
+            prefix = f"{optional_prefix}=~" if optional_prefix else "~"
+            self._zsh_tilde_matches = prefix, set(completions)
         return completions
 
     def collect_completions(
@@ -609,6 +634,14 @@ class CompletionFinder:
                 if cword_prequote == "":
                     escaped_completions[0] += " "
 
+        if self._zsh_tilde_matches:
+            # Keep provenance through quoting, including trailing spaces. Subclass hooks
+            # can add independent literal candidates before or after this step.
+            prefix, paths = self._zsh_tilde_matches
+            self._zsh_tilde_matches = (
+                prefix,
+                {quoted for original, quoted in zip(original_completions, escaped_completions) if original in paths},
+            )
         return escaped_completions
 
     def rl_complete(self, text: str, state: int) -> str | None:

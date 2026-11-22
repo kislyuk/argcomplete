@@ -35,7 +35,9 @@ subparsers.add_parser("basic", help="basic help\nnext line of help").add_argumen
 subparsers.add_parser("space").add_argument("arg", choices=["foo bar", "baz"])
 subparsers.add_parser("cont").add_argument("arg").completer = complete_cont
 subparsers.add_parser("spec").add_argument("arg", choices=["d$e$f", "d$e$g", "x!x", r"y\y"])
-subparsers.add_parser("quote").add_argument("arg", choices=["1'1", '2"2'])
+subparsers.add_parser("quote").add_argument("arg", choices=["1'1", '2"2', "~/literal"])
+subparsers.add_parser("file").add_argument("arg")
+subparsers.add_parser("directory").add_argument("--path", dest="arg").completer = argcomplete.DirectoriesCompleter()
 subparsers.add_parser("break", help="break help").add_argument("arg", choices=["a:b:c", "a:b:d"])
 subparsers.add_parser("env").add_argument("arg").completer = check_environ
 subparsers.add_parser("debug").add_argument("arg").completer = print_output
