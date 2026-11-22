@@ -1,3 +1,23 @@
+Changes for v3.8.0 (2026-11-21)
+===============================
+
+-  Improve tilde-prefixed completions (#579, #581, #587, #588)
+
+-  Complete only the suffix of a mid-word Bash quote (#589)
+
+-  Exclude directories from extension-filtered file completions (#582)
+
+-  Fix completion of attached option values with pending positionals
+   (#586)
+
+-  Avoid IndexError for empty completion suffixes (#576)
+
+-  Quote PowerShell completions with native escaping (#573)
+
+-  Expose consumed argument counts to custom completers (#567, #572)
+
+-  Neutralize IFS byte in zsh completion descriptions (#566)
+
 Changes for v3.7.2 (2026-08-05)
 ===============================
 
