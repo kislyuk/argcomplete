@@ -103,6 +103,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
         _num_consumed_args.clear()  # Added by argcomplete
         self._argcomplete_namespace = namespace
         self.active_actions: list[Action] = []  # Added by argcomplete
+        self.final_option: Action | None = None  # Added by argcomplete. Value-taking option in the final token, if any.
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
             arg_strings = self._read_args_from_files(arg_strings)
@@ -144,6 +145,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
 
         # join the pieces together to form the pattern
         arg_strings_pattern = ''.join(arg_string_pattern_parts)
+        options_ended = '-' in arg_strings_pattern  # Added by argcomplete: the cursor follows a '--' separator.
 
         # converts arg strings to the appropriate and then takes the action
         seen_actions: set[Action] = set()
@@ -247,7 +249,9 @@ class IntrospectiveArgumentParser(ArgumentParser):
                 else:
                     start = start_index + 1
                     selected_patterns = arg_strings_pattern[start:]
-                    self.active_actions = [action]  # Added by argcomplete
+                    self.active_actions = [] if options_ended else [action]  # Added by argcomplete
+                    if not selected_patterns and action.nargs != 0:  # Added by argcomplete
+                        self.final_option = action  # Added by argcomplete
                     _num_consumed_args[action] = 0  # Added by argcomplete
                     try:
                         arg_count = match_argument(action, selected_patterns)
@@ -264,7 +268,7 @@ class IntrospectiveArgumentParser(ArgumentParser):
                     # it wouldn't be able to consume any more args)
                     _num_consumed_args[action] = len(args)
                     if not action_is_open(action):
-                        self.active_actions.remove(action)
+                        self.active_actions.clear()  # Added by argcomplete
                     # End added by argcomplete
 
                     action_tuples.append((action, args, option_string))

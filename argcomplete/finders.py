@@ -180,11 +180,6 @@ class CompletionFinder:
         start = int(os.environ["_ARGCOMPLETE"]) - 1
         comp_words = comp_words[start:]
 
-        assert self._parser is not None
-        if cword_prefix and cword_prefix[0] in self._parser.prefix_chars and "=" in cword_prefix:
-            # Special case for when the current word is "--optional=PARTIAL_VALUE". Give the optional to the parser.
-            comp_words.append(cword_prefix.split("=", 1)[0])
-
         debug(
             f"\nLINE: {comp_line!r}",
             f"\nPOINT: {comp_point!r}",
@@ -197,14 +192,17 @@ class CompletionFinder:
 
         completions = self._get_completions(comp_words, cword_prefix, cword_prequote, last_wordbreak_pos)
 
+        def description(completion: str) -> str:
+            help_text = self._display_completions.get(completion)
+            if help_text is None and self.append_space and len(completions) == 1:
+                help_text = self._display_completions.get(completion.removesuffix(" "))
+            return (help_text or "").replace(ifs, " ")
+
         if dfs:
-            display_completions = {
-                key: value.replace(ifs, " ") if value else "" for key, value in self._display_completions.items()
-            }
-            completions = [dfs.join((key, display_completions.get(key) or "")) for key in completions]
+            completions = [dfs.join((c, description(c))) for c in completions]
 
         if os.environ.get("_ARGCOMPLETE_SHELL") == "zsh":
-            completions = [f"{c}:{(self._display_completions.get(c) or '').replace(ifs, ' ')}" for c in completions]
+            completions = [f"{c}:{description(c)}" for c in completions]
 
         debug("\nReturning completions:", completions)
         output_stream.write(ifs.join(completions))
@@ -228,13 +226,17 @@ class CompletionFinder:
     def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
         active_parsers = self._patch_argument_parser()
 
+        assert self._parser is not None
+        if cword_prefix and cword_prefix[0] in self._parser.prefix_chars and "=" in cword_prefix:
+            # Let argparse resolve the option in --option=PARTIAL, including abbreviations and aliases.
+            comp_words = [*comp_words, cword_prefix.split("=", 1)[0]]
+
         parsed_args = argparse.Namespace()
         self.completing = True
 
         try:
             debug("invoking parser with", comp_words[1:])
             with mute_stderr():
-                assert self._parser is not None
                 a = self._parser.parse_known_args(comp_words[1:], namespace=parsed_args)
             debug("parsed args:", a)
         except BaseException as e:
@@ -379,9 +381,11 @@ class CompletionFinder:
 
         isoptional = cword_prefix and cword_prefix[0] in parser.prefix_chars
         optional_prefix = ""
-        greedy_actions = [x for x in parser.active_actions if action_is_greedy(x, isoptional)]
+        active_actions = parser.active_actions
+        greedy_actions = [x for x in active_actions if action_is_greedy(x, isoptional)]
         if greedy_actions:
             assert len(greedy_actions) == 1, "expect at most 1 greedy action"
+            active_actions = greedy_actions
             # This means the action will fail to parse if the word under the cursor is not given
             # to it, so give it exclusive control over completions (flush previous completions)
             debug("Resetting completions because", greedy_actions[0], "must consume the next argument")
@@ -393,13 +397,20 @@ class CompletionFinder:
                 # The completer runs on PARTIAL_VALUE. The prefix is added back to the completions
                 # (and chopped back off later in quote_completions() by the COMP_WORDBREAKS logic).
                 optional_prefix, _, cword_prefix = cword_prefix.partition("=")
+                if parser.final_option is not None:
+                    # Only this option can consume a value attached to its token.
+                    active_actions = [parser.final_option]
             else:
                 # Only run completers if current word does not start with - (is not an optional)
                 return completions
 
+        def add_completion(value: str, description: str) -> None:
+            candidate = f"{optional_prefix}={value}" if optional_prefix else value
+            completions.append(candidate)
+            self._display_completions[candidate] = description
+
         complete_remaining_positionals = False
-        # Use the single greedy action (if there is one) or all active actions.
-        for active_action in greedy_actions or parser.active_actions:
+        for active_action in active_actions:
             if not active_action.option_strings:  # action is a positional
                 if action_is_open(active_action):
                     # Any positional arguments after this may slide down into this action
@@ -434,16 +445,14 @@ class CompletionFinder:
                     if isinstance(completer_output, Mapping):
                         for completion, description in completer_output.items():
                             if self.validator(completion, cword_prefix):
-                                completions.append(completion)
-                                self._display_completions[completion] = description
+                                add_completion(completion, description)
                     else:
                         for completion in completer_output:
                             if self.validator(completion, cword_prefix):
-                                completions.append(completion)
                                 if isinstance(completer, ChoicesCompleter):
-                                    self._display_completions[completion] = self._get_action_help(active_action)
+                                    add_completion(completion, self._get_action_help(active_action))
                                 else:
-                                    self._display_completions[completion] = ""
+                                    add_completion(completion, "")
                 else:
                     debug("Completer is not callable, trying the readline completer protocol instead")
                     for i in range(9999):
@@ -451,10 +460,7 @@ class CompletionFinder:
                         if next_completion is None:
                             break
                         if self.validator(next_completion, cword_prefix):
-                            self._display_completions[next_completion] = ""
-                            completions.append(next_completion)
-                if optional_prefix:
-                    completions = [optional_prefix + "=" + completion for completion in completions]
+                            add_completion(next_completion, "")
                 debug("Completions:", completions)
         return completions
 
@@ -548,6 +554,7 @@ class CompletionFinder:
             # Its shell integration quotes these raw values with PowerShell's own escaping API.
             return completions
 
+        original_completions = completions
         special_chars = "\\"
         # If the word under the cursor was quoted, escape the quote char.
         # Otherwise, escape all special characters and specially handle all COMP_WORDBREAKS chars.
@@ -581,9 +588,14 @@ class CompletionFinder:
             for char in special_chars:
                 escaped_completion = escaped_completion.replace(char, escape_char + char)
             escaped_completions.append(escaped_completion)
-            if completion in self._display_completions:
-                self._display_completions[escaped_completion] = self._display_completions[completion]
 
+        self._display_completions.update(
+            {
+                quoted: self._display_completions[original]
+                for original, quoted in zip(original_completions, escaped_completions)
+                if quoted != original and original in self._display_completions
+            }
+        )
         if self.append_space:
             # Similar functionality in bash was previously turned off by supplying the "-o nospace" option to complete.
             # Now it is conditionally disabled using "compopt -o nospace" if the match ends in a continuation character.
