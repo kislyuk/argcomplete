@@ -1749,6 +1749,20 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
             check("prog directory --path=~/pro", "prog directory --path=~/project/", home + "/project/")
             check(r"prog directory --path=\~/pro", r"prog directory --path=\~/project/", "~/project/")
 
+            for name in ("menu-a", "menu-b:dir"):
+                (Path(home) / name).mkdir()
+            self.sh.run_command("bindkey '^X?' list-choices")
+            for command, prefix, grouped in (("prog file ", "~/", "yes"), ("prog directory ", "--path=~/", "no")):
+                with self.subTest(menu=command, list_grouped=grouped):
+                    self.sh.run_command(f"zstyle ':completion:*' list-grouped {grouped}")
+                    self.sh.child.send(command + prefix + "menu-\x18?")
+                    # Listing the matches redraws the prompt with the command still editable.
+                    self.sh.child.expect_exact(self.sh.prompt)
+                    labels = self.sh.child.before.split()
+                    check("b", command + prefix + "menu-b:dir/", home + "/menu-b:dir/")
+                    self.assertIn(prefix + "menu-a/", labels)
+                    self.assertIn(prefix + "menu-b:dir/", labels)
+
 
 class TestBashZshGlobalBase(TestBashZshBase):
     install_cmd = 'eval "$(activate-global-python-argcomplete --dest=-)"'

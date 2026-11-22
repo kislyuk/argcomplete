@@ -46,12 +46,22 @@ _python_argcomplete%(function_suffix)s() {
             _ARGCOMPLETE_SUPPRESS_SPACE=1 \
             __python_argcomplete_run ${script:-${words[1]}}))
         # Keep the typed tilde in the word and let _describe quote the rest.
+        local describe_args=(completions)
         local tilde_prefix='~'
         [[ $PREFIX != '~'* && $PREFIX == *'=~'* ]] && tilde_prefix="${PREFIX%%%%=*}=~"
         if [[ -z ${compstate[quote]} && $PREFIX == "$tilde_prefix"* && ${words[CURRENT]} == "$tilde_prefix"* &&
               -z "${completions[@]:#"$tilde_prefix"*}" ]]; then
             compset -p "${#tilde_prefix}"
-            completions=("${completions[@]#"$tilde_prefix"}")
+            # _describe takes display records first and an optional array of insertion matches.
+            local suffixes=("${completions[@]#"$tilde_prefix"}")
+            describe_args+=(suffixes)
+            # _describe decodes the insertion records itself only when grouping descriptions.
+            if ! zstyle -T ":completion:${curcontext}:values" verbose ||
+               ! zstyle -T ":completion:${curcontext}:values" list-grouped; then
+                local list_state options_unused displays_unused
+                compdescribe -i '' "$COLUMNS" suffixes
+                compdescribe -g list_state options_unused suffixes displays_unused
+            fi
         fi
         local nosort=()
         local nospace=()
@@ -61,7 +71,7 @@ _python_argcomplete%(function_suffix)s() {
         if [[ "${completions-}" =~ ([^\\\\]): && "${match[1]}" =~ [=/:] ]]; then
             nospace=(-S '')
         fi
-        _describe "${words[1]}" completions "${nosort[@]}" "${nospace[@]}"
+        _describe "${words[1]}" "${describe_args[@]}" "${nosort[@]}" "${nospace[@]}"
     else
         local SUPPRESS_SPACE=0
         if compopt +o nospace 2> /dev/null; then
