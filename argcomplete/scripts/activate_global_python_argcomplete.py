@@ -38,7 +38,11 @@ parser: argparse.ArgumentParser = argparse.ArgumentParser(
     description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
 )
 parser.add_argument("-y", "--yes", help="automatically answer yes for all questions", action="store_true")
-parser.add_argument("--dest", help='Specify the shell completion modules directory to install into, or "-" for stdout')
+parser.add_argument(
+    "--dest",
+    type=os.path.expanduser,
+    help='Specify the shell completion modules directory to install into, or "-" for stdout',
+)
 parser.add_argument("--user", help="Install into user directory", action="store_true")
 argcomplete.autocomplete(parser)
 args = None
