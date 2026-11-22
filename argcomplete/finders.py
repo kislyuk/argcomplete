@@ -40,7 +40,7 @@ class CompletionFinder:
     """
 
     _parser: argparse.ArgumentParser | None
-    _formatter: argparse.HelpFormatter | None
+    _formatter: tuple[argparse.ArgumentParser, argparse.HelpFormatter] | None
     always_complete_options: bool | Literal["long", "short"]
     exclude: Container[str] | None
     validator: Callable[[str, str], bool]
@@ -342,11 +342,11 @@ class CompletionFinder:
             return ""
         if "%" not in action.help:
             return action.help
-        formatters = self._formatter
-        if formatters is None:
-            assert self._parser is not None
-            self._formatter = formatters = self._parser.formatter_class(prog=self._parser.prog)
-        return formatters._expand_help(action)
+        parser = self.active_parsers[-1]
+        formatter = self._formatter
+        if formatter is None or formatter[0] is not parser:
+            self._formatter = formatter = (parser, parser._get_formatter())
+        return formatter[1]._expand_help(action)
 
     def _get_subparser_completions(self, parser, cword_prefix):
         aliases_by_parser: dict[argparse.ArgumentParser, list[str]] = {}

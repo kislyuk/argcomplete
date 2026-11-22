@@ -897,6 +897,25 @@ class TestArgcomplete(unittest.TestCase):
         self.assertEqual("help for rover ", disp.get("sojourner", ""))
         self.assertEqual("", disp.get("low gain", ""))
 
+    def test_display_completions_use_active_parser(self):
+        parser = ArgumentParser(prog="catalog")
+        scan = parser.add_subparsers().add_parser("scan")
+        verify = scan.add_subparsers().add_parser("verify")
+        for subparser in (parser, scan, verify):
+            subparser.add_argument("--status", choices=("ready", "working"), help="Report for %(prog)s")
+
+        completer = CompletionFinder(parser, append_space=False)
+        for prefix, active_parser in (("", parser), ("scan ", scan), ("scan verify ", verify), ("", parser)):
+            expected = f"Report for {active_parser.prog}"
+            self.assertIn(expected, active_parser.format_help())
+            for partial, completion, key in (
+                ("--stat", "--status", "--status"),
+                ("--status rea", "--status ready", "ready"),
+            ):
+                with self.subTest(prog=active_parser.prog, partial=partial):
+                    self.assertEqual(completer.rl_complete(prefix + partial, 0), prefix + completion)
+                    self.assertEqual(completer.get_display_completions()[key], expected)
+
     def test_display_completions_with_aliases(self):
         parser = ArgumentParser()
         parser.add_subparsers().add_parser("a", aliases=["b", "c"], help="abc help")
