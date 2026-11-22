@@ -1,0 +1,655 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>argcomplete.packages._argparse - argcomplete documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">argcomplete  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">argcomplete  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"></div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for argcomplete.packages._argparse</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012-2023, Andrey Kislyuk and argcomplete contributors. Licensed under the terms of the</span>
+<span class="c1"># `Apache License, Version 2.0 &lt;http://www.apache.org/licenses/LICENSE-2.0&gt;`_. Distribution of the LICENSE and NOTICE</span>
+<span class="c1"># files with source copies of this package and derivative works is **REQUIRED** as specified by the Apache License.</span>
+<span class="c1"># See https://github.com/kislyuk/argcomplete for more info.</span>
+
+<span class="c1"># This file contains argparse introspection utilities used in the course of argcomplete execution.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">argparse</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ONE_OR_MORE</span><span class="p">,</span>
+    <span class="n">OPTIONAL</span><span class="p">,</span>
+    <span class="n">PARSER</span><span class="p">,</span>
+    <span class="n">REMAINDER</span><span class="p">,</span>
+    <span class="n">SUPPRESS</span><span class="p">,</span>
+    <span class="n">ZERO_OR_MORE</span><span class="p">,</span>
+    <span class="n">Action</span><span class="p">,</span>
+    <span class="n">ArgumentError</span><span class="p">,</span>
+    <span class="n">ArgumentParser</span><span class="p">,</span>
+    <span class="n">_get_action_name</span><span class="p">,</span>
+    <span class="n">_SubParsersAction</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gettext</span><span class="w"> </span><span class="kn">import</span> <span class="n">gettext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span>
+
+<span class="n">_OptionTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Action</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Action</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">_OptionTupleEntry</span> <span class="o">=</span> <span class="n">_OptionTuple</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">_OptionTuple</span><span class="p">]</span>
+
+<span class="n">_num_consumed_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="get_num_consumed_args">
+<a class="viewcode-back" href="../../../index.html#argcomplete.get_num_consumed_args">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_num_consumed_args</span><span class="p">(</span><span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the number of completed values assigned to an action during completion.</span>
+
+<span class="sd">    Call this from a completer with its ``action`` argument. The word being</span>
+<span class="sd">    completed is excluded. For repeated options, the count refers to the current</span>
+<span class="sd">    occurrence, not the total number of values from earlier occurrences.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_num_consumed_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">action_is_satisfied</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Returns False if the parse would raise an error if no more arguments are given to this action, True otherwise.&#39;&#39;&#39;</span>
+    <span class="n">num_consumed_args</span> <span class="o">=</span> <span class="n">_num_consumed_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">[</span><span class="n">OPTIONAL</span><span class="p">,</span> <span class="n">ZERO_OR_MORE</span><span class="p">,</span> <span class="n">REMAINDER</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">ONE_OR_MORE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">num_consumed_args</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">PARSER</span><span class="p">:</span>
+        <span class="c1"># Not sure what this should be, but this previously always returned False</span>
+        <span class="c1"># so at least this won&#39;t break anything that wasn&#39;t already broken.</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">num_consumed_args</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;failed to handle a possible nargs value: </span><span class="si">{</span><span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="si">!r}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">num_consumed_args</span> <span class="o">==</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">action_is_open</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Returns True if action could consume more arguments (i.e., its pattern is open).&#39;&#39;&#39;</span>
+    <span class="n">num_consumed_args</span> <span class="o">=</span> <span class="n">_num_consumed_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ZERO_OR_MORE</span><span class="p">,</span> <span class="n">ONE_OR_MORE</span><span class="p">,</span> <span class="n">PARSER</span><span class="p">,</span> <span class="n">REMAINDER</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">OPTIONAL</span> <span class="ow">or</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">num_consumed_args</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;failed to handle a possible nargs value: </span><span class="si">{</span><span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="si">!r}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">num_consumed_args</span> <span class="o">&lt;</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">action_is_greedy</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">isoptional</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Returns True if action will necessarily consume the next argument.</span>
+<span class="sd">    isoptional indicates whether the argument is an optional (starts with -).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">num_consumed_args</span> <span class="o">=</span> <span class="n">_num_consumed_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isoptional</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">action_is_satisfied</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">REMAINDER</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">REMAINDER</span> <span class="ow">and</span> <span class="n">num_consumed_args</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">IntrospectiveArgumentParser</span><span class="p">(</span><span class="n">ArgumentParser</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;The following is a verbatim copy of ArgumentParser._parse_known_args (Python 2.7.3),</span>
+<span class="sd">    except for the lines that contain the string &quot;Added by argcomplete&quot;.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_partial_num_consumed_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">arg_strings_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># Let argparse match the unfinished action without requiring all its</span>
+        <span class="c1"># values. Copy it so its declared nargs and normal parsing stay intact.</span>
+        <span class="n">partial_action</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">partial_action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">ZERO_OR_MORE</span>
+        <span class="n">arg_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_argument</span><span class="p">(</span><span class="n">partial_action</span><span class="p">,</span> <span class="n">arg_strings_pattern</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">arg_strings_pattern</span><span class="p">[:</span><span class="n">arg_count</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_known_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_strings</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">intermixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">_num_consumed_args</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Added by argcomplete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_argcomplete_namespace</span> <span class="o">=</span> <span class="n">namespace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_actions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Action</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Added by argcomplete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_option</span><span class="p">:</span> <span class="n">Action</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Added by argcomplete. Value-taking option in the final token, if any.</span>
+        <span class="c1"># replace arg strings that are file references</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fromfile_prefix_chars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">arg_strings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_args_from_files</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">)</span>
+
+        <span class="c1"># map all mutually exclusive arguments to the other arguments</span>
+        <span class="c1"># they can&#39;t occur with</span>
+        <span class="n">action_conflicts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Action</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_action_conflicts</span> <span class="o">=</span> <span class="n">action_conflicts</span>  <span class="c1"># Added by argcomplete</span>
+        <span class="k">for</span> <span class="n">mutex_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutually_exclusive_groups</span><span class="p">:</span>
+            <span class="n">group_actions</span> <span class="o">=</span> <span class="n">mutex_group</span><span class="o">.</span><span class="n">_group_actions</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mutex_action</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mutex_group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">):</span>
+                <span class="n">conflicts</span> <span class="o">=</span> <span class="n">action_conflicts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">mutex_action</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">conflicts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">group_actions</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">conflicts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">group_actions</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:])</span>
+
+        <span class="c1"># find all option indices, and determine the arg_string_pattern</span>
+        <span class="c1"># which has an &#39;O&#39; if there is an option at an index,</span>
+        <span class="c1"># an &#39;A&#39; if there is an argument, or a &#39;-&#39; if there is a &#39;--&#39;</span>
+        <span class="n">option_string_indices</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">_OptionTupleEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">arg_string_pattern_parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">arg_strings_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg_string</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg_strings_iter</span><span class="p">):</span>
+            <span class="c1"># all args after -- are non-options</span>
+            <span class="k">if</span> <span class="n">arg_string</span> <span class="o">==</span> <span class="s1">&#39;--&#39;</span><span class="p">:</span>
+                <span class="n">arg_string_pattern_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">arg_string</span> <span class="ow">in</span> <span class="n">arg_strings_iter</span><span class="p">:</span>
+                    <span class="n">arg_string_pattern_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+
+            <span class="c1"># otherwise, add the arg to the arg strings</span>
+            <span class="c1"># and note the index if it was an option</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">option_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_optional</span><span class="p">(</span><span class="n">arg_string</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">option_tuple</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">pattern</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">option_string_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">_OptionTupleEntry</span><span class="p">,</span> <span class="n">option_tuple</span><span class="p">)</span>
+                    <span class="n">pattern</span> <span class="o">=</span> <span class="s1">&#39;O&#39;</span>
+                <span class="n">arg_string_pattern_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+
+        <span class="c1"># join the pieces together to form the pattern</span>
+        <span class="n">arg_strings_pattern</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_string_pattern_parts</span><span class="p">)</span>
+        <span class="n">options_ended</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">arg_strings_pattern</span>  <span class="c1"># Added by argcomplete: the cursor follows a &#39;--&#39; separator.</span>
+
+        <span class="c1"># converts arg strings to the appropriate and then takes the action</span>
+        <span class="n">seen_actions</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">seen_non_default_actions</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seen_non_default_actions</span> <span class="o">=</span> <span class="n">seen_non_default_actions</span>  <span class="c1"># Added by argcomplete</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">seen_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">argument_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_values</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">)</span>
+
+            <span class="c1"># error if this argument is not allowed with other previously</span>
+            <span class="c1"># seen arguments, assuming that actions that use the default</span>
+            <span class="c1"># value don&#39;t really count as &quot;present&quot;</span>
+            <span class="k">if</span> <span class="n">argument_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                <span class="n">seen_non_default_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">conflict_action</span> <span class="ow">in</span> <span class="n">action_conflicts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">if</span> <span class="n">conflict_action</span> <span class="ow">in</span> <span class="n">seen_non_default_actions</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;not allowed with argument </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">action_name</span> <span class="o">=</span> <span class="n">_get_action_name</span><span class="p">(</span><span class="n">conflict_action</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">action_name</span><span class="p">)</span>
+
+            <span class="c1"># take the action if we didn&#39;t receive a SUPPRESS value</span>
+            <span class="c1"># (e.g. from a default)</span>
+            <span class="k">if</span> <span class="n">argument_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">SUPPRESS</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">_SubParsersAction</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">argument_values</span><span class="p">,</span> <span class="n">option_string</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                    <span class="c1"># Begin added by argcomplete</span>
+                    <span class="c1"># When a subparser action is taken and fails due to incomplete arguments, it does not merge the</span>
+                    <span class="c1"># contents of its parsed namespace into the parent namespace. Do that here to allow completers to</span>
+                    <span class="c1"># access the partially parsed arguments for the subparser.</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">_SubParsersAction</span><span class="p">):</span>
+                        <span class="n">subnamespace</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">_name_parser_map</span><span class="p">[</span><span class="n">argument_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">_argcomplete_namespace</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">subnamespace</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="nb">setattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="c1"># End added by argcomplete</span>
+                    <span class="k">raise</span>
+
+        <span class="c1"># function to convert arg_strings into an optional action</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
+            <span class="c1"># get the optional identified at this index</span>
+            <span class="n">raw_option_tuple</span> <span class="o">=</span> <span class="n">option_string_indices</span><span class="p">[</span><span class="n">start_index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_option_tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># Python 3.12.7+</span>
+                <span class="n">option_tuple</span> <span class="o">=</span> <span class="n">raw_option_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">option_tuple</span> <span class="o">=</span> <span class="n">raw_option_tuple</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">option_tuple</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">action</span><span class="p">,</span> <span class="n">option_string</span><span class="p">,</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">option_tuple</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Python 3.11.9+, 3.12.3+, 3.13+</span>
+                <span class="n">action</span><span class="p">,</span> <span class="n">option_string</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">option_tuple</span>
+
+            <span class="c1"># identify additional optionals in the same arg string</span>
+            <span class="c1"># (e.g. -xyz is the same as -x -y -z if no args are required)</span>
+            <span class="n">match_argument</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_argument</span>
+            <span class="n">action_tuples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># if we found no optional action, skip it</span>
+                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">extras</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="c1"># if there is an explicit argument, try to match the</span>
+                <span class="c1"># optional&#39;s string arguments to only this</span>
+                <span class="k">if</span> <span class="n">explicit_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">arg_count</span> <span class="o">=</span> <span class="n">match_argument</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># if the action is a single-dash option and takes no</span>
+                    <span class="c1"># arguments, try to parse more single-dash options out</span>
+                    <span class="c1"># of the tail of the option string</span>
+                    <span class="n">chars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefix_chars</span>
+                    <span class="k">if</span> <span class="n">arg_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">chars</span><span class="p">:</span>
+                        <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="p">[],</span> <span class="n">option_string</span><span class="p">))</span>
+                        <span class="n">char</span> <span class="o">=</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">option_string</span> <span class="o">=</span> <span class="n">char</span> <span class="o">+</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">new_explicit_arg</span> <span class="o">=</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="kc">None</span>
+                        <span class="n">optionals_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_string_actions</span>
+                        <span class="k">if</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">optionals_map</span><span class="p">:</span>
+                            <span class="n">action</span> <span class="o">=</span> <span class="n">optionals_map</span><span class="p">[</span><span class="n">option_string</span><span class="p">]</span>
+                            <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">new_explicit_arg</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;ignored explicit argument </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">explicit_arg</span><span class="p">)</span>
+
+                    <span class="c1"># if the action expect exactly one argument, we&#39;ve</span>
+                    <span class="c1"># successfully matched the option; exit the loop</span>
+                    <span class="k">elif</span> <span class="n">arg_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">stop</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">explicit_arg</span><span class="p">]</span>
+                        <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span><span class="p">))</span>
+                        <span class="k">break</span>
+
+                    <span class="c1"># error if a double-dash option did not use the</span>
+                    <span class="c1"># explicit argument</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;ignored explicit argument </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">explicit_arg</span><span class="p">)</span>
+
+                <span class="c1"># if there is no explicit argument, try to match the</span>
+                <span class="c1"># optional&#39;s string arguments with the following strings</span>
+                <span class="c1"># if successful, exit the loop</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">selected_patterns</span> <span class="o">=</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">active_actions</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">options_ended</span> <span class="k">else</span> <span class="p">[</span><span class="n">action</span><span class="p">]</span>  <span class="c1"># Added by argcomplete</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">selected_patterns</span> <span class="ow">and</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Added by argcomplete</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">final_option</span> <span class="o">=</span> <span class="n">action</span>  <span class="c1"># Added by argcomplete</span>
+                    <span class="n">_num_consumed_args</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Added by argcomplete</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">arg_count</span> <span class="o">=</span> <span class="n">match_argument</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">selected_patterns</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">ArgumentError</span><span class="p">:</span>
+                        <span class="c1"># Fixed nargs can be incomplete at the cursor. Preserve</span>
+                        <span class="c1"># the already entered values even though parsing stops.</span>
+                        <span class="n">_num_consumed_args</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_partial_num_consumed_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">selected_patterns</span><span class="p">)</span>
+                        <span class="k">raise</span>
+                    <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">arg_count</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="n">arg_strings</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+
+                    <span class="c1"># Begin added by argcomplete</span>
+                    <span class="c1"># If the pattern is not open (e.g. no + at the end), remove the action from active actions (since</span>
+                    <span class="c1"># it wouldn&#39;t be able to consume any more args)</span>
+                    <span class="n">_num_consumed_args</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">action_is_open</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">active_actions</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Added by argcomplete</span>
+                    <span class="c1"># End added by argcomplete</span>
+
+                    <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span><span class="p">))</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># add the Optional to the list and return the index at which</span>
+            <span class="c1"># the Optional&#39;s string args stopped</span>
+            <span class="k">assert</span> <span class="n">action_tuples</span>
+            <span class="k">for</span> <span class="n">optional_action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">action_tuples</span><span class="p">:</span>
+                <span class="n">take_action</span><span class="p">(</span><span class="n">optional_action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">stop</span>
+
+        <span class="c1"># the list of Positionals left to be parsed; this is modified</span>
+        <span class="c1"># by consume_positionals()</span>
+        <span class="n">positionals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_positional_actions</span><span class="p">()</span>
+
+        <span class="c1"># function to convert arg_strings into positional actions</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
+            <span class="c1"># match as many Positionals as possible</span>
+            <span class="n">match_partial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_arguments_partial</span>
+            <span class="n">selected_pattern</span> <span class="o">=</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">start_index</span><span class="p">:]</span>
+            <span class="n">arg_counts</span> <span class="o">=</span> <span class="n">match_partial</span><span class="p">(</span><span class="n">positionals</span><span class="p">,</span> <span class="n">selected_pattern</span><span class="p">)</span>
+
+            <span class="c1"># slice off the appropriate arg strings for each Positional</span>
+            <span class="c1"># and add the Positional and its args to the list</span>
+            <span class="k">for</span> <span class="n">action</span><span class="p">,</span> <span class="n">arg_count</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">positionals</span><span class="p">,</span> <span class="n">arg_counts</span><span class="p">):</span>  <span class="c1"># Added by argcomplete</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">active_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>  <span class="c1"># Added by argcomplete</span>
+            <span class="k">for</span> <span class="n">action</span><span class="p">,</span> <span class="n">arg_count</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">positionals</span><span class="p">,</span> <span class="n">arg_counts</span><span class="p">):</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span> <span class="p">:</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">arg_count</span><span class="p">]</span>
+                <span class="c1"># Begin added by argcomplete</span>
+                <span class="c1"># The matcher includes the &#39;--&#39; separator in its token count.</span>
+                <span class="c1"># Ordinary positionals only receive values; PARSER/REMAINDER</span>
+                <span class="c1"># can retain &#39;--&#39; as part of their arguments.</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="n">PARSER</span><span class="p">,</span> <span class="n">REMAINDER</span><span class="p">):</span>
+                    <span class="n">_num_consumed_args</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_count</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">_num_consumed_args</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">start_index</span> <span class="p">:</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">arg_count</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+                <span class="c1"># End added by argcomplete</span>
+                <span class="n">start_index</span> <span class="o">+=</span> <span class="n">arg_count</span>
+                <span class="n">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+            <span class="c1"># slice off the Positionals that we just parsed and return the</span>
+            <span class="c1"># index at which the Positionals&#39; string args stopped</span>
+            <span class="n">positionals</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">positionals</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">arg_counts</span><span class="p">)</span> <span class="p">:]</span>
+            <span class="k">return</span> <span class="n">start_index</span>
+
+        <span class="c1"># consume Positionals and Optionals alternately, until we have</span>
+        <span class="c1"># passed the last option string</span>
+        <span class="n">extras</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">option_string_indices</span><span class="p">:</span>
+            <span class="n">max_option_string_index</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">option_string_indices</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_option_string_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">while</span> <span class="n">start_index</span> <span class="o">&lt;=</span> <span class="n">max_option_string_index</span><span class="p">:</span>
+            <span class="c1"># consume any Positionals preceding the next option</span>
+            <span class="n">next_option_string_index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">option_string_indices</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">start_index</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">start_index</span> <span class="o">!=</span> <span class="n">next_option_string_index</span><span class="p">:</span>
+                <span class="n">positionals_end_index</span> <span class="o">=</span> <span class="n">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+
+                <span class="c1"># only try to parse the next optional if we didn&#39;t consume</span>
+                <span class="c1"># the option string during the positionals parsing</span>
+                <span class="k">if</span> <span class="n">positionals_end_index</span> <span class="o">&gt;</span> <span class="n">start_index</span><span class="p">:</span>
+                    <span class="n">start_index</span> <span class="o">=</span> <span class="n">positionals_end_index</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start_index</span> <span class="o">=</span> <span class="n">positionals_end_index</span>
+
+            <span class="c1"># if we consumed all the positionals we could and we&#39;re not</span>
+            <span class="c1"># at the index of an option string, there were extra arguments</span>
+            <span class="k">if</span> <span class="n">start_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string_indices</span><span class="p">:</span>
+                <span class="n">strings</span> <span class="o">=</span> <span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">next_option_string_index</span><span class="p">]</span>
+                <span class="n">extras</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
+                <span class="n">start_index</span> <span class="o">=</span> <span class="n">next_option_string_index</span>
+
+            <span class="c1"># consume the next optional and any arguments for it</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+
+        <span class="c1"># consume any positionals following the last Optional</span>
+        <span class="n">stop_index</span> <span class="o">=</span> <span class="n">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+
+        <span class="c1"># if we didn&#39;t consume all the argument strings, there were extras</span>
+        <span class="n">extras</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">[</span><span class="n">stop_index</span><span class="p">:])</span>
+
+        <span class="c1"># if we didn&#39;t use all the Positional objects, there were too few</span>
+        <span class="c1"># arg strings supplied.</span>
+
+        <span class="k">if</span> <span class="n">positionals</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">positionals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Added by argcomplete</span>
+            <span class="c1"># Begin added by argcomplete</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">positionals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">_num_consumed_args</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_partial_num_consumed_args</span><span class="p">(</span>
+                    <span class="n">action</span><span class="p">,</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">stop_index</span><span class="p">:]</span>
+                <span class="p">)</span>
+            <span class="c1"># End added by argcomplete</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;too few arguments&#39;</span><span class="p">))</span>
+
+        <span class="c1"># make sure all required actions were present</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_actions</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">_get_action_name</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;argument </span><span class="si">%s</span><span class="s1"> is required&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># make sure all required groups had one option present</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutually_exclusive_groups</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">seen_non_default_actions</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+                <span class="c1"># if no actions were used, report the error</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">_get_action_name</span><span class="p">(</span><span class="n">action</span><span class="p">))</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span> <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">SUPPRESS</span>
+                    <span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;one of the arguments </span><span class="si">%s</span><span class="s1"> is required&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
+
+        <span class="c1"># return the updated namespace and the extra arguments</span>
+        <span class="k">return</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">extras</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Andrey Kislyuk and argcomplete contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>
