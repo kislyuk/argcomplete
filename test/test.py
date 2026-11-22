@@ -1162,25 +1162,6 @@ class TestArgcomplete(unittest.TestCase):
         completions = self.run_completer(parser, "prog --opt ", shell="zsh", append_space=False)
         self.assertEqual(completions, ["value:desc injected"])
 
-    def test_zsh_tilde_completion_header(self):
-        parser = ArgumentParser()
-        parser.add_argument("--path", nargs="?").completer = DirectoriesCompleter()
-        parser.add_argument("choice", nargs="?", choices=["~/literal"])
-        os.environ["_ARGCOMPLETE_COMP_WORDBREAKS"] = ""
-        os.environ.pop("_ARGCOMPLETE_ZSH_TILDE", None)
-
-        with TemporaryDirectory() as home:
-            os.environ["HOME"] = home
-            (Path(home) / "directory").mkdir()
-            command = "prog --path=~/"
-            self.assertEqual(self.run_completer(parser, command, shell="zsh"), ["--path=~/directory/:"])
-            os.environ["_ARGCOMPLETE_ZSH_TILDE"] = "1"
-            self.assertEqual(self.run_completer(parser, command, shell="zsh"), ["", "--path=~", "--path=~/directory/:"])
-            # The space-separated form also offers the next positional argument's literal choice.
-            self.assertCountEqual(
-                self.run_completer(parser, "prog --path ~/", shell="zsh"), ["~/directory/:", "~/literal:"]
-            )
-
     def test_shellcode_utility(self):
         with NamedTemporaryFile() as fh:
             sc = shellcode(["prog"], use_defaults=True, shell="bash", complete_arguments=None)
@@ -1721,7 +1702,8 @@ class TestZsh(TestBashZshBase, unittest.TestCase):
                 rf"prog file {prefix}report:\ file ",
                 os.path.join(user.pw_dir, relative_dir, "report: file"),
             )
-            check("prog quote ~/lit", r"prog quote \~/literal ", "~/literal")
+            check("prog tilde ~/lit", "prog tilde ~/literal ", os.path.join(home, "literal"))
+            check(r"prog tilde \~/lit", r"prog tilde \~/literal ", "~/literal")
 
             # zsh normally expands a tilde after '=' only with MAGIC_EQUAL_SUBST.
             self.sh.run_command("unsetopt MAGIC_EQUAL_SUBST")

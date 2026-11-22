@@ -43,17 +43,15 @@ _python_argcomplete%(function_suffix)s() {
             COMP_POINT="$CURSOR" \
             _ARGCOMPLETE=1 \
             _ARGCOMPLETE_SHELL="zsh" \
-            _ARGCOMPLETE_ZSH_TILDE=1 \
             _ARGCOMPLETE_SUPPRESS_SPACE=1 \
             __python_argcomplete_run ${script:-${words[1]}}))
-        if (( ${#completions[@]} >= 3 )) && [[ -z "${completions[1]}" ]]; then
-            local prefix="${completions[2]}"
-            shift 2 completions
-            # words[CURRENT] retains a quoted or escaped tilde even when PREFIX is dequoted.
-            if [[ -z "${compstate[quote]}" && "$PREFIX" == "$prefix"* && "${words[CURRENT]}" == "$prefix"* ]]; then
-                compset -p "${#prefix}"
-                completions=("${completions[@]#"$prefix"}")
-            fi
+        # Keep the typed tilde in the word and let _describe quote the rest.
+        local tilde_prefix='~'
+        [[ $PREFIX != '~'* && $PREFIX == *'=~'* ]] && tilde_prefix="${PREFIX%%%%=*}=~"
+        if [[ -z ${compstate[quote]} && $PREFIX == "$tilde_prefix"* && ${words[CURRENT]} == "$tilde_prefix"* &&
+              -z "${completions[@]:#"$tilde_prefix"*}" ]]; then
+            compset -p "${#tilde_prefix}"
+            completions=("${completions[@]#"$tilde_prefix"}")
         fi
         local nosort=()
         local nospace=()
