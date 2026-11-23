@@ -1460,6 +1460,43 @@ class TestCheckModule(unittest.TestCase):
         self.assertEqual(path, os.path.abspath("package/__main__.py"))
         self.assertNotIn("package", sys.modules)
 
+    def test_namespace_package_main(self):
+        for name in ("namespace", "namespace.nested"):
+            with self.subTest(name=name), patch.dict(sys.modules):
+                package_path = name.replace(".", "/")
+                os.makedirs(package_path, exist_ok=True)
+                main_path = os.path.join(package_path, "__main__.py")
+                with open(main_path, "w") as main:
+                    main.write("raise RuntimeError('must not import __main__')\n")
+                self.assertEqual(_check_module.find(name), os.path.abspath(main_path))
+                self.assertNotIn(name + ".__main__", sys.modules)
+
+    def test_namespace_package_main_multiple_locations(self):
+        os.makedirs("first/namespace")
+        os.makedirs("second/namespace")
+        self._mkfile("second/namespace/__main__.py")
+        paths = [os.path.abspath("first"), os.path.abspath("second"), *sys.path]
+        with patch.object(sys, "path", paths), patch.dict(sys.modules):
+            self.assertEqual(_check_module.find("namespace"), os.path.abspath("second/namespace/__main__.py"))
+            self.assertNotIn("namespace.__main__", sys.modules)
+
+    def test_namespace_package_without_main(self):
+        os.mkdir("namespace")
+        with patch.dict(sys.modules), self.assertRaises(_check_module.ArgcompleteMarkerNotFound):
+            _check_module.find("namespace")
+
+    def test_namespace_package_console_script(self):
+        os.mkdir("namespace")
+        self._mkfile("namespace/__main__.py")
+        with self.assertRaises(_check_module.ArgcompleteMarkerNotFound):
+            _check_module.find("namespace", return_package=True)
+
+    def test_namespace_package_main_is_package(self):
+        os.makedirs("namespace/__main__")
+        self._mkfile("namespace/__main__/__init__.py")
+        with patch.dict(sys.modules), self.assertRaises(_check_module.ArgcompleteMarkerNotFound):
+            _check_module.find("namespace")
+
     def test_not_package(self):
         self._mkfile("module.py")
         with self.assertRaisesRegex(Exception, "module is not a package"):
@@ -1808,6 +1845,16 @@ class TestBashZshGlobalBase(TestBashZshBase):
             shutil.copy(prog, "package/prog.py")
             self.sh.run_command("cd " + os.getcwd())
             self.assertEqual(self.sh.run_command("python3 -m package.prog basic f\t"), "foo\r\n")
+
+    def test_python_namespace_package(self):
+        prog = os.path.join(TEST_DIR, "prog")
+        for name in ("package", "package.nested"):
+            with self.subTest(name=name), TempDir(prefix="test_dir_py", dir="."):
+                package_path = name.replace(".", "/")
+                os.makedirs(package_path)
+                shutil.copy(prog, os.path.join(package_path, "__main__.py"))
+                self.sh.run_command("cd " + os.getcwd())
+                self.assertEqual(self.sh.run_command(f"python3 -m {name} basic f\t"), "foo\r\n")
 
     def _test_console_script(self, package=False, wheel=False):
         with TempDir(prefix="test_dir_py", dir="."):

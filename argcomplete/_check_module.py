@@ -29,6 +29,11 @@ def find(name, return_package=False):
 
     if spec is None:
         raise ArgcompleteMarkerNotFound(f'no module named "{names[0]}"')
+    if spec.origin is None and spec.submodule_search_locations is not None and not return_package:
+        # Namespace packages have no source file, but `python -m` can run their __main__ module.
+        main_spec = find_spec(name + ".__main__")
+        if main_spec is not None and main_spec.has_location and main_spec.submodule_search_locations is None:
+            return main_spec.origin
     if not spec.has_location:
         raise ArgcompleteMarkerNotFound("cannot locate file")
     if spec.submodule_search_locations is None:
