@@ -83,7 +83,7 @@ def install_to_destination(dest: str) -> None:
             sys.stdout.write(fh.read())
         return
     destdir = os.path.dirname(dest)
-    if not os.path.exists(destdir):
+    if destdir and not os.path.exists(destdir):
         try:
             os.makedirs(destdir, exist_ok=True)
         except Exception as e:
