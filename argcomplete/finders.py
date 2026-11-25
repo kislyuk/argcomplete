@@ -437,6 +437,13 @@ class CompletionFinder:
             self._display_completions[candidate] = description
 
         complete_remaining_positionals = False
+        # When every remaining action is an optional positional (nargs="?"), argparse
+        # assigns the current word to the first unfilled one, in positional order, so
+        # the completions of the later ones can never be accepted here (#221).
+        if len(active_actions) > 1 and all(
+            not action.option_strings and action.nargs == argparse.OPTIONAL for action in active_actions
+        ):
+            active_actions = [next((action for action in active_actions if action_is_open(action)), active_actions[0])]
         for active_action in active_actions:
             if not active_action.option_strings:  # action is a positional
                 if action_is_open(active_action):

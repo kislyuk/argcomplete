@@ -994,6 +994,26 @@ class TestArgcomplete(unittest.TestCase):
         for cmd, output in expected_outputs:
             self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
 
+    def test_multiple_optional_positionals(self):
+        """Only the first unfilled optional positional may be completed (#221)"""
+
+        def make_parser():
+            parser = ArgumentParser()
+            parser.add_argument("foo", choices=["foo1", "foo2"], nargs="?")
+            parser.add_argument("bar", choices=["bar1", "bar2"], nargs="?")
+            return parser
+
+        options = ["-h", "--help"]
+        expected_outputs = (
+            ("prog ", ["foo1", "foo2"] + options),
+            ("prog foo1 ", ["bar1", "bar2"] + options),
+            ("prog foo1 bar1 ", options),
+        )
+
+        for cmd, output in expected_outputs:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(set(self.run_completer(make_parser(), cmd)), set(output))
+
     def test_optional_nargs(self):
         def make_parser():
             parser = ArgumentParser()
