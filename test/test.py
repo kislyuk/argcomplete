@@ -1494,6 +1494,26 @@ class TestActivateGlobalScript(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue(os.path.isfile(os.path.join(home, "completions", "_python-argcomplete")))
 
+    def test_dest_in_current_directory(self):
+        with TempDir(prefix="test_dir_home", dir="."):
+            os.mkdir("completions")
+            environment = os.environ.copy()
+            environment.update(HOME=os.getcwd(), PYTHONPATH=BASE_DIR, SHELL="/bin/sh")
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "argcomplete.scripts.activate_global_python_argcomplete",
+                    "--dest=completions",
+                ],
+                env=environment,
+                check=False,
+                capture_output=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(os.path.isfile(os.path.join("completions", "_python-argcomplete")))
+
 
 class TestShellBase:
     """
